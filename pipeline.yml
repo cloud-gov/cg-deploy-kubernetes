@@ -1,0 +1,263 @@
+---
+groups:
+- name: all
+  jobs:
+  - build-kubernetes-release
+  - deploy-kubernetes-staging
+  - deploy-kubernetes-production
+- name: release
+  jobs:
+  - build-kubernetes-release
+- name: deploy
+  jobs:
+  - deploy-kubernetes-staging
+  - deploy-kubernetes-production
+
+jobs:
+- name: build-kubernetes-release
+  plan:
+  - aggregate:
+    - get: release-git-repo
+      resource: kubernetes-release
+      trigger: true
+    - get: pipeline-tasks
+    - get: final-builds-dir-tarball
+      resource: kubernetes-final-builds-dir-tarball
+    - get: releases-dir-tarball
+      resource: kubernetes-releases-dir-tarball
+  - task: finalize-release
+    file: pipeline-tasks/finalize-bosh-release.yml
+    params:
+      PRIVATE_YML_CONTENT: {{kubernetes-private-yml}}
+  - aggregate:
+    - put: kubernetes-release-tarball
+      params:
+        file: finalized-release/kubernetes-*.tgz
+    - put: kubernetes-final-builds-dir-tarball
+      params:
+        file: finalized-release/final-builds-dir-kubernetes.tgz
+    - put: kubernetes-releases-dir-tarball
+      params:
+        file: finalized-release/releases-dir-kubernetes.tgz
+
+- name: deploy-kubernetes-staging
+  plan:
+  - aggregate:
+    - get: pipeline-tasks
+    - get: kubernetes-release
+    - get: kubernetes-release-tarball
+      trigger: true
+    - get: common-staging
+      trigger: true
+    - get: kubernetes-stemcell
+  - task: kubernetes-manifest
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: 18fgsa/concourse-task
+      inputs:
+      - name: kubernetes-release
+      - name: common-staging
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          kubernetes-release/generate_deployment_manifest aws common-staging/secrets.yml \
+            > kubernetes-manifest/manifest.yml
+      outputs:
+      - name: kubernetes-manifest
+  - put: kubernetes-staging-deployment
+    params:
+      cert: common-staging/boshCA.crt
+      manifest: kubernetes-manifest/manifest.yml
+      releases:
+      - kubernetes-release-tarball/*.tgz
+      stemcells:
+      - kubernetes-stemcell/*.tgz
+    on_failure:
+      put: slack
+      params:
+        text: |
+          :x: FAILED to deploy kubernetes on staging
+          <https://ci.cloud.gov/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+    on_success:
+      put: slack
+      params:
+        text: |
+          :white_check_mark: Successfully deployed kubernetes on staging
+          <https://ci.cloud.gov/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+
+- name: deploy-kubernetes-production
+  plan:
+  - aggregate:
+    - get: pipeline-tasks
+    - get: kubernetes-release
+    - get: kubernetes-release-tarball
+      trigger: true
+    - get: common-production
+      trigger: true
+    - get: kubernetes-stemcell
+  - task: kubernetes-manifest
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: 18fgsa/concourse-task
+      inputs:
+      - name: kubernetes-release
+      - name: common-production
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          kubernetes-release/generate_deployment_manifest aws common-production/secrets.yml \
+            > kubernetes-manifest/manifest.yml
+      outputs:
+      - name: kubernetes-manifest
+  - put: kubernetes-production-deployment
+    params:
+      cert: common-production/boshCA.crt
+      manifest: kubernetes-manifest/manifest.yml
+      releases:
+      - kubernetes-release-tarball/*.tgz
+      stemcells:
+      - kubernetes-stemcell/*.tgz
+    on_failure:
+      put: slack
+      params:
+        text: |
+          :x: FAILED to deploy kubernetes on production
+          <https://ci.cloud.gov/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+    on_success:
+      put: slack
+      params:
+        text: |
+          :white_check_mark: Successfully deployed kubernetes on production
+          <https://ci.cloud.gov/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+
+resources:
+- name: pipeline-tasks
+  type: git
+  source:
+    uri: {{pipeline-tasks-git-url}}
+    branch: {{pipeline-tasks-git-branch}}
+
+- name: kubernetes-release
+  type: git
+  source:
+    uri: {{kubernetes-release-git-url}}
+    branch: {{kubernetes-release-git-branch}}
+
+- name: kubernetes-release-tarball
+  type: s3
+  source:
+    bucket: {{s3-bosh-releases-bucket}}
+    regexp: kubernetes-(.*).tgz
+    access_key_id: {{s3-bosh-releases-access-key-id}}
+    secret_access_key: {{s3-bosh-releases-secret-access-key}}
+    region_name: {{aws-region}}
+
+- name: kubernetes-final-builds-dir-tarball
+  type: s3
+  source:
+    bucket: {{s3-bosh-releases-bucket}}
+    versioned_file: final-builds-dir-kubernetes.tgz
+    access_key_id: {{s3-bosh-releases-access-key-id}}
+    secret_access_key: {{s3-bosh-releases-secret-access-key}}
+    region_name: {{aws-region}}
+
+- name: kubernetes-releases-dir-tarball
+  type: s3
+  source:
+    bucket: {{s3-bosh-releases-bucket}}
+    versioned_file: releases-dir-kubernetes.tgz
+    access_key_id: {{s3-bosh-releases-access-key-id}}
+    secret_access_key: {{s3-bosh-releases-secret-access-key}}
+    region_name: {{aws-region}}
+
+- name: kubernetes-stemcell
+  type: s3
+  source:
+    access_key_id: {{ci-access-key-id}}
+    bucket: {{stemcell-bucket}}
+    regexp: light-bosh-stemcell-(.*)-aws-xen-hvm-ubuntu-trusty-go_agent.tgz
+    region_name: {{aws-region}}
+    secret_access_key: {{ci-secret-access-key}}
+
+- name: common-staging
+  type: cg-common
+  source:
+    region: {{aws-region}}
+    bucket_name: {{kubernetes-staging-private-bucket}}
+    access_key_id: {{ci-access-key-id}}
+    secret_access_key: {{ci-secret-access-key}}
+    secrets_file: kubernetes.yml
+    secrets_passphrase: {{kubernetes-staging-private-passphrase}}
+    bosh_cert: bosh.pem
+
+- name: common-production
+  type: cg-common
+  source:
+    region: {{aws-region}}
+    bucket_name: {{kubernetes-production-private-bucket}}
+    access_key_id: {{ci-access-key-id}}
+    secret_access_key: {{ci-secret-access-key}}
+    secrets_file: kubernetes.yml
+    secrets_passphrase: {{kubernetes-production-private-passphrase}}
+    bosh_cert: bosh.pem
+
+- name: kubernetes-staging-deployment
+  type: 18f-bosh-deployment
+  source:
+    target: {{kubernetes-staging-deployment-bosh-target}}
+    username: {{kubernetes-staging-deployment-bosh-username}}
+    password: {{kubernetes-staging-deployment-bosh-password}}
+    deployment: {{kubernetes-staging-deployment-bosh-deployment}}
+    ignore_ssl: false
+
+- name: kubernetes-production-deployment
+  type: 18f-bosh-deployment
+  source:
+    target: {{kubernetes-production-deployment-bosh-target}}
+    username: {{kubernetes-production-deployment-bosh-username}}
+    password: {{kubernetes-production-deployment-bosh-password}}
+    deployment: {{kubernetes-production-deployment-bosh-deployment}}
+    ignore_ssl: false
+
+- name: slack
+  type: slack-notification
+  source:
+    url: {{slack-webhook-url}}
+
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
+- name: 18f-bosh-deployment
+  type: docker-image
+  source:
+    repository: 18fgsa/bosh-deployment-resource
+
+- name: cg-common
+  type: docker-image
+  source:
+    repository: 18fgsa/cg-common-resource
