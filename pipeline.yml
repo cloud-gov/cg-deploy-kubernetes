@@ -95,6 +95,17 @@ jobs:
         channel: {{slack-channel}}
         username: {{slack-username}}
         icon_url: {{slack-icon-url}}
+  - task: create-kubernetes-dns
+    file: pipeline-tasks/bosh-errand.yml
+    input_mapping:
+      common: common-staging
+    params:
+      BOSH_ERRAND: create-kubernetes-dns
+      BOSH_TARGET: {{kubernetes-staging-deployment-bosh-target}}
+      BOSH_USERNAME: {{kubernetes-staging-deployment-bosh-username}}
+      BOSH_PASSWORD: {{kubernetes-staging-deployment-bosh-password}}
+      BOSH_DEPLOYMENT_NAME: {{kubernetes-staging-deployment-bosh-deployment}}
+      BOSH_CACERT: common/boshCA.crt
 
 - name: deploy-kubernetes-production
   plan:
@@ -151,6 +162,17 @@ jobs:
         channel: {{slack-channel}}
         username: {{slack-username}}
         icon_url: {{slack-icon-url}}
+  - task: create-kubernetes-dns
+    file: pipeline-tasks/bosh-errand.yml
+    input_mapping:
+      common: common-production
+    params:
+      BOSH_ERRAND: create-kubernetes-dns
+      BOSH_TARGET: {{kubernetes-production-deployment-bosh-target}}
+      BOSH_USERNAME: {{kubernetes-production-deployment-bosh-username}}
+      BOSH_PASSWORD: {{kubernetes-production-deployment-bosh-password}}
+      BOSH_DEPLOYMENT_NAME: {{kubernetes-production-deployment-bosh-deployment}}
+      BOSH_CACERT: common/boshCA.crt
 
 resources:
 - name: pipeline-tasks
