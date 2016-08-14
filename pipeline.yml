@@ -4,14 +4,18 @@ groups:
   jobs:
   - build-kubernetes-release
   - deploy-kubernetes-staging
+  - deploy-kubernetes-broker-staging
   - deploy-kubernetes-production
+  - deploy-kubernetes-broker-production
 - name: release
   jobs:
   - build-kubernetes-release
 - name: deploy
   jobs:
   - deploy-kubernetes-staging
+  - deploy-kubernetes-broker-staging
   - deploy-kubernetes-production
+  - deploy-kubernetes-broker-production
 
 jobs:
 - name: build-kubernetes-release
@@ -107,6 +111,19 @@ jobs:
       BOSH_DEPLOYMENT_NAME: {{kubernetes-staging-deployment-bosh-deployment}}
       BOSH_CACERT: common/boshCA.crt
 
+- name: deploy-kubernetes-broker-staging
+  plan:
+  - get: kubernetes-broker
+    trigger: true
+  - put: kubernetes-broker-staging-deployment
+    params:
+      manifest: kubernetes-broker/manifest.yml
+      path: kubernetes-broker
+      current_app_name: kubernetes-broker
+      environment_variables:
+        AUTH_USER: {{broker-auth-user-staging}}
+        AUTH_PASS: {{broker-auth-pass-staging}}
+
 - name: deploy-kubernetes-production
   plan:
   - aggregate:
@@ -174,6 +191,19 @@ jobs:
       BOSH_DEPLOYMENT_NAME: {{kubernetes-production-deployment-bosh-deployment}}
       BOSH_CACERT: common/boshCA.crt
 
+- name: deploy-kubernetes-broker-production
+  plan:
+  - get: kubernetes-broker
+    trigger: true
+  - put: kubernetes-broker-production-deployment
+    params:
+      manifest: kubernetes-broker/manifest.yml
+      path: kubernetes-broker
+      current_app_name: kubernetes-broker
+      environment_variables:
+        AUTH_USER: {{broker-auth-user-production}}
+        AUTH_PASS: {{broker-auth-pass-production}}
+
 resources:
 - name: pipeline-tasks
   type: git
@@ -186,6 +216,12 @@ resources:
   source:
     uri: {{kubernetes-release-git-url}}
     branch: {{kubernetes-release-git-branch}}
+
+- name: kubernetes-broker
+  type: git
+  source:
+    uri: {{kubernetes-broker-git-url}}
+    branch: {{kubernetes-broker-git-branch}}
 
 - name: kubernetes-release-tarball
   type: s3
@@ -262,6 +298,26 @@ resources:
     password: {{kubernetes-production-deployment-bosh-password}}
     deployment: {{kubernetes-production-deployment-bosh-deployment}}
     ignore_ssl: false
+
+- name: kubernetes-broker-staging-deployment
+  type: cf
+  source:
+    api: {{cf-api-url-staging}}
+    username: {{cf-deploy-username-staging}}
+    password: {{cf-deploy-password-staging}}
+    organization: {{cf-organization-staging}}
+    space: {{cf-space-staging}}
+    skip_cert_check: false
+
+- name: kubernetes-broker-production-deployment
+  type: cf
+  source:
+    api: {{cf-api-url-production}}
+    username: {{cf-deploy-username-production}}
+    password: {{cf-deploy-password-production}}
+    organization: {{cf-organization-production}}
+    space: {{cf-space-production}}
+    skip_cert_check: false
 
 - name: slack
   type: slack-notification
