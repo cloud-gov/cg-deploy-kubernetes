@@ -113,8 +113,10 @@ jobs:
 
 - name: deploy-kubernetes-broker-staging
   plan:
-  - get: kubernetes-broker
-    trigger: true
+  - aggregate:
+    - get: pipeline-tasks
+    - get: kubernetes-broker
+      trigger: true
   - put: kubernetes-broker-staging-deployment
     params:
       manifest: kubernetes-broker/manifest.yml
@@ -123,6 +125,20 @@ jobs:
       environment_variables:
         AUTH_USER: {{broker-auth-user-staging}}
         AUTH_PASS: {{broker-auth-pass-staging}}
+  - task: register-service-broker-staging
+    file: pipeline-tasks/register-service-broker.yml
+    params:
+      CF_API_URL: {{cf-api-url-staging}}
+      CF_USERNAME: {{cf-deploy-username-staging}}
+      CF_PASSWORD: {{cf-deploy-password-staging}}
+      CF_ORGANIZATION: {{cf-organization-staging}}
+      CF_SPACE: {{cf-space-staging}}
+      BROKER_NAME: kubernetes-broker
+      AUTH_USER: {{broker-auth-user-staging}}
+      AUTH_PASS: {{broker-auth-pass-staging}}
+      SERVICE_NAMES: {{broker-service-names-staging}}
+      SERVICE_ORGANIZATION: {{broker-service-organization-staging}}
+      SERVICE_PLAN: {{broker-service-plan-staging}}
 
 - name: deploy-kubernetes-production
   plan:
@@ -203,6 +219,20 @@ jobs:
       environment_variables:
         AUTH_USER: {{broker-auth-user-production}}
         AUTH_PASS: {{broker-auth-pass-production}}
+  - task: register-service-broker-production
+    file: pipeline-tasks/register-service-broker.yml
+    params:
+      CF_API_URL: {{cf-api-url-production}}
+      CF_USERNAME: {{cf-deploy-username-production}}
+      CF_PASSWORD: {{cf-deploy-password-production}}
+      CF_ORGANIZATION: {{cf-organization-production}}
+      CF_SPACE: {{cf-space-production}}
+      BROKER_NAME: kubernetes-broker
+      AUTH_USER: {{broker-auth-user-production}}
+      AUTH_PASS: {{broker-auth-pass-production}}
+      SERVICE_NAMES: {{broker-service-names-production}}
+      SERVICE_ORGANIZATION: {{broker-service-organization-production}}
+      SERVICE_PLAN: {{broker-service-plan-production}}
 
 resources:
 - name: pipeline-tasks
