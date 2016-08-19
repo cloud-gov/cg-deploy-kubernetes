@@ -125,6 +125,15 @@ jobs:
       environment_variables:
         AUTH_USER: {{broker-auth-user-staging}}
         AUTH_PASS: {{broker-auth-pass-staging}}
+        CONNECTOR_TYPE: static
+        CLUSTER_API_SERVER: {{api-server-staging}}
+        CLUSTER_USERNAME: {{cluster-username-staging}}
+        CLUSTER_PASSWORD: {{cluster-password-staging}}
+        CF_CLIENT_ID: {{cf-client-id-staging}}
+        CF_CLIENT_SECRET: {{cf-client-secret-staging}}
+        CF_TOKEN_URL: {{cf-token-url-staging}}
+        CF_API_ENDPOINT: {{cf-api-url-staging}}
+        CF_TOKEN_KEY: {{cf-token-key-staging}}
   - task: register-service-broker-staging
     file: pipeline-tasks/register-service-broker.yml
     params:
@@ -219,6 +228,15 @@ jobs:
       environment_variables:
         AUTH_USER: {{broker-auth-user-production}}
         AUTH_PASS: {{broker-auth-pass-production}}
+        CONNECTOR_TYPE: static
+        CLUSTER_API_SERVER: {{api-server-production}}
+        CLUSTER_USERNAME: {{cluster-username-production}}
+        CLUSTER_PASSWORD: {{cluster-password-production}}
+        CF_CLIENT_ID: {{cf-client-id-production}}
+        CF_CLIENT_SECRET: {{cf-client-secret-production}}
+        CF_TOKEN_URL: {{cf-token-url-production}}
+        CF_API_ENDPOINT: {{cf-api-url-production}}
+        CF_TOKEN_KEY: {{cf-token-key-production}}
   - task: register-service-broker-production
     file: pipeline-tasks/register-service-broker.yml
     params:
