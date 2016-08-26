@@ -314,7 +314,7 @@ resources:
 - name: consul-boshrelease
   type: bosh-io-release
   source:
-    repository: github.com/cloudfoundry-community/consul-boshrelease
+    repository: cloudfoundry-community/consul-boshrelease
 
 - name: common-staging
   type: cg-common
