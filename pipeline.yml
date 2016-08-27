@@ -54,6 +54,8 @@ jobs:
     - get: common-staging
       trigger: true
     - get: kubernetes-stemcell
+    - get: consul-boshrelease
+      trigger: true
   - task: kubernetes-manifest
     config:
       platform: linux
@@ -159,6 +161,8 @@ jobs:
     - get: common-production
       trigger: true
     - get: kubernetes-stemcell
+    - get: consul-boshrelease
+      trigger: true
   - task: kubernetes-manifest
     config:
       platform: linux
@@ -306,6 +310,11 @@ resources:
     regexp: light-bosh-stemcell-(.*)-aws-xen-hvm-ubuntu-trusty-go_agent.tgz
     region_name: {{aws-region}}
     secret_access_key: {{ci-secret-access-key}}
+
+- name: consul-boshrelease
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry-community/consul-boshrelease
 
 - name: common-staging
   type: cg-common
