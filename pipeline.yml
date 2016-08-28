@@ -128,6 +128,7 @@ jobs:
         AUTH_USER: {{broker-auth-user-staging}}
         AUTH_PASS: {{broker-auth-pass-staging}}
         CONNECTOR_TYPE: static
+        CONSUL_DOMAIN: {{consul-domain-staging}}
         CLUSTER_API_SERVER: {{api-server-staging}}
         CLUSTER_USERNAME: {{cluster-username-staging}}
         CLUSTER_PASSWORD: {{cluster-password-staging}}
@@ -233,6 +234,7 @@ jobs:
         AUTH_USER: {{broker-auth-user-production}}
         AUTH_PASS: {{broker-auth-pass-production}}
         CONNECTOR_TYPE: static
+        CONSUL_DOMAIN: {{consul-domain-production}}
         CLUSTER_API_SERVER: {{api-server-production}}
         CLUSTER_USERNAME: {{cluster-username-production}}
         CLUSTER_PASSWORD: {{cluster-password-production}}
