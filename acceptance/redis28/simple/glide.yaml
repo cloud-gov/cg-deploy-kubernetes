@@ -1,0 +1,8 @@
+package: redis_simple_test
+import:
+- package: github.com/cloudfoundry-community/go-cfenv
+  version: ~1.14.0
+- package: github.com/garyburd/redigo
+  version: ~1.0.0
+  subpackages:
+  - redis

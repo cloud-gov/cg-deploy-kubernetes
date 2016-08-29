@@ -5,8 +5,10 @@ groups:
   - build-kubernetes-release
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
+  - acceptance-tests-staging
   - deploy-kubernetes-production
   - deploy-kubernetes-broker-production
+  - acceptance-tests-production
 - name: release
   jobs:
   - build-kubernetes-release
@@ -14,8 +16,10 @@ groups:
   jobs:
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
+  - acceptance-tests-staging
   - deploy-kubernetes-production
   - deploy-kubernetes-broker-production
+  - acceptance-tests-production
 
 jobs:
 - name: build-kubernetes-release
@@ -152,6 +156,28 @@ jobs:
       SERVICE_ORGANIZATION: {{broker-service-organization-staging}}
       SERVICE_PLAN: {{broker-service-plan-staging}}
 
+- name: acceptance-tests-staging
+  plan:
+  - aggregate:
+    - get: kubernetes-config
+    - get: kubernetes-broker-staging-deployment
+      passed: [deploy-kubernetes-broker-staging]
+      trigger: true
+  - aggregate:
+    - task: acceptance-test-redis28-simple
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        CF_API_URL: {{cf-api-url-staging}}
+        CF_USERNAME: {{cf-deploy-username-staging}}
+        CF_PASSWORD: {{cf-deploy-password-staging}}
+        CF_ORGANIZATION: {{cf-organization-staging}}
+        CF_SPACE: {{cf-space-staging}}
+        APP_NAME: redis28-simple
+        SERVICE_NAME: redis28-multinode
+        PLAN_NAME: free
+        SERVICE_INSTANCE_NAME: redis28-simple
+        TEST_PATH: kubernetes-config/acceptance/redis28/simple
+
 - name: deploy-kubernetes-production
   plan:
   - aggregate:
@@ -164,6 +190,8 @@ jobs:
     - get: kubernetes-stemcell
     - get: consul-boshrelease
       trigger: true
+    - get: kubernetes-broker-staging-deployment
+      passed: [acceptance-tests-staging]
   - task: kubernetes-manifest
     config:
       platform: linux
@@ -223,8 +251,11 @@ jobs:
 
 - name: deploy-kubernetes-broker-production
   plan:
-  - get: kubernetes-broker
-    trigger: true
+  - aggregate:
+    - get: kubernetes-broker
+      trigger: true
+    - get: kubernetes-broker-staging-deployment
+      passed: [acceptance-tests-staging]
   - put: kubernetes-broker-production-deployment
     params:
       manifest: kubernetes-broker/manifest.yml
@@ -258,6 +289,28 @@ jobs:
       SERVICE_ORGANIZATION: {{broker-service-organization-production}}
       SERVICE_PLAN: {{broker-service-plan-production}}
 
+- name: acceptance-tests-production
+  plan:
+  - aggregate:
+    - get: kubernetes-config
+    - get: kubernetes-broker-production-deployment
+      passed: [deploy-kubernetes-broker-production]
+      trigger: true
+  - aggregate:
+    - task: acceptance-test-redis28-simple
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        CF_API_URL: {{cf-api-url-production}}
+        CF_USERNAME: {{cf-deploy-username-production}}
+        CF_PASSWORD: {{cf-deploy-password-production}}
+        CF_ORGANIZATION: {{cf-organization-production}}
+        CF_SPACE: {{cf-space-production}}
+        APP_NAME: redis28-simple
+        SERVICE_NAME: redis28-multinode
+        PLAN_NAME: free
+        SERVICE_INSTANCE_NAME: redis28-simple
+        TEST_PATH: kubernetes-config/acceptance/redis28/simple
+
 resources:
 - name: pipeline-tasks
   type: git
@@ -276,6 +329,12 @@ resources:
   source:
     uri: {{kubernetes-broker-git-url}}
     branch: {{kubernetes-broker-git-branch}}
+
+- name: kubernetes-config
+  type: git
+  source:
+    uri: {{kubernetes-config-git-url}}
+    branch: {{kubernetes-config-git-branch}}
 
 - name: kubernetes-release-tarball
   type: s3
