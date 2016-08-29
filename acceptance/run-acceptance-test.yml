@@ -1,0 +1,13 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: 18fgsa/concourse-task
+
+inputs:
+- name: kubernetes-config
+
+run:
+  path: kubernetes-config/acceptance/run-acceptance-test.sh
