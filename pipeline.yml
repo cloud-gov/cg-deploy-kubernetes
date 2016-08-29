@@ -53,6 +53,8 @@ jobs:
   - aggregate:
     - get: pipeline-tasks
     - get: kubernetes-release
+      params:
+        submodules: none
     - get: kubernetes-release-tarball
       trigger: true
     - get: common-staging
@@ -183,6 +185,8 @@ jobs:
   - aggregate:
     - get: pipeline-tasks
     - get: kubernetes-release
+      params:
+        submodules: none
     - get: kubernetes-release-tarball
       trigger: true
     - get: common-production
