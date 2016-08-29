@@ -21,6 +21,34 @@ groups:
   - deploy-kubernetes-broker-production
   - acceptance-tests-production
 
+params:
+  staging:
+    cf: &cf-staging:
+      CF_API_URL: {{cf-api-url-staging}}
+      CF_USERNAME: {{cf-deploy-username-staging}}
+      CF_PASSWORD: {{cf-deploy-password-staging}}
+      CF_ORGANIZATION: {{cf-organization-staging}}
+      CF_SPACE: {{cf-space-staging}}
+    bosh-errand: &bosh-errand-staging
+      BOSH_TARGET: {{kubernetes-staging-deployment-bosh-target}}
+      BOSH_USERNAME: {{kubernetes-staging-deployment-bosh-username}}
+      BOSH_PASSWORD: {{kubernetes-staging-deployment-bosh-password}}
+      BOSH_DEPLOYMENT_NAME: {{kubernetes-staging-deployment-bosh-deployment}}
+      BOSH_CACERT: common/boshCA.crt
+  production:
+    cf: &cf-production:
+      CF_API_URL: {{cf-api-url-production}}
+      CF_USERNAME: {{cf-deploy-username-production}}
+      CF_PASSWORD: {{cf-deploy-password-production}}
+      CF_ORGANIZATION: {{cf-organization-production}}
+      CF_SPACE: {{cf-space-production}}
+    bosh-errand: &bosh-errand-production
+      BOSH_TARGET: {{kubernetes-production-deployment-bosh-target}}
+      BOSH_USERNAME: {{kubernetes-production-deployment-bosh-username}}
+      BOSH_PASSWORD: {{kubernetes-production-deployment-bosh-password}}
+      BOSH_DEPLOYMENT_NAME: {{kubernetes-production-deployment-bosh-deployment}}
+      BOSH_CACERT: common/boshCA.crt
+
 jobs:
 - name: build-kubernetes-release
   plan:
@@ -113,11 +141,14 @@ jobs:
       common: common-staging
     params:
       BOSH_ERRAND: create-kubernetes-dns
-      BOSH_TARGET: {{kubernetes-staging-deployment-bosh-target}}
-      BOSH_USERNAME: {{kubernetes-staging-deployment-bosh-username}}
-      BOSH_PASSWORD: {{kubernetes-staging-deployment-bosh-password}}
-      BOSH_DEPLOYMENT_NAME: {{kubernetes-staging-deployment-bosh-deployment}}
-      BOSH_CACERT: common/boshCA.crt
+      <<: *bosh-errand-staging
+  - task: create-kubernetes-monitoring
+    file: pipeline-tasks/bosh-errand.yml
+    input_mapping:
+      common: common-staging
+    params:
+      BOSH_ERRAND: create-kubernetes-monitoring
+      <<: *bosh-errand-staging
 
 - name: deploy-kubernetes-broker-staging
   plan:
@@ -146,11 +177,7 @@ jobs:
   - task: register-service-broker-staging
     file: pipeline-tasks/register-service-broker.yml
     params:
-      CF_API_URL: {{cf-api-url-staging}}
-      CF_USERNAME: {{cf-deploy-username-staging}}
-      CF_PASSWORD: {{cf-deploy-password-staging}}
-      CF_ORGANIZATION: {{cf-organization-staging}}
-      CF_SPACE: {{cf-space-staging}}
+      <<: *cf-staging
       BROKER_NAME: kubernetes-broker
       AUTH_USER: {{broker-auth-user-staging}}
       AUTH_PASS: {{broker-auth-pass-staging}}
@@ -169,11 +196,7 @@ jobs:
     - task: acceptance-test-redis28-simple
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        CF_API_URL: {{cf-api-url-staging}}
-        CF_USERNAME: {{cf-deploy-username-staging}}
-        CF_PASSWORD: {{cf-deploy-password-staging}}
-        CF_ORGANIZATION: {{cf-organization-staging}}
-        CF_SPACE: {{cf-space-staging}}
+        <<: *cf-staging
         APP_NAME: redis28-simple
         SERVICE_NAME: redis28-multinode
         PLAN_NAME: free
@@ -247,11 +270,14 @@ jobs:
       common: common-production
     params:
       BOSH_ERRAND: create-kubernetes-dns
-      BOSH_TARGET: {{kubernetes-production-deployment-bosh-target}}
-      BOSH_USERNAME: {{kubernetes-production-deployment-bosh-username}}
-      BOSH_PASSWORD: {{kubernetes-production-deployment-bosh-password}}
-      BOSH_DEPLOYMENT_NAME: {{kubernetes-production-deployment-bosh-deployment}}
-      BOSH_CACERT: common/boshCA.crt
+      <<: *bosh-errand-production
+  - task: create-kubernetes-monitoring
+    file: pipeline-tasks/bosh-errand.yml
+    input_mapping:
+      common: common-production
+    params:
+      BOSH_ERRAND: create-kubernetes-monitoring
+      <<: *bosh-errand-production
 
 - name: deploy-kubernetes-broker-production
   plan:
@@ -281,11 +307,7 @@ jobs:
   - task: register-service-broker-production
     file: pipeline-tasks/register-service-broker.yml
     params:
-      CF_API_URL: {{cf-api-url-production}}
-      CF_USERNAME: {{cf-deploy-username-production}}
-      CF_PASSWORD: {{cf-deploy-password-production}}
-      CF_ORGANIZATION: {{cf-organization-production}}
-      CF_SPACE: {{cf-space-production}}
+      <<: *cf-production
       BROKER_NAME: kubernetes-broker
       AUTH_USER: {{broker-auth-user-production}}
       AUTH_PASS: {{broker-auth-pass-production}}
@@ -304,11 +326,7 @@ jobs:
     - task: acceptance-test-redis28-simple
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        CF_API_URL: {{cf-api-url-production}}
-        CF_USERNAME: {{cf-deploy-username-production}}
-        CF_PASSWORD: {{cf-deploy-password-production}}
-        CF_ORGANIZATION: {{cf-organization-production}}
-        CF_SPACE: {{cf-space-production}}
+        <<: *cf-production
         APP_NAME: redis28-simple
         SERVICE_NAME: redis28-multinode
         PLAN_NAME: free
