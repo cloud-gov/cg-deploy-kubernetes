@@ -1,0 +1,9 @@
+applications:
+- name: redis28-test
+  buildpack: go_buildpack
+  command: redis-test
+  health-check-type: none
+  no-route: true
+  env:
+    GOPACKAGENAME: redis-test
+    GO15VENDOREXPERIMENT: 1

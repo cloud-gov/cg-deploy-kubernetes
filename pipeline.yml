@@ -166,7 +166,7 @@ jobs:
       passed: [deploy-kubernetes-broker-staging]
       trigger: true
   - aggregate:
-    - task: acceptance-test-redis28-simple
+    - task: acceptance-test-redis28-free
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         CF_API_URL: {{cf-api-url-staging}}
@@ -174,11 +174,24 @@ jobs:
         CF_PASSWORD: {{cf-deploy-password-staging}}
         CF_ORGANIZATION: {{cf-organization-staging}}
         CF_SPACE: {{cf-space-staging}}
-        APP_NAME: redis28-simple
+        APP_NAME: redis28-test
         SERVICE_NAME: redis28-multinode
         PLAN_NAME: free
-        SERVICE_INSTANCE_NAME: redis28-simple
-        TEST_PATH: kubernetes-config/acceptance/redis28/simple
+        SERVICE_INSTANCE_NAME: redis28-free
+        TEST_PATH: kubernetes-config/acceptance/redis28
+    - task: acceptance-test-mongo30-persistent
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        CF_API_URL: {{cf-api-url-staging}}
+        CF_USERNAME: {{cf-deploy-username-staging}}
+        CF_PASSWORD: {{cf-deploy-password-staging}}
+        CF_ORGANIZATION: {{cf-organization-staging}}
+        CF_SPACE: {{cf-space-staging}}
+        APP_NAME: mongodb30-test
+        SERVICE_NAME: mongodb30-multinode
+        PLAN_NAME: persistent
+        SERVICE_INSTANCE_NAME: mongodb30-persistent
+        TEST_PATH: kubernetes-config/acceptance/mongodb30
 
 - name: deploy-kubernetes-production
   plan:
@@ -301,7 +314,7 @@ jobs:
       passed: [deploy-kubernetes-broker-production]
       trigger: true
   - aggregate:
-    - task: acceptance-test-redis28-simple
+    - task: acceptance-test-redis28-free
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         CF_API_URL: {{cf-api-url-production}}
@@ -309,11 +322,24 @@ jobs:
         CF_PASSWORD: {{cf-deploy-password-production}}
         CF_ORGANIZATION: {{cf-organization-production}}
         CF_SPACE: {{cf-space-production}}
-        APP_NAME: redis28-simple
+        APP_NAME: redis28-test
         SERVICE_NAME: redis28-multinode
         PLAN_NAME: free
-        SERVICE_INSTANCE_NAME: redis28-simple
-        TEST_PATH: kubernetes-config/acceptance/redis28/simple
+        SERVICE_INSTANCE_NAME: redis28-free
+        TEST_PATH: kubernetes-config/acceptance/redis28
+    - task: acceptance-test-mongo30-persistent
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        CF_API_URL: {{cf-api-url-production}}
+        CF_USERNAME: {{cf-deploy-username-production}}
+        CF_PASSWORD: {{cf-deploy-password-production}}
+        CF_ORGANIZATION: {{cf-organization-production}}
+        CF_SPACE: {{cf-space-production}}
+        APP_NAME: mongodb30-test
+        SERVICE_NAME: mongodb30-multinode
+        PLAN_NAME: persistent
+        SERVICE_INSTANCE_NAME: mongodb30-persistent
+        TEST_PATH: kubernetes-config/acceptance/mongodb30
 
 resources:
 - name: pipeline-tasks
