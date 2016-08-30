@@ -1,0 +1,7 @@
+package: mongodb30-test
+import:
+- package: github.com/cloudfoundry-community/go-cfenv
+  version: ~1.14.0
+- package: gopkg.in/mgo.v2
+  subpackages:
+  - bson
