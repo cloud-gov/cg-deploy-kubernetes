@@ -23,7 +23,7 @@ groups:
 
 params:
   staging:
-    cf: &cf-staging:
+    cf: &cf-staging
       CF_API_URL: {{cf-api-url-staging}}
       CF_USERNAME: {{cf-deploy-username-staging}}
       CF_PASSWORD: {{cf-deploy-password-staging}}
@@ -36,7 +36,7 @@ params:
       BOSH_DEPLOYMENT_NAME: {{kubernetes-staging-deployment-bosh-deployment}}
       BOSH_CACERT: common/boshCA.crt
   production:
-    cf: &cf-production:
+    cf: &cf-production
       CF_API_URL: {{cf-api-url-production}}
       CF_USERNAME: {{cf-deploy-username-production}}
       CF_PASSWORD: {{cf-deploy-password-production}}
@@ -83,6 +83,8 @@ jobs:
     - get: kubernetes-release
       params:
         submodules: none
+    - get: kubernetes-config
+      trigger: true
     - get: kubernetes-release-tarball
       trigger: true
     - get: common-staging
@@ -99,13 +101,16 @@ jobs:
           repository: 18fgsa/concourse-task
       inputs:
       - name: kubernetes-release
+      - name: kubernetes-config
       - name: common-staging
       run:
         path: sh
         args:
         - -exc
         - |
-          kubernetes-release/generate_deployment_manifest aws common-staging/secrets.yml \
+          kubernetes-release/generate_deployment_manifest aws \
+            common-staging/secrets.yml \
+            kubernetes-config/k8s-jobs.yml \
             > kubernetes-manifest/manifest.yml
       outputs:
       - name: kubernetes-manifest
@@ -193,15 +198,24 @@ jobs:
       passed: [deploy-kubernetes-broker-staging]
       trigger: true
   - aggregate:
-    - task: acceptance-test-redis28-simple
+    - task: acceptance-test-redis28-free
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging
-        APP_NAME: redis28-simple
+        APP_NAME: redis28-test
         SERVICE_NAME: redis28-multinode
         PLAN_NAME: free
-        SERVICE_INSTANCE_NAME: redis28-simple
-        TEST_PATH: kubernetes-config/acceptance/redis28/simple
+        SERVICE_INSTANCE_NAME: redis28-free
+        TEST_PATH: kubernetes-config/acceptance/redis28
+    - task: acceptance-test-mongo30-persistent
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-staging
+        APP_NAME: mongodb30-test
+        SERVICE_NAME: mongodb30-multinode
+        PLAN_NAME: persistent
+        SERVICE_INSTANCE_NAME: mongodb30-persistent
+        TEST_PATH: kubernetes-config/acceptance/mongodb30
 
 - name: deploy-kubernetes-production
   plan:
@@ -210,6 +224,8 @@ jobs:
     - get: kubernetes-release
       params:
         submodules: none
+    - get: kubernetes-config
+      trigger: true
     - get: kubernetes-release-tarball
       trigger: true
     - get: common-production
@@ -228,13 +244,16 @@ jobs:
           repository: 18fgsa/concourse-task
       inputs:
       - name: kubernetes-release
+      - name: kubernetes-config
       - name: common-production
       run:
         path: sh
         args:
         - -exc
         - |
-          kubernetes-release/generate_deployment_manifest aws common-production/secrets.yml \
+          kubernetes-release/generate_deployment_manifest aws \
+            common-production/secrets.yml \
+            kubernetes-config/k8s-jobs.yml \
             > kubernetes-manifest/manifest.yml
       outputs:
       - name: kubernetes-manifest
@@ -323,15 +342,24 @@ jobs:
       passed: [deploy-kubernetes-broker-production]
       trigger: true
   - aggregate:
-    - task: acceptance-test-redis28-simple
+    - task: acceptance-test-redis28-free
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-production
-        APP_NAME: redis28-simple
+        APP_NAME: redis28-test
         SERVICE_NAME: redis28-multinode
         PLAN_NAME: free
-        SERVICE_INSTANCE_NAME: redis28-simple
-        TEST_PATH: kubernetes-config/acceptance/redis28/simple
+        SERVICE_INSTANCE_NAME: redis28-free
+        TEST_PATH: kubernetes-config/acceptance/redis28
+    - task: acceptance-test-mongo30-persistent
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-production
+        APP_NAME: mongodb30-test
+        SERVICE_NAME: mongodb30-multinode
+        PLAN_NAME: persistent
+        SERVICE_INSTANCE_NAME: mongodb30-persistent
+        TEST_PATH: kubernetes-config/acceptance/mongodb30
 
 resources:
 - name: pipeline-tasks

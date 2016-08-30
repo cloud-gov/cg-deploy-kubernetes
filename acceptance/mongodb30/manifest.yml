@@ -1,9 +1,9 @@
 applications:
-- name: redis28-simple
+- name: mongodb30-test
   buildpack: go_buildpack
-  command: redis_simple_test
+  command: mongodb30-test
   health-check-type: none
   no-route: true
   env:
-    GOPACKAGENAME: redis_simple_test
+    GOPACKAGENAME: mongodb30-test
     GO15VENDOREXPERIMENT: 1

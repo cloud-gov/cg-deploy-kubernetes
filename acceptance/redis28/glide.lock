@@ -1,5 +1,5 @@
-hash: 0ad6d99218e9142018645d664da86dda632ad26ed5034e4a12a19935b0c3f071
-updated: 2016-08-28T19:19:58.190680119-04:00
+hash: 58bcd47b7b1fb21cabfd823746a6b5f7e093a6491bf4338b24e09bca70ee8f6e
+updated: 2016-08-29T19:23:53.655169671-04:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
   version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
