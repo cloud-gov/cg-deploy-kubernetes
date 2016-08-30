@@ -55,6 +55,8 @@ jobs:
     - get: kubernetes-release
       params:
         submodules: none
+    - get: kubernetes-config
+      trigger: true
     - get: kubernetes-release-tarball
       trigger: true
     - get: common-staging
@@ -71,13 +73,16 @@ jobs:
           repository: 18fgsa/concourse-task
       inputs:
       - name: kubernetes-release
+      - name: kubernetes-config
       - name: common-staging
       run:
         path: sh
         args:
         - -exc
         - |
-          kubernetes-release/generate_deployment_manifest aws common-staging/secrets.yml \
+          kubernetes-release/generate_deployment_manifest aws \
+            common-staging/secrets.yml \
+            kubernetes-config/k8s-jobs.yml \
             > kubernetes-manifest/manifest.yml
       outputs:
       - name: kubernetes-manifest
@@ -200,6 +205,8 @@ jobs:
     - get: kubernetes-release
       params:
         submodules: none
+    - get: kubernetes-config
+      trigger: true
     - get: kubernetes-release-tarball
       trigger: true
     - get: common-production
@@ -218,13 +225,16 @@ jobs:
           repository: 18fgsa/concourse-task
       inputs:
       - name: kubernetes-release
+      - name: kubernetes-config
       - name: common-production
       run:
         path: sh
         args:
         - -exc
         - |
-          kubernetes-release/generate_deployment_manifest aws common-production/secrets.yml \
+          kubernetes-release/generate_deployment_manifest aws \
+            common-production/secrets.yml \
+            kubernetes-config/k8s-jobs.yml \
             > kubernetes-manifest/manifest.yml
       outputs:
       - name: kubernetes-manifest

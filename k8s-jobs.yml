@@ -1,0 +1,29 @@
+releases:
+- (( append ))
+- {name: fisma, version: latest}
+- {name: newrelic, version: latest}
+- {name: collectd, version: latest}
+- {name: tripwire, version: latest}
+- {name: awslogs, version: latest}
+- {name: nessus-agent, version: latest}
+- {name: riemannc, version: latest}
+- {name: clamav, version: latest}
+- {name: snort, version: latest}
+
+jobs:
+- name: master
+  templates: &hardening-templates
+  - (( append ))
+  - {name: newrelic-monitor, release: newrelic}
+  - {name: nessus-agent, release: nessus-agent}
+  - {name: harden, release: fisma}
+  - {name: collectd, release: collectd}
+  - {name: tripwire, release: tripwire}
+  - {name: awslogs, release: awslogs}
+  - {name: riemannc, release: riemannc}
+  - {name: clamav, release: clamav}
+  - {name: snort, release: snort}
+- name: minion
+  templates: *hardening-templates
+- name: consul
+  templates: *hardening-templates
