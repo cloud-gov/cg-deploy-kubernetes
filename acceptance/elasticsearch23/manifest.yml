@@ -1,0 +1,9 @@
+applications:
+- name: elasticsearch23-test
+  buildpack: go_buildpack
+  command: elasticsearch23-test
+  health-check-type: none
+  no-route: true
+  env:
+    GOPACKAGENAME: elasticsearch23-test
+    GO15VENDOREXPERIMENT: 1
