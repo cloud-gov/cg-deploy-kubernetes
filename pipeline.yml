@@ -186,9 +186,8 @@ jobs:
       BROKER_NAME: kubernetes-broker
       AUTH_USER: {{broker-auth-user-staging}}
       AUTH_PASS: {{broker-auth-pass-staging}}
-      SERVICE_NAMES: {{broker-service-names-staging}}
+      SERVICES: {{broker-service-names-staging}}
       SERVICE_ORGANIZATION: {{broker-service-organization-staging}}
-      SERVICE_PLAN: {{broker-service-plan-staging}}
 
 - name: acceptance-tests-staging
   plan:
@@ -330,9 +329,8 @@ jobs:
       BROKER_NAME: kubernetes-broker
       AUTH_USER: {{broker-auth-user-production}}
       AUTH_PASS: {{broker-auth-pass-production}}
-      SERVICE_NAMES: {{broker-service-names-production}}
+      SERVICES: {{broker-service-names-production}}
       SERVICE_ORGANIZATION: {{broker-service-organization-production}}
-      SERVICE_PLAN: {{broker-service-plan-production}}
 
 - name: acceptance-tests-production
   plan:
