@@ -11,8 +11,7 @@ function cleanup() {
 function check_service() {
   counter=36
   until [ $counter -le 0 ]; do
-    status=$(cf service ${SERVICE_NAME})
-    echo ${status}
+    status=$(cf service ${SERVICE_INSTANCE_NAME})
     if echo ${status} | grep "Status: create succeeded"; then
       return 0
     elif echo ${status} | grep "Status: create failed"; then
