@@ -1,0 +1,14 @@
+hash: dd274f3c1e0cbbd9f974190226fc4cd8cd76572a10a32b6cac09a8db593eb3f0
+updated: 2016-09-06T16:05:52.764982206-04:00
+imports:
+- name: github.com/cloudfoundry-community/go-cfenv
+  version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
+- name: github.com/go-sql-driver/mysql
+  version: a732e14c62dde3285440047bba97581bc472ae18
+- name: github.com/lib/pq
+  version: 50761b0867bd1d9d069276790bcd4a3bccf2324a
+  subpackages:
+  - oid
+- name: github.com/mitchellh/mapstructure
+  version: ca63d7c062ee3c9f34db231e352b60012b4fd0c1
+testImports: []
