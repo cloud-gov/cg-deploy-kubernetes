@@ -3,5 +3,4 @@ import:
 - package: github.com/cloudfoundry-community/go-cfenv
   version: ~1.14.0
 - package: github.com/go-sql-driver/mysql
-  version: ~1.2.0
 - package: github.com/lib/pq

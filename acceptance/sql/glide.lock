@@ -1,10 +1,10 @@
-hash: dd274f3c1e0cbbd9f974190226fc4cd8cd76572a10a32b6cac09a8db593eb3f0
-updated: 2016-09-06T16:05:52.764982206-04:00
+hash: 9c92f20153347959ae1a7667992bba0561d93353016f33a0ecc3b396d1a6f7c9
+updated: 2016-09-06T22:29:04.452488356-04:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
   version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
 - name: github.com/go-sql-driver/mysql
-  version: a732e14c62dde3285440047bba97581bc472ae18
+  version: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
 - name: github.com/lib/pq
   version: 50761b0867bd1d9d069276790bcd4a3bccf2324a
   subpackages:

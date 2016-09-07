@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"os/signal"
-	// "strings"
 
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
@@ -46,12 +46,19 @@ func main() {
 	}
 	creds := services[0].Credentials
 
-	// Create client
-	// uri := strings.Replace(fmt.Sprint(creds["uri"]), "mysql://", "", -1)
+	// Build connection string
 	uri := fmt.Sprint(creds["uri"])
+	if driver == "mysql" {
+		u, _ := url.Parse(uri)
+		u.Host = fmt.Sprintf("tcp(%s)", u.Host)
+		uri = u.String()
+	}
+
+	// Create client
 	db, err := sql.Open(driver, uri)
 	checkStatus(err)
 
+	// Write and read data
 	_, err = db.Exec("CREATE TABLE acceptance (id INTEGER, value TEXT)")
 	checkStatus(err)
 
