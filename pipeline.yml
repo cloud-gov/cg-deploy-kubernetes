@@ -215,6 +215,15 @@ jobs:
         PLAN_NAME: persistent
         SERVICE_INSTANCE_NAME: mongodb30-persistent
         TEST_PATH: kubernetes-config/acceptance/mongodb30
+    - task: acceptance-test-elasticsearch23-persistent
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-staging
+        APP_NAME: elasticsearch23-test
+        SERVICE_NAME: elasticsearch23-multinode
+        PLAN_NAME: persistent
+        SERVICE_INSTANCE_NAME: elasticsearch23-persistent
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch23
 
 - name: deploy-kubernetes-production
   plan:
@@ -358,6 +367,15 @@ jobs:
         PLAN_NAME: persistent
         SERVICE_INSTANCE_NAME: mongodb30-persistent
         TEST_PATH: kubernetes-config/acceptance/mongodb30
+    - task: acceptance-test-elasticsearch23-persistent
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-production
+        APP_NAME: elasticsearch23-test
+        SERVICE_NAME: elasticsearch23-multinode
+        PLAN_NAME: persistent
+        SERVICE_INSTANCE_NAME: elasticsearch23-persistent
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch23
 
 resources:
 - name: pipeline-tasks
