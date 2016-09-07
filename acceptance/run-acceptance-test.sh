@@ -21,7 +21,7 @@ cleanup
 
 cf create-service ${SERVICE_NAME} ${PLAN_NAME} ${SERVICE_INSTANCE_NAME}
 
-cf push --no-start -f ./manifest.yml
+cf push --no-start -f ${MANIFEST_FILE:-manifest.yml}
 cf bind-service ${APP_NAME} ${SERVICE_INSTANCE_NAME}
 cf start ${APP_NAME}
 
