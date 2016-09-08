@@ -160,7 +160,10 @@ jobs:
   - aggregate:
     - get: pipeline-tasks
     - get: kubernetes-broker
+    - get: kubernetes-config
       trigger: true
+  - task: run-tests
+    file: kubernetes-config/run-tests.yml
   - put: kubernetes-broker-staging-deployment
     params:
       manifest: kubernetes-broker/manifest.yml
