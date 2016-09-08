@@ -1,0 +1,11 @@
+applications:
+- name: postgresql94-test
+  buildpack: go_buildpack
+  command: sql-test
+  health-check-type: none
+  no-route: true
+  env:
+    GOPACKAGENAME: sql-test
+    GO15VENDOREXPERIMENT: 1
+    SQL_DRIVER: postgres
+    SQL_SERVICE: postgresql94-multinode

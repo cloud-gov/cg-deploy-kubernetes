@@ -1,0 +1,11 @@
+applications:
+- name: mysql56-test
+  buildpack: go_buildpack
+  command: sql-test
+  health-check-type: none
+  no-route: true
+  env:
+    GOPACKAGENAME: sql-test
+    GO15VENDOREXPERIMENT: 1
+    SQL_DRIVER: mysql
+    SQL_SERVICE: mysql56-multinode
