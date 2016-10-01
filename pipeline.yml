@@ -227,26 +227,35 @@ jobs:
         PLAN_NAME: persistent
         SERVICE_INSTANCE_NAME: elasticsearch23-persistent
         TEST_PATH: kubernetes-config/acceptance/elasticsearch23
-    - task: acceptance-test-mysql56-persistent
+    - task: acceptance-test-elasticsearch17-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging
-        APP_NAME: mysql56-test
-        SERVICE_NAME: mysql56-multinode
+        APP_NAME: elasticsearch17-test
+        SERVICE_NAME: elasticsearch17-multinode
         PLAN_NAME: persistent
-        SERVICE_INSTANCE_NAME: mysql56-persistent
-        TEST_PATH: kubernetes-config/acceptance/sql
-        MANIFEST_FILE: manifest-mysql56-multinode.yml
-    - task: acceptance-test-postgresql94-persistent
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging
-        APP_NAME: postgresql94-test
-        SERVICE_NAME: postgresql94-multinode
-        PLAN_NAME: persistent
-        SERVICE_INSTANCE_NAME: postgresql94-persistent
-        TEST_PATH: kubernetes-config/acceptance/sql
-        MANIFEST_FILE: manifest-postgresql94-multinode.yml
+        SERVICE_INSTANCE_NAME: elasticsearch17-persistent
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch17
+    # - task: acceptance-test-mysql56-persistent
+    #   file: kubernetes-config/acceptance/run-acceptance-test.yml
+    #   params:
+    #     <<: *cf-staging
+    #     APP_NAME: mysql56-test
+    #     SERVICE_NAME: mysql56-multinode
+    #     PLAN_NAME: persistent
+    #     SERVICE_INSTANCE_NAME: mysql56-persistent
+    #     TEST_PATH: kubernetes-config/acceptance/sql
+    #     MANIFEST_FILE: manifest-mysql56-multinode.yml
+    # - task: acceptance-test-postgresql94-persistent
+    #   file: kubernetes-config/acceptance/run-acceptance-test.yml
+    #   params:
+    #     <<: *cf-staging
+    #     APP_NAME: postgresql94-test
+    #     SERVICE_NAME: postgresql94-multinode
+    #     PLAN_NAME: persistent
+    #     SERVICE_INSTANCE_NAME: postgresql94-persistent
+    #     TEST_PATH: kubernetes-config/acceptance/sql
+    #     MANIFEST_FILE: manifest-postgresql94-multinode.yml
 
 - name: deploy-kubernetes-production
   plan:
@@ -399,26 +408,35 @@ jobs:
         PLAN_NAME: persistent
         SERVICE_INSTANCE_NAME: elasticsearch23-persistent
         TEST_PATH: kubernetes-config/acceptance/elasticsearch23
-    - task: acceptance-test-mysql56-persistent
+    - task: acceptance-test-elasticsearch17-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-production
-        APP_NAME: mysql56-test
-        SERVICE_NAME: mysql56-multinode
+        APP_NAME: elasticsearch17-test
+        SERVICE_NAME: elasticsearch17-multinode
         PLAN_NAME: persistent
-        SERVICE_INSTANCE_NAME: mysql56-persistent
-        TEST_PATH: kubernetes-config/acceptance/sql
-        MANIFEST_FILE: manifest-mysql56-multinode.yml
-    - task: acceptance-test-postgresql94-persistent
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-production
-        APP_NAME: postgresql94-test
-        SERVICE_NAME: postgresql94-multinode
-        PLAN_NAME: persistent
-        SERVICE_INSTANCE_NAME: postgresql94-persistent
-        TEST_PATH: kubernetes-config/acceptance/sql
-        MANIFEST_FILE: manifest-postgresql94-multinode.yml
+        SERVICE_INSTANCE_NAME: elasticsearch17-persistent
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch17
+    # - task: acceptance-test-mysql56-persistent
+    #   file: kubernetes-config/acceptance/run-acceptance-test.yml
+    #   params:
+    #     <<: *cf-production
+    #     APP_NAME: mysql56-test
+    #     SERVICE_NAME: mysql56-multinode
+    #     PLAN_NAME: persistent
+    #     SERVICE_INSTANCE_NAME: mysql56-persistent
+    #     TEST_PATH: kubernetes-config/acceptance/sql
+    #     MANIFEST_FILE: manifest-mysql56-multinode.yml
+    # - task: acceptance-test-postgresql94-persistent
+    #   file: kubernetes-config/acceptance/run-acceptance-test.yml
+    #   params:
+    #     <<: *cf-production
+    #     APP_NAME: postgresql94-test
+    #     SERVICE_NAME: postgresql94-multinode
+    #     PLAN_NAME: persistent
+    #     SERVICE_INSTANCE_NAME: postgresql94-persistent
+    #     TEST_PATH: kubernetes-config/acceptance/sql
+    #     MANIFEST_FILE: manifest-postgresql94-multinode.yml
 
 resources:
 - name: pipeline-tasks
