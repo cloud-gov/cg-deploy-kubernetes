@@ -108,6 +108,7 @@ jobs:
         args:
         - -exc
         - |
+          export SPRUCE_FILE_BASE_PATH=./kubernetes-config
           kubernetes-release/generate_deployment_manifest aws \
             common-staging/secrets.yml \
             kubernetes-config/k8s-jobs.yml \
@@ -153,6 +154,13 @@ jobs:
       common: common-staging
     params:
       BOSH_ERRAND: create-kubernetes-monitoring
+      <<: *bosh-errand-staging
+  - task: apply-kubernetes-manifests
+    file: pipeline-tasks/bosh-errand.yml
+    input_mapping:
+      common: common-staging
+    params:
+      BOSH_ERRAND: apply-kubernetes-manifests
       <<: *bosh-errand-staging
 
 - name: deploy-kubernetes-broker-staging
@@ -291,6 +299,7 @@ jobs:
         args:
         - -exc
         - |
+          export SPRUCE_FILE_BASE_PATH=./kubernetes-config
           kubernetes-release/generate_deployment_manifest aws \
             common-production/secrets.yml \
             kubernetes-config/k8s-jobs.yml \
@@ -336,6 +345,13 @@ jobs:
       common: common-production
     params:
       BOSH_ERRAND: create-kubernetes-monitoring
+      <<: *bosh-errand-production
+  - task: apply-kubernetes-manifests
+    file: pipeline-tasks/bosh-errand.yml
+    input_mapping:
+      common: common-production
+    params:
+      BOSH_ERRAND: apply-kubernetes-manifests
       <<: *bosh-errand-production
 
 - name: deploy-kubernetes-broker-production
