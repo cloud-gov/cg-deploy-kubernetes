@@ -27,3 +27,7 @@ jobs:
   templates: *hardening-templates
 - name: consul
   templates: *hardening-templates
+- name: apply-kubernetes-manifests
+  properties:
+    manifests:
+    - (( file "manifests/storage-class.yaml" ))
