@@ -11,7 +11,7 @@ releases:
 - {name: snort, version: latest}
 
 jobs:
-- name: master
+- name: consul
   templates: &hardening-templates
   - (( append ))
   - {name: newrelic-monitor, release: newrelic}
@@ -23,9 +23,11 @@ jobs:
   - {name: riemannc, release: riemannc}
   - {name: clamav, release: clamav}
   - {name: snort, release: snort}
-- name: minion
+- name: etcd
   templates: *hardening-templates
-- name: consul
+- name: master
+  templates: *hardening-templates
+- name: minion
   templates: *hardening-templates
 - name: apply-kubernetes-manifests
   properties:
