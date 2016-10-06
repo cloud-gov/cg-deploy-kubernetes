@@ -33,3 +33,4 @@ jobs:
   properties:
     manifests:
     - (( file "manifests/storage-class.yaml" ))
+    - (( file "manifests/fluentd-cloudwatch.yaml" ))

@@ -87,14 +87,15 @@ jobs:
       trigger: true
     - get: kubernetes-release-tarball
       trigger: true
-    - get: common-staging
+    - get: common
+      resource: common-staging
       trigger: true
     - get: kubernetes-stemcell
       trigger: true
     - get: consul-boshrelease
       trigger: true
   - task: kubernetes-manifest
-    config:
+    config: &manifest-config
       platform: linux
       image_resource:
         type: docker-image
@@ -103,23 +104,31 @@ jobs:
       inputs:
       - name: kubernetes-release
       - name: kubernetes-config
-      - name: common-staging
+      - name: common
       run:
         path: sh
         args:
         - -exc
         - |
+          cat << EOF > ./cloudwatch-params.yaml
+          ${CLOUDWATCH_PARAMS}
+          EOF
+          spruce merge --prune meta kubernetes-config/manifests/fluentd-cloudwatch-template.yaml \
+            ./cloudwatch-params.yaml \
+            > kubernetes-config/manifests/fluentd-cloudwatch.yaml
           export SPRUCE_FILE_BASE_PATH=./kubernetes-config
           kubernetes-release/generate_deployment_manifest aws \
-            common-staging/secrets.yml \
+            common/secrets.yml \
             kubernetes-config/k8s-jobs.yml \
             kubernetes-config/infrastructure-aws-staging.yml \
             > kubernetes-manifest/manifest.yml
       outputs:
       - name: kubernetes-manifest
+      params:
+        CLOUDWATCH_PARAMS: {{cloudwatch-params-staging}}
   - put: kubernetes-staging-deployment
-    params:
-      cert: common-staging/boshCA.crt
+    params: &deployment-params
+      cert: common/boshCA.crt
       manifest: kubernetes-manifest/manifest.yml
       releases:
       - kubernetes-release-tarball/*.tgz
@@ -145,22 +154,16 @@ jobs:
         icon_url: {{slack-icon-url}}
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
-    input_mapping:
-      common: common-staging
     params:
       BOSH_ERRAND: create-kubernetes-dns
       <<: *bosh-errand-staging
   - task: create-kubernetes-monitoring
     file: pipeline-tasks/bosh-errand.yml
-    input_mapping:
-      common: common-staging
     params:
       BOSH_ERRAND: create-kubernetes-monitoring
       <<: *bosh-errand-staging
   - task: apply-kubernetes-manifests
     file: pipeline-tasks/bosh-errand.yml
-    input_mapping:
-      common: common-staging
     params:
       BOSH_ERRAND: apply-kubernetes-manifests
       <<: *bosh-errand-staging
@@ -278,7 +281,8 @@ jobs:
       trigger: true
     - get: kubernetes-release-tarball
       trigger: true
-    - get: common-production
+    - get: common
+      resource: common-production
       trigger: true
     - get: kubernetes-stemcell
       trigger: true
@@ -288,36 +292,11 @@ jobs:
       passed: [acceptance-tests-staging]
   - task: kubernetes-manifest
     config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: 18fgsa/concourse-task
-      inputs:
-      - name: kubernetes-release
-      - name: kubernetes-config
-      - name: common-production
-      run:
-        path: sh
-        args:
-        - -exc
-        - |
-          export SPRUCE_FILE_BASE_PATH=./kubernetes-config
-          kubernetes-release/generate_deployment_manifest aws \
-            common-production/secrets.yml \
-            kubernetes-config/k8s-jobs.yml \
-            kubernetes-config/infrastructure-aws-production.yml \
-            > kubernetes-manifest/manifest.yml
-      outputs:
-      - name: kubernetes-manifest
+      <<: *manifest-config
+      params:
+        CLOUDWATCH_PARAMS: {{cloudwatch-params-production}}
   - put: kubernetes-production-deployment
-    params:
-      cert: common-production/boshCA.crt
-      manifest: kubernetes-manifest/manifest.yml
-      releases:
-      - kubernetes-release-tarball/*.tgz
-      stemcells:
-      - kubernetes-stemcell/*.tgz
+    params: *deployment-params
     on_failure:
       put: slack
       params:
@@ -338,22 +317,16 @@ jobs:
         icon_url: {{slack-icon-url}}
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
-    input_mapping:
-      common: common-production
     params:
       BOSH_ERRAND: create-kubernetes-dns
       <<: *bosh-errand-production
   - task: create-kubernetes-monitoring
     file: pipeline-tasks/bosh-errand.yml
-    input_mapping:
-      common: common-production
     params:
       BOSH_ERRAND: create-kubernetes-monitoring
       <<: *bosh-errand-production
   - task: apply-kubernetes-manifests
     file: pipeline-tasks/bosh-errand.yml
-    input_mapping:
-      common: common-production
     params:
       BOSH_ERRAND: apply-kubernetes-manifests
       <<: *bosh-errand-production
