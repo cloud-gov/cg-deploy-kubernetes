@@ -3,6 +3,7 @@ groups:
 - name: all
   jobs:
   - build-kubernetes-release
+  - fluentd-cloudwatch
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
   - acceptance-tests-staging
@@ -12,6 +13,7 @@ groups:
 - name: release
   jobs:
   - build-kubernetes-release
+  - fluentd-cloudwatch
 - name: deploy
   jobs:
   - deploy-kubernetes-staging
@@ -75,6 +77,14 @@ jobs:
     - put: kubernetes-releases-dir-tarball
       params:
         file: finalized-release/releases-dir-kubernetes.tgz
+
+- name: fluentd-cloudwatch
+  plan:
+  - get: fluentd-cloudwatch-config
+    trigger: true
+  - put: docker-hub-fluentd-cloudwatch
+    params:
+      build: fluentd-cloudwatch-config/images/fluentd-cloudwatch
 
 - name: deploy-kubernetes-staging
   plan:
@@ -564,6 +574,23 @@ resources:
   type: slack-notification
   source:
     url: {{slack-webhook-url}}
+
+- name: fluentd-cloudwatch-config
+  type: git
+  source:
+    uri: {{kubernetes-config-git-url}}
+    branch: {{kubernetes-config-git-branch}}
+    paths:
+    - images/fluentd-cloudwatch/*
+
+- name: docker-hub-fluentd-cloudwatch
+  type: docker-image
+  source:
+    email: {{docker-email}}
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-repo}}
+    tag: {{docker-tag-fluentd-cloudwatch}}
 
 resource_types:
 - name: slack-notification
