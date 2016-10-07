@@ -24,7 +24,9 @@ function check_service() {
 
 cd ${TEST_PATH}
 
+cf api $CF_API_URL
 cf auth $CF_USERNAME $CF_PASSWORD
+
 cf target -o $CF_ORGANIZATION 
 
 cf create-space $CF_SPACE
