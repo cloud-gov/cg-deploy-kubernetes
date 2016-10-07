@@ -232,15 +232,15 @@ jobs:
         PLAN_NAME: free
         SERVICE_INSTANCE_NAME: redis28-free
         TEST_PATH: kubernetes-config/acceptance/redis28
-    - task: acceptance-test-mongo30-persistent
+    - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging
-        APP_NAME: mongodb30-test
-        SERVICE_NAME: mongodb30-multinode
-        PLAN_NAME: persistent
-        SERVICE_INSTANCE_NAME: mongodb30-persistent
-        TEST_PATH: kubernetes-config/acceptance/mongodb30
+        APP_NAME: mongodb32-test
+        SERVICE_NAME: mongodb32
+        PLAN_NAME: standard
+        SERVICE_INSTANCE_NAME: mongodb32-standard
+        TEST_PATH: kubernetes-config/acceptance/mongodb32
     - task: acceptance-test-elasticsearch23-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -393,15 +393,15 @@ jobs:
         PLAN_NAME: free
         SERVICE_INSTANCE_NAME: redis28-free
         TEST_PATH: kubernetes-config/acceptance/redis28
-    - task: acceptance-test-mongo30-persistent
+    - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-production
-        APP_NAME: mongodb30-test
-        SERVICE_NAME: mongodb30-multinode
-        PLAN_NAME: persistent
-        SERVICE_INSTANCE_NAME: mongodb30-persistent
-        TEST_PATH: kubernetes-config/acceptance/mongodb30
+        APP_NAME: mongodb32-test
+        SERVICE_NAME: mongodb32
+        PLAN_NAME: standard
+        SERVICE_INSTANCE_NAME: mongodb32-standard
+        TEST_PATH: kubernetes-config/acceptance/mongodb32
     - task: acceptance-test-elasticsearch23-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:

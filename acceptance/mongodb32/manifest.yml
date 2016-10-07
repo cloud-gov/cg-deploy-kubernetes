@@ -1,9 +1,9 @@
 applications:
-- name: mongodb30-test
+- name: mongodb32-test
   buildpack: go_buildpack
-  command: mongodb30-test
+  command: mongodb32-test
   health-check-type: none
   no-route: true
   env:
-    GOPACKAGENAME: mongodb30-test
+    GOPACKAGENAME: mongodb32-test
     GO15VENDOREXPERIMENT: 1

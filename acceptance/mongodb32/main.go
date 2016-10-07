@@ -30,11 +30,11 @@ type Record struct {
 }
 
 func main() {
-	// Get mongodb30-multinode credentials
+	// Get mongodb32 credentials
 	env, _ := cfenv.Current()
-	services, _ := env.Services.WithLabel("mongodb30-multinode")
+	services, _ := env.Services.WithLabel("mongodb32")
 	if len(services) != 1 {
-		log.Fatal("mongodb30-multinode service not found")
+		log.Fatal("mongodb32service not found")
 	}
 	creds := services[0].Credentials
 
