@@ -34,7 +34,7 @@ func main() {
 	env, _ := cfenv.Current()
 	services, _ := env.Services.WithLabel("elasticsearch17")
 	if len(services) != 1 {
-		log.Fatal("elasticsearch17")
+		log.Fatal("elasticsearch17 service not found")
 	}
 	creds := services[0].Credentials
 

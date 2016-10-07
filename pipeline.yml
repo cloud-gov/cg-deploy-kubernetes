@@ -31,6 +31,12 @@ params:
       CF_PASSWORD: {{cf-deploy-password-staging}}
       CF_ORGANIZATION: {{cf-organization-staging}}
       CF_SPACE: {{cf-space-staging}}
+    cf: &cf-staging-tests
+      CF_API_URL: {{cf-api-url-staging}}
+      CF_USERNAME: {{cf-deploy-username-staging}}
+      CF_PASSWORD: {{cf-deploy-password-staging}}
+      CF_ORGANIZATION: {{cf-organization-staging}}
+      CF_SPACE: {{cf-space-staging-acctests}}
     bosh-errand: &bosh-errand-staging
       BOSH_TARGET: {{kubernetes-staging-deployment-bosh-target}}
       BOSH_USERNAME: {{kubernetes-staging-deployment-bosh-username}}
@@ -44,6 +50,12 @@ params:
       CF_PASSWORD: {{cf-deploy-password-production}}
       CF_ORGANIZATION: {{cf-organization-production}}
       CF_SPACE: {{cf-space-production}}
+    cf: &cf-production-tests
+      CF_API_URL: {{cf-api-url-production}}
+      CF_USERNAME: {{cf-deploy-username-production}}
+      CF_PASSWORD: {{cf-deploy-password-production}}
+      CF_ORGANIZATION: {{cf-organization-production}}
+      CF_SPACE: {{cf-space-production-acctests}}
     bosh-errand: &bosh-errand-production
       BOSH_TARGET: {{kubernetes-production-deployment-bosh-target}}
       BOSH_USERNAME: {{kubernetes-production-deployment-bosh-username}}
@@ -226,10 +238,10 @@ jobs:
       passed: [deploy-kubernetes-broker-staging]
       trigger: true
   - aggregate:
-    - task: acceptance-test-redis28-free
+    - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        <<: *cf-staging
+        <<: *cf-staging-tests
         APP_NAME: redis28-test
         SERVICE_NAME: redis28
         PLAN_NAME: standard
@@ -238,7 +250,7 @@ jobs:
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        <<: *cf-staging
+        <<: *cf-staging-tests
         APP_NAME: mongodb32-test
         SERVICE_NAME: mongodb32
         PLAN_NAME: standard
@@ -247,7 +259,7 @@ jobs:
     - task: acceptance-test-elasticsearch23-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        <<: *cf-staging
+        <<: *cf-staging-tests
         APP_NAME: elasticsearch23-test
         SERVICE_NAME: elasticsearch23
         PLAN_NAME: 1x
@@ -256,7 +268,7 @@ jobs:
     - task: acceptance-test-elasticsearch17-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        <<: *cf-staging
+        <<: *cf-staging-tests
         APP_NAME: elasticsearch17-test
         SERVICE_NAME: elasticsearch17
         PLAN_NAME: 1x
@@ -390,19 +402,19 @@ jobs:
       passed: [deploy-kubernetes-broker-production]
       trigger: true
   - aggregate:
-    - task: acceptance-test-redis28-free
+    - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        <<: *cf-production
+        <<: *cf-production-tests
         APP_NAME: redis28-test
-        SERVICE_NAME: redis28-multinode
-        PLAN_NAME: free
-        SERVICE_INSTANCE_NAME: redis28-free
+        SERVICE_NAME: redis28
+        PLAN_NAME: standard
+        SERVICE_INSTANCE_NAME: redis28-standard
         TEST_PATH: kubernetes-config/acceptance/redis28
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        <<: *cf-production
+        <<: *cf-production-tests
         APP_NAME: mongodb32-test
         SERVICE_NAME: mongodb32
         PLAN_NAME: standard
@@ -411,20 +423,20 @@ jobs:
     - task: acceptance-test-elasticsearch23-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        <<: *cf-production
+        <<: *cf-production-tests
         APP_NAME: elasticsearch23-test
-        SERVICE_NAME: elasticsearch23-multinode
-        PLAN_NAME: persistent
-        SERVICE_INSTANCE_NAME: elasticsearch23-persistent
+        SERVICE_NAME: elasticsearch23
+        PLAN_NAME: 1x
+        SERVICE_INSTANCE_NAME: elasticsearch23-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch23
     - task: acceptance-test-elasticsearch17-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        <<: *cf-production
+        <<: *cf-production-tests
         APP_NAME: elasticsearch17-test
-        SERVICE_NAME: elasticsearch17-multinode
-        PLAN_NAME: persistent
-        SERVICE_INSTANCE_NAME: elasticsearch17-persistent
+        SERVICE_NAME: elasticsearch17
+        PLAN_NAME: 1x
+        SERVICE_INSTANCE_NAME: elasticsearch17-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch17
     # - task: acceptance-test-mysql56-persistent
     #   file: kubernetes-config/acceptance/run-acceptance-test.yml
