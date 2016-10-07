@@ -185,6 +185,7 @@ jobs:
       manifest: kubernetes-manifest/manifest.yml
       releases:
       - kubernetes-release-tarball/*.tgz
+      - consul-boshrelease/*.tgz
       stemcells:
       - kubernetes-stemcell/*.tgz
     on_failure:
