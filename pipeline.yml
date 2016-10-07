@@ -87,6 +87,7 @@ jobs:
       build: fluentd-cloudwatch-config/images/fluentd-cloudwatch
 
 - name: deploy-kubernetes-staging
+  serial: true
   plan:
   - aggregate:
     - get: pipeline-tasks
@@ -179,6 +180,7 @@ jobs:
       <<: *bosh-errand-staging
 
 - name: deploy-kubernetes-broker-staging
+  serial: true
   plan:
   - aggregate:
     - get: pipeline-tasks
@@ -216,6 +218,7 @@ jobs:
       SERVICE_ORGANIZATION: {{broker-service-organization-staging}}
 
 - name: acceptance-tests-staging
+  serial: true
   plan:
   - aggregate:
     - get: kubernetes-config
@@ -281,6 +284,7 @@ jobs:
     #     MANIFEST_FILE: manifest-postgresql94-multinode.yml
 
 - name: deploy-kubernetes-production
+  serial: true
   plan:
   - aggregate:
     - get: pipeline-tasks
@@ -342,6 +346,7 @@ jobs:
       <<: *bosh-errand-production
 
 - name: deploy-kubernetes-broker-production
+  serial: true
   plan:
   - aggregate:
     - get: kubernetes-broker
@@ -377,6 +382,7 @@ jobs:
       SERVICE_ORGANIZATION: {{broker-service-organization-production}}
 
 - name: acceptance-tests-production
+  serial: true
   plan:
   - aggregate:
     - get: kubernetes-config
