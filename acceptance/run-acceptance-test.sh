@@ -27,10 +27,8 @@ cd ${TEST_PATH}
 cf api $CF_API_URL
 cf auth $CF_USERNAME $CF_PASSWORD
 
-cf target -o $CF_ORGANIZATION 
-
-cf create-space $CF_SPACE
-cf target -s $CF_SPACE
+cf create-space -o $CF_ORGANIZATION $CF_SPACE
+cf target -o $CF_ORGANIZATION -s $CF_SPACE
 
 cleanup
 
