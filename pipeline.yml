@@ -228,9 +228,9 @@ jobs:
       params:
         <<: *cf-staging
         APP_NAME: redis28-test
-        SERVICE_NAME: redis28-multinode
-        PLAN_NAME: free
-        SERVICE_INSTANCE_NAME: redis28-free
+        SERVICE_NAME: redis28
+        PLAN_NAME: standard
+        SERVICE_INSTANCE_NAME: redis28-standard
         TEST_PATH: kubernetes-config/acceptance/redis28
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -246,18 +246,18 @@ jobs:
       params:
         <<: *cf-staging
         APP_NAME: elasticsearch23-test
-        SERVICE_NAME: elasticsearch23-multinode
-        PLAN_NAME: persistent
-        SERVICE_INSTANCE_NAME: elasticsearch23-persistent
+        SERVICE_NAME: elasticsearch23
+        PLAN_NAME: 1x
+        SERVICE_INSTANCE_NAME: elasticsearch23-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch23
     - task: acceptance-test-elasticsearch17-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging
         APP_NAME: elasticsearch17-test
-        SERVICE_NAME: elasticsearch17-multinode
-        PLAN_NAME: persistent
-        SERVICE_INSTANCE_NAME: elasticsearch17-persistent
+        SERVICE_NAME: elasticsearch17
+        PLAN_NAME: 1x
+        SERVICE_INSTANCE_NAME: elasticsearch17-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch17
     # - task: acceptance-test-mysql56-persistent
     #   file: kubernetes-config/acceptance/run-acceptance-test.yml

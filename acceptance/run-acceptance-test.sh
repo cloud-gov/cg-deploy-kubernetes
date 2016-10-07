@@ -24,12 +24,11 @@ function check_service() {
 
 cd ${TEST_PATH}
 
-cf login \
-  -a $CF_API_URL \
-  -u $CF_USERNAME \
-  -p $CF_PASSWORD \
-  -o $CF_ORGANIZATION \
-  -s $CF_SPACE
+cf api $CF_API_URL
+cf auth $CF_USERNAME $CF_PASSWORD
+
+cf create-space -o $CF_ORGANIZATION $CF_SPACE
+cf target -o $CF_ORGANIZATION -s $CF_SPACE
 
 cleanup
 

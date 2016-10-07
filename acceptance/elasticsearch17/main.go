@@ -32,9 +32,9 @@ type Record struct {
 func main() {
 	// Get elasticsearch17-multinode credentials
 	env, _ := cfenv.Current()
-	services, _ := env.Services.WithLabel("elasticsearch17-multinode")
+	services, _ := env.Services.WithLabel("elasticsearch17")
 	if len(services) != 1 {
-		log.Fatal("elasticsearch17-multinode service not found")
+		log.Fatal("elasticsearch17")
 	}
 	creds := services[0].Credentials
 
