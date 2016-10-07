@@ -1,4 +1,4 @@
-package: mongodb30-test
+package: mongodb32-test
 import:
 - package: github.com/cloudfoundry-community/go-cfenv
   version: ~1.14.0
