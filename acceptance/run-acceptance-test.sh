@@ -25,11 +25,9 @@ function check_service() {
 cd ${TEST_PATH}
 
 cf auth $CF_USERNAME $CF_PASSWORD
-
 cf target -o $CF_ORGANIZATION 
 
 cf create-space $CF_SPACE
-
 cf target -s $CF_SPACE
 
 cleanup
