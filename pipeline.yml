@@ -230,7 +230,7 @@ jobs:
         APP_NAME: redis28-test
         SERVICE_NAME: redis28
         PLAN_NAME: standard
-        SERVICE_INSTANCE_NAME: redis28-standard-acctest
+        SERVICE_INSTANCE_NAME: redis28-standard
         TEST_PATH: kubernetes-config/acceptance/redis28
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -239,7 +239,7 @@ jobs:
         APP_NAME: mongodb32-test
         SERVICE_NAME: mongodb32
         PLAN_NAME: standard
-        SERVICE_INSTANCE_NAME: mongodb32-standard-acctest
+        SERVICE_INSTANCE_NAME: mongodb32-standard
         TEST_PATH: kubernetes-config/acceptance/mongodb32
     - task: acceptance-test-elasticsearch23-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -248,7 +248,7 @@ jobs:
         APP_NAME: elasticsearch23-test
         SERVICE_NAME: elasticsearch23
         PLAN_NAME: 1x
-        SERVICE_INSTANCE_NAME: elasticsearch23-1x-acctest
+        SERVICE_INSTANCE_NAME: elasticsearch23-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch23
     - task: acceptance-test-elasticsearch17-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -257,7 +257,7 @@ jobs:
         APP_NAME: elasticsearch17-test
         SERVICE_NAME: elasticsearch17
         PLAN_NAME: 1x
-        SERVICE_INSTANCE_NAME: elasticsearch17-1x-acctest
+        SERVICE_INSTANCE_NAME: elasticsearch17-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch17
     # - task: acceptance-test-mysql56-persistent
     #   file: kubernetes-config/acceptance/run-acceptance-test.yml
