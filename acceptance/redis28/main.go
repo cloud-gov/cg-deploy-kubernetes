@@ -26,9 +26,9 @@ func waitForExit() {
 func main() {
 	// Get redis28-multinode credentials
 	env, _ := cfenv.Current()
-	services, _ := env.Services.WithLabel("redis28-multinode")
+	services, _ := env.Services.WithLabel("redis28")
 	if len(services) != 1 {
-		log.Fatal("redis28-multinode service not found")
+		log.Fatal("redis28service not found")
 	}
 	creds := services[0].Credentials
 
