@@ -392,7 +392,9 @@ jobs:
   serial: true
   plan:
   - aggregate:
+    - get: pipeline-tasks
     - get: kubernetes-broker
+    - get: kubernetes-config
       trigger: true
     - get: kubernetes-broker-staging-deployment
       passed: [acceptance-tests-staging]
