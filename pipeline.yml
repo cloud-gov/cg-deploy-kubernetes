@@ -136,7 +136,8 @@ jobs:
     - get: kubernetes-release
       params:
         submodules: none
-    - get: kubernetes-config-staging
+    - get: kubernetes-config
+      resource: kubernetes-config-staging
       trigger: true
     - get: kubernetes-release-tarball
       trigger: true
@@ -148,7 +149,6 @@ jobs:
     - get: consul-boshrelease
       trigger: true
   - task: kubernetes-manifest
-    input_mapping: {kubernetes-config: kubernetes-config-staging}
     config: &manifest-config
       platform: linux
       image_resource:
@@ -229,11 +229,11 @@ jobs:
   - aggregate:
     - get: pipeline-tasks
     - get: kubernetes-broker
-    - get: kubernetes-config-staging
+    - get: kubernetes-config
+      resource: kubernetes-config-staging
       trigger: true
   - task: run-tests
-    input_mapping: {kubernetes-config: kubernetes-config-staging}
-    file: kubernetes-config-staging/run-tests.yml
+    file: kubernetes-config/run-tests.yml
   - put: kubernetes-broker-staging-deployment
     params:
       manifest: kubernetes-broker/manifest.yml
@@ -266,14 +266,14 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: kubernetes-config-staging
+    - get: kubernetes-config
+      resource: kubernetes-config-staging
     - get: kubernetes-broker-staging-deployment
       passed: [deploy-kubernetes-broker-staging]
       trigger: true
   - aggregate:
     - task: acceptance-test-redis28-standard
-      input_mapping: {kubernetes-config: kubernetes-config-staging}
-      file: kubernetes-config-staging/acceptance/run-acceptance-test.yml
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging-tests
         APP_NAME: redis28-test
@@ -282,8 +282,7 @@ jobs:
         SERVICE_INSTANCE_NAME: redis28-standard
         TEST_PATH: kubernetes-config/acceptance/redis28
     - task: acceptance-test-mongo32-standard
-      input_mapping: {kubernetes-config: kubernetes-config-staging}
-      file: kubernetes-config-staging/acceptance/run-acceptance-test.yml
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging-tests
         APP_NAME: mongodb32-test
@@ -292,8 +291,7 @@ jobs:
         SERVICE_INSTANCE_NAME: mongodb32-standard
         TEST_PATH: kubernetes-config/acceptance/mongodb32
     - task: acceptance-test-elasticsearch23-persistent
-      input_mapping: {kubernetes-config: kubernetes-config-staging}
-      file: kubernetes-config-staging/acceptance/run-acceptance-test.yml
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging-tests
         APP_NAME: elasticsearch23-test
@@ -302,8 +300,7 @@ jobs:
         SERVICE_INSTANCE_NAME: elasticsearch23-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch23
     - task: acceptance-test-elasticsearch17-persistent
-      input_mapping: {kubernetes-config: kubernetes-config-staging}
-      file: kubernetes-config-staging/acceptance/run-acceptance-test.yml
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging-tests
         APP_NAME: elasticsearch17-test
@@ -340,7 +337,8 @@ jobs:
     - get: kubernetes-release
       params:
         submodules: none
-    - get: kubernetes-config-production
+    - get: kubernetes-config
+      resource: kubernetes-config-production
       trigger: true
     - get: kubernetes-release-tarball
       trigger: true
@@ -354,7 +352,6 @@ jobs:
     - get: kubernetes-broker-staging-deployment
       passed: [acceptance-tests-staging]
   - task: kubernetes-manifest
-    input_mapping: {kubernetes-config: kubernetes-config-production}
     config:
       <<: *manifest-config
       params:
@@ -401,7 +398,8 @@ jobs:
   - aggregate:
     - get: pipeline-tasks
     - get: kubernetes-broker
-    - get: kubernetes-config-production
+    - get: kubernetes-config
+      resource: kubernetes-config-production
       trigger: true
     - get: kubernetes-broker-staging-deployment
       passed: [acceptance-tests-staging]
@@ -437,14 +435,14 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: kubernetes-config-production
+    - get: kubernetes-config
+      resource: kubernetes-config-production
     - get: kubernetes-broker-production-deployment
       passed: [deploy-kubernetes-broker-production]
       trigger: true
   - aggregate:
     - task: acceptance-test-redis28-standard
-      input_mapping: {kubernetes-config: kubernetes-config-production}
-      file: kubernetes-config-production/acceptance/run-acceptance-test.yml
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-production-tests
         APP_NAME: redis28-test
@@ -453,8 +451,7 @@ jobs:
         SERVICE_INSTANCE_NAME: redis28-standard
         TEST_PATH: kubernetes-config/acceptance/redis28
     - task: acceptance-test-mongo32-standard
-      input_mapping: {kubernetes-config: kubernetes-config-production}
-      file: kubernetes-config-production/acceptance/run-acceptance-test.yml
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-production-tests
         APP_NAME: mongodb32-test
@@ -463,8 +460,7 @@ jobs:
         SERVICE_INSTANCE_NAME: mongodb32-standard
         TEST_PATH: kubernetes-config/acceptance/mongodb32
     - task: acceptance-test-elasticsearch23-persistent
-      input_mapping: {kubernetes-config: kubernetes-config-production}
-      file: kubernetes-config-production/acceptance/run-acceptance-test.yml
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-production-tests
         APP_NAME: elasticsearch23-test
@@ -473,8 +469,7 @@ jobs:
         SERVICE_INSTANCE_NAME: elasticsearch23-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch23
     - task: acceptance-test-elasticsearch17-persistent
-      input_mapping: {kubernetes-config: kubernetes-config-production}
-      file: kubernetes-config-production/acceptance/run-acceptance-test.yml
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-production-tests
         APP_NAME: elasticsearch17-test
