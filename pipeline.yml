@@ -170,6 +170,14 @@ jobs:
           spruce merge --prune meta kubernetes-config/manifests/fluentd-cloudwatch-template.yaml \
             ./cloudwatch-params.yaml \
             > kubernetes-config/manifests/fluentd-cloudwatch.yaml
+
+          cat << EOF > ./kube2iam-params.yaml
+          ${KUBE2IAM_PARAMS}
+          EOF
+          spruce merge --prune meta kubernetes-config/manifests/kube2iam-template.yaml \
+            ./kube2iam-params.yaml \
+            > kubernetes-config/manifests/kube2iam.yaml
+
           export SPRUCE_FILE_BASE_PATH=./kubernetes-config
           kubernetes-release/generate_deployment_manifest aws \
             common/secrets.yml \
@@ -180,6 +188,7 @@ jobs:
       - name: kubernetes-manifest
       params:
         CLOUDWATCH_PARAMS: {{cloudwatch-params-staging}}
+        KUBE2IAM_PARAMS: {{kube2iam-params-staging}}
   - put: kubernetes-staging-deployment
     params: &deployment-params
       cert: common/boshCA.crt
@@ -356,6 +365,7 @@ jobs:
       <<: *manifest-config
       params:
         CLOUDWATCH_PARAMS: {{cloudwatch-params-production}}
+        KUBE2IAM_PARAMS: {{kube2iam-params-production}}
   - put: kubernetes-production-deployment
     params: *deployment-params
     on_failure:
