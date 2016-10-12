@@ -32,5 +32,6 @@ jobs:
 - name: apply-kubernetes-manifests
   properties:
     manifests:
+    - (( file "manifests/kube2iam.yaml" ))
     - (( file "manifests/storage-class.yaml" ))
     - (( file "manifests/fluentd-cloudwatch.yaml" ))
