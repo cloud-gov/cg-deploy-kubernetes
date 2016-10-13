@@ -238,8 +238,11 @@ jobs:
   - aggregate:
     - get: pipeline-tasks
     - get: kubernetes-broker
+      trigger: true
     - get: kubernetes-config
       resource: kubernetes-config-staging
+      passed: [deploy-kubernetes-staging]
+    - get: kubernetes-staging-deployment
       trigger: true
   - task: run-tests
     file: kubernetes-config/run-tests.yml
@@ -277,9 +280,21 @@ jobs:
   - aggregate:
     - get: kubernetes-config
       resource: kubernetes-config-staging
-    - get: kubernetes-broker-staging-deployment
       passed: [deploy-kubernetes-broker-staging]
+    - get: kubernetes-broker-staging-deployment
       trigger: true
+    # Get resources from upstream jobs for use in production deploy
+    - get: kubernetes-release
+      passed: [deploy-kubernetes-staging]
+      params:
+        submodules: none
+    - get: kubernetes-release-tarball
+      passed: [deploy-kubernetes-staging]
+    - get: kubernetes-stemcell
+    - get: consul-boshrelease
+      passed: [deploy-kubernetes-staging]
+    - get: kubernetes-broker
+      passed: [deploy-kubernetes-broker-staging]
   - aggregate:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -344,22 +359,24 @@ jobs:
   - aggregate:
     - get: pipeline-tasks
     - get: kubernetes-release
+      passed: [acceptance-tests-staging]
       params:
         submodules: none
     - get: kubernetes-config
       resource: kubernetes-config-production
       trigger: true
     - get: kubernetes-release-tarball
+      passed: [acceptance-tests-staging]
       trigger: true
     - get: common
       resource: common-production
       trigger: true
     - get: kubernetes-stemcell
+      passed: [acceptance-tests-staging]
       trigger: true
     - get: consul-boshrelease
-      trigger: true
-    - get: kubernetes-broker-staging-deployment
       passed: [acceptance-tests-staging]
+      trigger: true
   - task: kubernetes-manifest
     config:
       <<: *manifest-config
@@ -408,11 +425,12 @@ jobs:
   - aggregate:
     - get: pipeline-tasks
     - get: kubernetes-broker
+      passed: [acceptance-tests-staging]
+      trigger: true
     - get: kubernetes-config
       resource: kubernetes-config-production
+      passed: [deploy-kubernetes-production]
       trigger: true
-    - get: kubernetes-broker-staging-deployment
-      passed: [acceptance-tests-staging]
   - put: kubernetes-broker-production-deployment
     params:
       manifest: kubernetes-broker/manifest.yml
@@ -447,8 +465,8 @@ jobs:
   - aggregate:
     - get: kubernetes-config
       resource: kubernetes-config-production
-    - get: kubernetes-broker-production-deployment
       passed: [deploy-kubernetes-broker-production]
+    - get: kubernetes-broker-production-deployment
       trigger: true
   - aggregate:
     - task: acceptance-test-redis28-standard
