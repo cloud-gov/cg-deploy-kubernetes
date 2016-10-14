@@ -21,7 +21,7 @@ spec:
         - "--host-ip=$(HOST_IP)"
         - "--iptables=true"
         env:
-        - name: AWS_DEFAULT_REGION
+        - name: AWS_REGION
           value: (( grab meta.region ))
         - name: BASE_ROLE_ARN
           value: (( grab meta.base_role_arn ))
