@@ -3,11 +3,6 @@
 set -e
 set -u
 
-function cleanup() {
-  cf delete -f ${APP_NAME}
-  cf delete-service -f ${SERVICE_INSTANCE_NAME}
-}
-
 function check_service() {
   counter=36
   until [ $counter -le 0 ]; do
@@ -20,7 +15,10 @@ function check_service() {
     let counter-=1
     sleep 5
   done
+  return 1
 }
+
+SERVICE_INSTANCE_NAME=$(mktemp "${SERVICE_NAME}-${PLAN_NAME}-XXXXXX")
 
 cd ${TEST_PATH}
 
@@ -29,8 +27,6 @@ cf auth $CF_USERNAME $CF_PASSWORD
 
 cf create-space -o $CF_ORGANIZATION $CF_SPACE
 cf target -o $CF_ORGANIZATION -s $CF_SPACE
-
-cleanup
 
 cf create-service ${SERVICE_NAME} ${PLAN_NAME} ${SERVICE_INSTANCE_NAME}
 
@@ -44,4 +40,5 @@ fi
 cf bind-service ${APP_NAME} ${SERVICE_INSTANCE_NAME}
 cf start ${APP_NAME}
 
-cleanup
+cf delete -f ${APP_NAME}
+cf delete-service -f ${SERVICE_INSTANCE_NAME}

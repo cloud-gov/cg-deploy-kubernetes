@@ -4,6 +4,7 @@ applications:
   command: redis-test
   health-check-type: none
   no-route: true
+  memory: 128M
   env:
     GOPACKAGENAME: redis-test
     GO15VENDOREXPERIMENT: 1

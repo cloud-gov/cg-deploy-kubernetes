@@ -198,24 +198,6 @@ jobs:
       - consul-boshrelease/*.tgz
       stemcells:
       - kubernetes-stemcell/*.tgz
-    on_failure:
-      put: slack
-      params:
-        text: |
-          :x: FAILED to deploy kubernetes on staging
-          <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-        channel: {{slack-channel}}
-        username: {{slack-username}}
-        icon_url: {{slack-icon-url}}
-    on_success:
-      put: slack
-      params:
-        text: |
-          :white_check_mark: Successfully deployed kubernetes on staging
-          <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-        channel: {{slack-channel}}
-        username: {{slack-username}}
-        icon_url: {{slack-icon-url}}
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
     params:
@@ -231,6 +213,24 @@ jobs:
     params:
       BOSH_ERRAND: apply-kubernetes-manifests
       <<: *bosh-errand-staging
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy kubernetes on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed kubernetes on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
 
 - name: deploy-kubernetes-broker-staging
   serial: true
@@ -303,7 +303,6 @@ jobs:
         APP_NAME: redis28-test
         SERVICE_NAME: redis28
         PLAN_NAME: standard
-        SERVICE_INSTANCE_NAME: redis28-standard
         TEST_PATH: kubernetes-config/acceptance/redis28
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -312,7 +311,6 @@ jobs:
         APP_NAME: mongodb32-test
         SERVICE_NAME: mongodb32
         PLAN_NAME: standard
-        SERVICE_INSTANCE_NAME: mongodb32-standard
         TEST_PATH: kubernetes-config/acceptance/mongodb32
     - task: acceptance-test-elasticsearch23-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -321,7 +319,6 @@ jobs:
         APP_NAME: elasticsearch23-test
         SERVICE_NAME: elasticsearch23
         PLAN_NAME: 1x
-        SERVICE_INSTANCE_NAME: elasticsearch23-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch23
     - task: acceptance-test-elasticsearch17-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -330,7 +327,6 @@ jobs:
         APP_NAME: elasticsearch17-test
         SERVICE_NAME: elasticsearch17
         PLAN_NAME: 1x
-        SERVICE_INSTANCE_NAME: elasticsearch17-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch17
     # - task: acceptance-test-mysql56-persistent
     #   file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -339,7 +335,6 @@ jobs:
     #     APP_NAME: mysql56-test
     #     SERVICE_NAME: mysql56-multinode
     #     PLAN_NAME: persistent
-    #     SERVICE_INSTANCE_NAME: mysql56-persistent
     #     TEST_PATH: kubernetes-config/acceptance/sql
     #     MANIFEST_FILE: manifest-mysql56-multinode.yml
     # - task: acceptance-test-postgresql94-persistent
@@ -349,7 +344,6 @@ jobs:
     #     APP_NAME: postgresql94-test
     #     SERVICE_NAME: postgresql94-multinode
     #     PLAN_NAME: persistent
-    #     SERVICE_INSTANCE_NAME: postgresql94-persistent
     #     TEST_PATH: kubernetes-config/acceptance/sql
     #     MANIFEST_FILE: manifest-postgresql94-multinode.yml
 
@@ -385,24 +379,6 @@ jobs:
         KUBE2IAM_PARAMS: {{kube2iam-params-production}}
   - put: kubernetes-production-deployment
     params: *deployment-params
-    on_failure:
-      put: slack
-      params:
-        text: |
-          :x: FAILED to deploy kubernetes on production
-          <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-        channel: {{slack-channel}}
-        username: {{slack-username}}
-        icon_url: {{slack-icon-url}}
-    on_success:
-      put: slack
-      params:
-        text: |
-          :white_check_mark: Successfully deployed kubernetes on production
-          <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-        channel: {{slack-channel}}
-        username: {{slack-username}}
-        icon_url: {{slack-icon-url}}
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
     params:
@@ -418,6 +394,24 @@ jobs:
     params:
       BOSH_ERRAND: apply-kubernetes-manifests
       <<: *bosh-errand-production
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy kubernetes on production
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed kubernetes on production
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
 
 - name: deploy-kubernetes-broker-production
   serial: true
@@ -476,7 +470,6 @@ jobs:
         APP_NAME: redis28-test
         SERVICE_NAME: redis28
         PLAN_NAME: standard
-        SERVICE_INSTANCE_NAME: redis28-standard
         TEST_PATH: kubernetes-config/acceptance/redis28
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -485,7 +478,6 @@ jobs:
         APP_NAME: mongodb32-test
         SERVICE_NAME: mongodb32
         PLAN_NAME: standard
-        SERVICE_INSTANCE_NAME: mongodb32-standard
         TEST_PATH: kubernetes-config/acceptance/mongodb32
     - task: acceptance-test-elasticsearch23-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -494,7 +486,6 @@ jobs:
         APP_NAME: elasticsearch23-test
         SERVICE_NAME: elasticsearch23
         PLAN_NAME: 1x
-        SERVICE_INSTANCE_NAME: elasticsearch23-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch23
     - task: acceptance-test-elasticsearch17-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -503,7 +494,6 @@ jobs:
         APP_NAME: elasticsearch17-test
         SERVICE_NAME: elasticsearch17
         PLAN_NAME: 1x
-        SERVICE_INSTANCE_NAME: elasticsearch17-1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch17
     # - task: acceptance-test-mysql56-persistent
     #   file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -512,7 +502,6 @@ jobs:
     #     APP_NAME: mysql56-test
     #     SERVICE_NAME: mysql56-multinode
     #     PLAN_NAME: persistent
-    #     SERVICE_INSTANCE_NAME: mysql56-persistent
     #     TEST_PATH: kubernetes-config/acceptance/sql
     #     MANIFEST_FILE: manifest-mysql56-multinode.yml
     # - task: acceptance-test-postgresql94-persistent
@@ -522,7 +511,6 @@ jobs:
     #     APP_NAME: postgresql94-test
     #     SERVICE_NAME: postgresql94-multinode
     #     PLAN_NAME: persistent
-    #     SERVICE_INSTANCE_NAME: postgresql94-persistent
     #     TEST_PATH: kubernetes-config/acceptance/sql
     #     MANIFEST_FILE: manifest-postgresql94-multinode.yml
 
