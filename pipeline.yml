@@ -137,7 +137,6 @@ jobs:
       params:
         submodules: none
     - get: kubernetes-config
-      resource: kubernetes-config-staging
       trigger: true
     - get: kubernetes-release-tarball
       trigger: true
@@ -240,7 +239,6 @@ jobs:
     - get: kubernetes-broker
       trigger: true
     - get: kubernetes-config
-      resource: kubernetes-config-staging
       passed: [deploy-kubernetes-staging]
     - get: kubernetes-staging-deployment
       trigger: true
@@ -279,7 +277,6 @@ jobs:
   plan:
   - aggregate:
     - get: kubernetes-config
-      resource: kubernetes-config-staging
       passed: [deploy-kubernetes-broker-staging]
     - get: kubernetes-broker-staging-deployment
       trigger: true
@@ -357,7 +354,6 @@ jobs:
       params:
         submodules: none
     - get: kubernetes-config
-      resource: kubernetes-config-production
       trigger: true
     - get: kubernetes-release-tarball
       passed: [acceptance-tests-staging]
@@ -422,7 +418,6 @@ jobs:
       passed: [acceptance-tests-staging]
       trigger: true
     - get: kubernetes-config
-      resource: kubernetes-config-production
       passed: [deploy-kubernetes-production]
       trigger: true
   - put: kubernetes-broker-production-deployment
@@ -458,7 +453,6 @@ jobs:
   plan:
   - aggregate:
     - get: kubernetes-config
-      resource: kubernetes-config-production
       passed: [deploy-kubernetes-broker-production]
     - get: kubernetes-broker-production-deployment
       trigger: true
@@ -533,17 +527,11 @@ resources:
     uri: {{kubernetes-broker-git-url}}
     branch: {{kubernetes-broker-git-branch}}
 
-- name: kubernetes-config-staging
+- name: kubernetes-config
   type: git
   source:
     uri: {{kubernetes-config-git-url}}
-    branch: {{kubernetes-config-git-branch-staging}}
-
-- name: kubernetes-config-production
-  type: git
-  source:
-    uri: {{kubernetes-config-git-url}}
-    branch: {{kubernetes-config-git-branch-production}}
+    branch: {{kubernetes-config-git-branch}}
 
 - name: kubernetes-release-tarball
   type: s3
@@ -658,7 +646,7 @@ resources:
   type: git
   source:
     uri: {{kubernetes-config-git-url}}
-    branch: {{kubernetes-config-git-branch-production}}
+    branch: {{kubernetes-config-git-branch}}
     paths:
     - images/fluentd-cloudwatch/*
 
