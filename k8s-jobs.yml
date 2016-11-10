@@ -9,6 +9,8 @@ releases:
 - {name: riemannc, version: latest}
 - {name: clamav, version: latest}
 - {name: snort, version: latest}
+- {name: cron, version: latest}
+
 
 jobs:
 - name: consul
@@ -24,7 +26,18 @@ jobs:
   - {name: clamav, release: clamav}
   - {name: snort, release: snort}
 - name: etcd
-  templates: *hardening-templates
+  templates:
+  - (( append ))
+  - {name: newrelic-monitor, release: newrelic}
+  - {name: nessus-agent, release: nessus-agent}
+  - {name: harden, release: fisma}
+  - {name: collectd, release: collectd}
+  - {name: tripwire, release: tripwire}
+  - {name: awslogs, release: awslogs}
+  - {name: riemannc, release: riemannc}
+  - {name: clamav, release: clamav}
+  - {name: snort, release: snort}
+  - {name: cron, release: cron}
 - name: master
   templates: *hardening-templates
 - name: minion
@@ -37,3 +50,21 @@ jobs:
       recreate: true
     - content: (( file "manifests/fluentd-cloudwatch.yaml" ))
       recreate: true
+
+properties:
+    riemann:
+      server: (( grab properties.collectd.riemann_server))
+    cron:
+      variables:
+        AWS_DEFAULT_REGION: (( grab meta.aws.default_region ))
+        S3_BUCKET_NAME: (( grab meta.etcd_bucket_name ))
+      entries:
+      - script:
+          name: etcdbackup.sh
+          contents: (( file "cronjobs/etcdbackup.sh" ))
+        minute: '*/15'
+        hour: '*'
+        day: '*'
+        month: '*'
+        wday: '*'
+        user: root
