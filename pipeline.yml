@@ -355,6 +355,7 @@ jobs:
         submodules: none
     - get: kubernetes-config
       trigger: true
+      passed: [acceptance-tests-staging]
     - get: kubernetes-release-tarball
       passed: [acceptance-tests-staging]
       trigger: true
