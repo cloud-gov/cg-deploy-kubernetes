@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -39,8 +38,7 @@ func main() {
 	creds := services[0].Credentials
 
 	// Create elasticsearch client
-	url := fmt.Sprintf("%s:%s", creds["hostname"], creds["port"])
-	client, err := elastic.NewClient(elastic.SetURL(url))
+	client, err := elastic.NewClient(elastic.SetURL(creds["uri"]))
 
 	// Set and check document
 	record := Record{Key: "key", Value: "value"}
