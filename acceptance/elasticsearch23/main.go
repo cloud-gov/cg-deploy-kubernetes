@@ -38,23 +38,27 @@ func main() {
 	creds := services[0].Credentials
 
 	// Create elasticsearch client
-	client, err := elastic.NewClient(elastic.SetURL(creds["uri"]))
+	client, err := elastic.NewClient(
+		elastic.SetURL("http://"+creds["hostname"].(string)+":"+creds["port"].(string)),
+		elastic.SetBasicAuth(creds["username"].(string), creds["password"].(string)),
+		elastic.SetSniff(false),
+	)
+	checkStatus(err)
 
 	// Set and check document
 	record := Record{Key: "key", Value: "value"}
 	_, err = client.Index().Index("test").Type("test").Id("1").BodyJson(record).Refresh(true).Do()
 	checkStatus(err)
 
-	query := elastic.NewTermQuery("key", "value")
-	results, err := client.Search().Index("test").Query(query).Do()
+	resp, err := client.Get().Index("test").Type("test").Id("1").Do()
 	checkStatus(err)
 
-	if results.Hits.TotalHits != 1 {
-		log.Fatalf("should find exactly one record; found %d", results.Hits.TotalHits)
+	if !resp.Found {
+		log.Fatalf("record not found")
 	}
 
 	result := Record{}
-	err = json.Unmarshal(*results.Hits.Hits[0].Source, &result)
+	err = json.Unmarshal(*resp.Source, &result)
 	checkStatus(err)
 	if record.Value != "value" {
 		log.Fatalf("incorrect value: %s", result.Value)
