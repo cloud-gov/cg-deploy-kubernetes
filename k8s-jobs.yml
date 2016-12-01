@@ -1,47 +1,4 @@
-releases:
-- (( append ))
-- {name: fisma, version: latest}
-- {name: newrelic, version: latest}
-- {name: collectd, version: latest}
-- {name: tripwire, version: latest}
-- {name: awslogs, version: latest}
-- {name: nessus-agent, version: latest}
-- {name: riemannc, version: latest}
-- {name: clamav, version: latest}
-- {name: snort, version: latest}
-- {name: cron, version: latest}
-
-
 jobs:
-- name: consul
-  templates: &hardening-templates
-  - (( append ))
-  - {name: newrelic-monitor, release: newrelic}
-  - {name: nessus-agent, release: nessus-agent}
-  - {name: harden, release: fisma}
-  - {name: collectd, release: collectd}
-  - {name: tripwire, release: tripwire}
-  - {name: awslogs, release: awslogs}
-  - {name: riemannc, release: riemannc}
-  - {name: clamav, release: clamav}
-  - {name: snort, release: snort}
-- name: etcd
-  templates:
-  - (( append ))
-  - {name: newrelic-monitor, release: newrelic}
-  - {name: nessus-agent, release: nessus-agent}
-  - {name: harden, release: fisma}
-  - {name: collectd, release: collectd}
-  - {name: tripwire, release: tripwire}
-  - {name: awslogs, release: awslogs}
-  - {name: riemannc, release: riemannc}
-  - {name: clamav, release: clamav}
-  - {name: snort, release: snort}
-  - {name: cron, release: cron}
-- name: master
-  templates: *hardening-templates
-- name: minion
-  templates: *hardening-templates
 - name: apply-kubernetes-manifests
   properties:
     manifests:
@@ -52,19 +9,19 @@ jobs:
       recreate: true
 
 properties:
-    riemann:
-      server: (( grab properties.collectd.riemann_server))
-    cron:
-      variables:
-        AWS_DEFAULT_REGION: (( grab meta.aws.default_region ))
-        S3_BUCKET_NAME: (( grab meta.etcd_bucket_name ))
-      entries:
-      - script:
-          name: etcdbackup.sh
-          contents: (( file "cronjobs/etcdbackup.sh" ))
-        minute: '*/15'
-        hour: '*'
-        day: '*'
-        month: '*'
-        wday: '*'
-        user: root
+  riemann:
+    server: (( grab properties.collectd.riemann_server))
+  cron:
+    variables:
+      AWS_DEFAULT_REGION: (( grab meta.aws.default_region ))
+      S3_BUCKET_NAME: (( grab meta.etcd_bucket_name ))
+    entries:
+    - script:
+        name: etcdbackup.sh
+        contents: (( file "cronjobs/etcdbackup.sh" ))
+      minute: '*/15'
+      hour: '*'
+      day: '*'
+      month: '*'
+      wday: '*'
+      user: root
