@@ -1,1 +1,7 @@
-infrastructure-aws-staging.yml
+resource_pools:
+- name: minion
+  cloud_properties:
+    instance_type: c3.2xlarge
+jobs:
+- name: minion
+  instances: 5
