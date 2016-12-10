@@ -11,5 +11,8 @@ inputs:
 - name: kubernetes-config
 - name: common
 
+outputs:
+- name: kubernetes-manifest
+
 run:
   path: kubernetes-config/build-k8s-manifest.sh
