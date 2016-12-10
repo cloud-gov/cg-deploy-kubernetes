@@ -148,46 +148,11 @@ jobs:
     - get: consul-boshrelease
       trigger: true
   - task: kubernetes-manifest
-    config: &manifest-config
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: 18fgsa/concourse-task
-      inputs:
-      - name: kubernetes-release
-      - name: kubernetes-config
-      - name: common
-      run:
-        path: sh
-        args:
-        - -exc
-        - |
-          cat << EOF > ./cloudwatch-params.yaml
-          ${CLOUDWATCH_PARAMS}
-          EOF
-          spruce merge --prune meta kubernetes-config/manifests/fluentd-cloudwatch-template.yaml \
-            ./cloudwatch-params.yaml \
-            > kubernetes-config/manifests/fluentd-cloudwatch.yaml
-
-          cat << EOF > ./kube2iam-params.yaml
-          ${KUBE2IAM_PARAMS}
-          EOF
-          spruce merge --prune meta kubernetes-config/manifests/kube2iam-template.yaml \
-            ./kube2iam-params.yaml \
-            > kubernetes-config/manifests/kube2iam.yaml
-
-          export SPRUCE_FILE_BASE_PATH=./kubernetes-config
-          kubernetes-release/generate_deployment_manifest aws \
-            common/secrets.yml \
-            kubernetes-config/k8s-jobs.yml \
-            kubernetes-config/infrastructure-aws-staging.yml \
-            > kubernetes-manifest/manifest.yml
-      outputs:
-      - name: kubernetes-manifest
-      params:
-        CLOUDWATCH_PARAMS: {{cloudwatch-params-staging}}
-        KUBE2IAM_PARAMS: {{kube2iam-params-staging}}
+    file: kubernetes-config/build-k8s-manifest.yml
+    params:
+      CLOUDWATCH_PARAMS: {{cloudwatch-params-staging}}
+      KUBE2IAM_PARAMS: {{kube2iam-params-staging}}
+      TARGET_ENVIRONMENT: staging
   - put: kubernetes-staging-deployment
     params: &deployment-params
       cert: common/boshCA.crt
@@ -369,11 +334,11 @@ jobs:
       passed: [acceptance-tests-staging]
       trigger: true
   - task: kubernetes-manifest
-    config:
-      <<: *manifest-config
-      params:
-        CLOUDWATCH_PARAMS: {{cloudwatch-params-production}}
-        KUBE2IAM_PARAMS: {{kube2iam-params-production}}
+    file: kubernetes-config/build-k8s-manifest.yml
+    params:
+      CLOUDWATCH_PARAMS: {{cloudwatch-params-staging}}
+      KUBE2IAM_PARAMS: {{kube2iam-params-staging}}
+      TARGET_ENVIRONMENT: production
   - put: kubernetes-production-deployment
     params: *deployment-params
   - task: create-kubernetes-dns

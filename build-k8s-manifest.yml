@@ -1,0 +1,15 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: 18fgsa/concourse-task
+
+inputs:
+- name: kubernetes-release
+- name: kubernetes-config
+- name: common
+
+run:
+  path: kubernetes-config/build-k8s-manifest.sh
