@@ -206,6 +206,7 @@ jobs:
     - get: kubernetes-config
       passed: [deploy-kubernetes-staging]
     - get: kubernetes-staging-deployment
+      passed: [deploy-kubernetes-staging]
       trigger: true
   - task: run-tests
     file: kubernetes-config/run-tests.yml
