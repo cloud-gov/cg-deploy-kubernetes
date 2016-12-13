@@ -60,7 +60,7 @@ func main() {
 	result := Record{}
 	err = json.Unmarshal(*resp.Source, &result)
 	checkStatus(err)
-	if record.Value != "value" {
+	if result.Value != "value" {
 		log.Fatalf("incorrect value: %s", result.Value)
 	}
 
