@@ -285,6 +285,14 @@ jobs:
         SERVICE_NAME: mongodb32
         PLAN_NAME: standard
         TEST_PATH: kubernetes-config/acceptance/mongodb32
+    - task: acceptance-test-elasticsearch24-persistent
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-staging-tests
+        APP_NAME: elasticsearch24-test
+        SERVICE_NAME: elasticsearch24
+        PLAN_NAME: 1x
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch24
     - task: acceptance-test-elasticsearch23-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -450,6 +458,14 @@ jobs:
         SERVICE_NAME: mongodb32
         PLAN_NAME: standard
         TEST_PATH: kubernetes-config/acceptance/mongodb32
+    - task: acceptance-test-elasticsearch24-persistent
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-production-tests
+        APP_NAME: elasticsearch24-test
+        SERVICE_NAME: elasticsearch24
+        PLAN_NAME: 1x
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch24
     - task: acceptance-test-elasticsearch23-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
