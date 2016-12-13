@@ -4,6 +4,7 @@ groups:
   jobs:
   - build-kubernetes-release
   - fluentd-cloudwatch
+  - elasticsearch-24
   - elasticsearch-23
   - elasticsearch-17
   - mongo-32
@@ -17,6 +18,7 @@ groups:
   jobs:
   - build-kubernetes-release
   - fluentd-cloudwatch
+  - elasticsearch-24
   - elasticsearch-23
   - elasticsearch-17
   - mongo-32
@@ -103,6 +105,14 @@ jobs:
   - put: docker-hub-fluentd-cloudwatch
     params:
       build: fluentd-cloudwatch-config/images/fluentd-cloudwatch
+
+- name: elasticsearch-24
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - put: docker-hub-elasticsearch-24
+    params:
+      build: kubernetes-broker-images/custom_images/docker-elasticsearch-kubernetes-auth-24
 
 - name: elasticsearch-23
   plan:
@@ -633,6 +643,15 @@ resources:
     password: {{docker-password}}
     repository: {{docker-repo-fluentd}}
     tag: {{docker-tag-fluentd-cloudwatch}}
+
+- name: docker-hub-elasticsearch-24
+  type: docker-image
+  source:
+    email: {{docker-email}}
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-repo-elastic}}
+    tag: {{docker-tag-elasticsearch-24}}
 
 - name: docker-hub-elasticsearch-23
   type: docker-image
