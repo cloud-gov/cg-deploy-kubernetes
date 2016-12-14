@@ -337,21 +337,23 @@ jobs:
       passed: [acceptance-tests-staging]
       params:
         submodules: none
+    # all triggers set to false until k8s AWS volume issues are sorted
+    # once that happens it's ok to set all triggers below back to true
     - get: kubernetes-config
-      trigger: true
+      trigger: false
       passed: [acceptance-tests-staging]
     - get: kubernetes-release-tarball
       passed: [acceptance-tests-staging]
-      trigger: true
+      trigger: false
     - get: common
       resource: common-production
-      trigger: true
+      trigger: false
     - get: kubernetes-stemcell
       passed: [acceptance-tests-staging]
-      trigger: true
+      trigger: false
     - get: consul-boshrelease
       passed: [acceptance-tests-staging]
-      trigger: true
+      trigger: false
   - task: kubernetes-manifest
     file: kubernetes-config/build-k8s-manifest.yml
     params:
