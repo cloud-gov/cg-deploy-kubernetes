@@ -1,5 +1,11 @@
+releases:
+- name: cron
+  version: latest
+
 jobs:
 - name: apply-kubernetes-manifests
+  templates:
+    - {name: cron, release: cron}
   properties:
     manifests:
     - content: (( file "manifests/storage-class.yaml" ))
