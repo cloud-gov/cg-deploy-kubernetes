@@ -50,7 +50,7 @@ params:
       BOSH_USERNAME: {{kubernetes-staging-deployment-bosh-username}}
       BOSH_PASSWORD: {{kubernetes-staging-deployment-bosh-password}}
       BOSH_DEPLOYMENT_NAME: {{kubernetes-staging-deployment-bosh-deployment}}
-      BOSH_CACERT: common/boshCA.crt
+      BOSH_CACERT: common/master-bosh.crt
   production:
     cf: &cf-production
       CF_API_URL: {{cf-api-url-production}}
@@ -69,7 +69,7 @@ params:
       BOSH_USERNAME: {{kubernetes-production-deployment-bosh-username}}
       BOSH_PASSWORD: {{kubernetes-production-deployment-bosh-password}}
       BOSH_DEPLOYMENT_NAME: {{kubernetes-production-deployment-bosh-deployment}}
-      BOSH_CACERT: common/boshCA.crt
+      BOSH_CACERT: common/master-bosh.crt
 
 jobs:
 - name: build-kubernetes-release
@@ -142,6 +142,8 @@ jobs:
   serial: true
   plan:
   - aggregate:
+    - get: common
+      resource: master-bosh-root-cert
     - get: pipeline-tasks
     - get: kubernetes-release
       params:
@@ -150,7 +152,7 @@ jobs:
       trigger: true
     - get: kubernetes-release-tarball
       trigger: true
-    - get: common
+    - get: common-secret
       resource: common-staging
       trigger: true
     - get: kubernetes-stemcell
@@ -165,7 +167,7 @@ jobs:
       TARGET_ENVIRONMENT: staging
   - put: kubernetes-staging-deployment
     params: &deployment-params
-      cert: common/boshCA.crt
+      cert: common/master-bosh.crt
       manifest: kubernetes-manifest/manifest.yml
       releases:
       - kubernetes-release-tarball/*.tgz
@@ -332,6 +334,8 @@ jobs:
   serial: true
   plan:
   - aggregate:
+    - get: common
+      resource: master-bosh-root-cert
     - get: pipeline-tasks
     - get: kubernetes-release
       passed: [acceptance-tests-staging]
@@ -345,7 +349,7 @@ jobs:
     - get: kubernetes-release-tarball
       passed: [acceptance-tests-staging]
       trigger: false
-    - get: common
+    - get: common-secret
       resource: common-production
       trigger: false
     - get: kubernetes-stemcell
@@ -504,6 +508,15 @@ jobs:
     #     MANIFEST_FILE: manifest-postgresql94-multinode.yml
 
 resources:
+- name: master-bosh-root-cert
+  type: s3
+  source:
+    access_key_id: {{ci-access-key-id}}
+    bucket: {{kubernetes-production-private-bucket}}
+    region_name: {{aws-region}}
+    secret_access_key: {{ci-secret-access-key}}
+    versioned_file: master-bosh.crt
+
 - name: pipeline-tasks
   type: git
   source:

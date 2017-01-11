@@ -9,7 +9,7 @@ image_resource:
 inputs:
 - name: kubernetes-release
 - name: kubernetes-config
-- name: common
+- name: common-secret
 
 outputs:
 - name: kubernetes-manifest
