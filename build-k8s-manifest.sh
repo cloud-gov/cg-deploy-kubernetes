@@ -19,7 +19,7 @@ spruce merge --prune meta kubernetes-config/manifests/kube2iam-template.yaml \
 
 export SPRUCE_FILE_BASE_PATH=./kubernetes-config
 kubernetes-release/generate_deployment_manifest aws \
-  common/secrets.yml \
+  common-secret/secrets.yml \
   kubernetes-config/k8s-jobs.yml \
   kubernetes-config/infrastructure-aws-${TARGET_ENVIRONMENT}.yml \
   > kubernetes-manifest/manifest.yml
