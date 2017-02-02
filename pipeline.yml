@@ -256,7 +256,9 @@ jobs:
   - aggregate:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-staging]
-    - get: kubernetes-broker-staging-deployment
+      trigger: true
+    - get: kubernetes-broker
+      passed: [deploy-kubernetes-broker-staging]
       trigger: true
     # Get resources from upstream jobs for use in production deploy
     - get: kubernetes-release
@@ -268,8 +270,6 @@ jobs:
     - get: kubernetes-stemcell
     - get: consul-boshrelease
       passed: [deploy-kubernetes-staging]
-    - get: kubernetes-broker
-      passed: [deploy-kubernetes-broker-staging]
   - aggregate:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -445,7 +445,9 @@ jobs:
   - aggregate:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-production]
-    - get: kubernetes-broker-production-deployment
+      trigger: true
+    - get: kubernetes-broker
+      passed: [deploy-kubernetes-broker-production]
       trigger: true
   - aggregate:
     - task: acceptance-test-redis28-standard
