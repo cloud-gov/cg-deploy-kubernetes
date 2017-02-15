@@ -2,6 +2,10 @@ resource_pools:
 - name: minion
   cloud_properties:
     instance_type: c3.2xlarge
+- name: etcd
+  cloud_properties:
+    instance_type: t2.medium
+
 jobs:
 - name: minion
   instances: 5
