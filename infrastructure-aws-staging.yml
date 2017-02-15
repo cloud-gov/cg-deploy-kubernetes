@@ -2,3 +2,7 @@ resource_pools:
 - name: minion
   cloud_properties:
     instance_type: c3.2xlarge
+resource_pools:
+- name: etcd
+  cloud_properties:
+    instance_type: t2.medium
