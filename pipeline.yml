@@ -361,8 +361,8 @@ jobs:
   - task: kubernetes-manifest
     file: kubernetes-config/build-k8s-manifest.yml
     params:
-      CLOUDWATCH_PARAMS: {{cloudwatch-params-staging}}
-      KUBE2IAM_PARAMS: {{kube2iam-params-staging}}
+      CLOUDWATCH_PARAMS: {{cloudwatch-params-production}}
+      KUBE2IAM_PARAMS: {{kube2iam-params-production}}
       TARGET_ENVIRONMENT: production
   - put: kubernetes-production-deployment
     params: *deployment-params
