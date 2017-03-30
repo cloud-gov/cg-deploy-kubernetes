@@ -17,6 +17,14 @@ spruce merge --prune meta kubernetes-config/manifests/kube2iam-template.yaml \
   ./kube2iam-params.yaml \
   > kubernetes-config/manifests/kube2iam.yaml
 
+cat << EOF > ./riemann-podstatus.yaml
+${RIEMANN_PODSTATUS_PARAMS}
+EOF
+spruce merge --prune meta kubernetes-config/manifests/riemann-podstatus-template.yaml \
+  ./riemann-podstatus.yaml \
+  > kubernetes-config/manifests/riemann-podstatus.yaml
+
+
 export SPRUCE_FILE_BASE_PATH=./kubernetes-config
 kubernetes-release/generate_deployment_manifest aws \
   common-secret/secrets.yml \
