@@ -1,0 +1,38 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: riemann-podstatus
+  labels:
+    app: riemann-podstatus
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        name: riemann-podstatus
+    spec:
+      containers:
+      - image: 18fgsa/concourse-task
+        name: bash
+        command:
+        - "/bin/bash"
+        args:
+        - "-c"
+        - |-
+          API_URL="https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_PORT_443_TCP_PORT/api/v1/pods/"
+
+          while sleep 60; do
+            TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+            RESPONSE=$(curl -s -k -H "Authorization: Bearer ${TOKEN}" $API_URL)
+
+            /bin/bash -x <(echo ${RESPONSE} | jq -r '.items[] |
+              "riemannc send --server '${RIEMANN_HOST}' \\
+              --host riemann-podstatus \\
+              --service "+.metadata.namespace+"/"+.metadata.name+" \\
+              --state "+.status.phase+";"'
+            )
+          done
+        env:
+        - name: RIEMANN_HOST
+          value: (( grab meta.riemann ))

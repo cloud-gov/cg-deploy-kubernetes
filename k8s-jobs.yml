@@ -13,6 +13,8 @@ jobs:
       recreate: true
     - content: (( file "manifests/fluentd-cloudwatch.yaml" ))
       recreate: true
+    - content: (( file "manifests/riemann-podstatus.yaml" ))
+      recreate: true
 
 update:
   canaries: 0
