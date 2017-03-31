@@ -1,17 +1,17 @@
 ---
 apiVersion: extensions/v1beta1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: riemann-podstatus
   labels:
     app: riemann-podstatus
 spec:
+  replicas: 2
   template:
     metadata:
       labels:
         name: riemann-podstatus
     spec:
-      hostNetwork: true
       containers:
       - image: 18fgsa/concourse-task
         name: bash
@@ -20,11 +20,19 @@ spec:
         args:
         - "-c"
         - |-
+          API_URL="https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_PORT_443_TCP_PORT/api/v1/pods/"
+
           while sleep 60; do
-            /bin/bash -x <(curl -s -k -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_PORT_443_TCP_PORT/api/v1/pods/ | jq -r '.items[] | "riemannc send --server '${RIEMANN_HOST}' --host riemann-podstatus --service "+.metadata.namespace+"/"+.metadata.name+" --state "+.status.phase+";"')
+            TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+            RESPONSE=$(curl -s -k -H "Authorization: Bearer ${TOKEN}" $API_URL)
+
+            /bin/bash -x <(echo ${RESPONSE} | jq -r '.items[] |
+              "riemannc send --server '${RIEMANN_HOST}' \\
+              --host riemann-podstatus \\
+              --service "+.metadata.namespace+"/"+.metadata.name+" \\
+              --state "+.status.phase+";"'
+            )
           done
         env:
         - name: RIEMANN_HOST
           value: (( grab meta.riemann ))
-        securityContext:
-          privileged: true
