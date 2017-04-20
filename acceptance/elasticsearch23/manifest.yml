@@ -7,4 +7,3 @@ applications:
   memory: 128M
   env:
     GOPACKAGENAME: elasticsearch23-test
-    GO15VENDOREXPERIMENT: 1

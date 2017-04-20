@@ -7,6 +7,5 @@ applications:
   memory: 128M
   env:
     GOPACKAGENAME: sql-test
-    GO15VENDOREXPERIMENT: 1
     SQL_DRIVER: postgres
     SQL_SERVICE: postgresql94-multinode
