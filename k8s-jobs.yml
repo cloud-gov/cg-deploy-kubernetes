@@ -3,9 +3,17 @@ releases:
   version: latest
 
 jobs:
+- name: master
+  properties:
+    docker:
+      log_options: [max-size=10m, max-file=1]
+- name: minion
+  properties:
+    docker:
+      log_options: [max-size=10m, max-file=1]
 - name: apply-kubernetes-manifests
   templates:
-    - {name: cron, release: cron}
+  - {name: cron, release: cron}
   properties:
     manifests:
     - content: (( file "manifests/storage-class.yaml" ))
