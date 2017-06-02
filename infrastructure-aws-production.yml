@@ -1,14 +1,6 @@
-resource_pools:
-- name: minion
-  cloud_properties:
-    instance_type: r4.xlarge
-- name: etcd
-  cloud_properties:
-    instance_type: t2.medium
-
 jobs:
 - name: minion
   instances: 7
   networks:
-  - name: default
-    static_ips: (( static_ips(9, 10, 11, 12, 13, 14, 15) ))
+  - name: minion
+    static_ips: (( grab terraform_outputs.kubernetes_static_ips ))
