@@ -236,7 +236,7 @@ jobs:
         CLUSTER_API_SERVER: {{api-server-staging}}
         CLUSTER_USERNAME: {{cluster-username-staging}}
         CLUSTER_PASSWORD: {{cluster-password-staging}}
-        CF_CLIENT_ID: {{cf-client-id-staging}}
+        CF_CLIENT_ID: kubernetes-client
         CF_CLIENT_SECRET: {{cf-client-secret-staging}}
         CF_TOKEN_URL: {{cf-token-url-staging}}
         CF_API_ENDPOINT: {{cf-api-url-staging}}
@@ -426,7 +426,7 @@ jobs:
         CLUSTER_API_SERVER: {{api-server-production}}
         CLUSTER_USERNAME: {{cluster-username-production}}
         CLUSTER_PASSWORD: {{cluster-password-production}}
-        CF_CLIENT_ID: {{cf-client-id-production}}
+        CF_CLIENT_ID: kubernetes-client
         CF_CLIENT_SECRET: {{cf-client-secret-production}}
         CF_TOKEN_URL: {{cf-token-url-production}}
         CF_API_ENDPOINT: {{cf-api-url-production}}
