@@ -1,6 +1,0 @@
-package: elasticsearch17-test
-import:
-- package: github.com/cloudfoundry-community/go-cfenv
-  version: ~1.14.0
-- package: gopkg.in/olivere/elastic.v2
-  version: ~3.0.55

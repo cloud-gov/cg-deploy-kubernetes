@@ -2,11 +2,8 @@
 groups:
 - name: all
   jobs:
-  - build-kubernetes-release
   - fluentd-cloudwatch
   - elasticsearch-24
-  - elasticsearch-23
-  - elasticsearch-17
   - mongo-32
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
@@ -16,11 +13,8 @@ groups:
   - acceptance-tests-production
 - name: release
   jobs:
-  - build-kubernetes-release
   - fluentd-cloudwatch
   - elasticsearch-24
-  - elasticsearch-23
-  - elasticsearch-17
   - mongo-32
 - name: deploy
   jobs:
@@ -72,32 +66,6 @@ params:
       BOSH_CACERT: common/master-bosh.crt
 
 jobs:
-- name: build-kubernetes-release
-  plan:
-  - aggregate:
-    - get: release-git-repo
-      resource: kubernetes-release
-      trigger: true
-    - get: pipeline-tasks
-    - get: final-builds-dir-tarball
-      resource: kubernetes-final-builds-dir-tarball
-    - get: releases-dir-tarball
-      resource: kubernetes-releases-dir-tarball
-  - task: finalize-release
-    file: pipeline-tasks/finalize-bosh-release.yml
-    params:
-      PRIVATE_YML_CONTENT: {{kubernetes-private-yml}}
-  - aggregate:
-    - put: kubernetes-release-tarball
-      params:
-        file: finalized-release/kubernetes-*.tgz
-    - put: kubernetes-final-builds-dir-tarball
-      params:
-        file: finalized-release/final-builds-dir-kubernetes.tgz
-    - put: kubernetes-releases-dir-tarball
-      params:
-        file: finalized-release/releases-dir-kubernetes.tgz
-
 - name: fluentd-cloudwatch
   plan:
   - get: fluentd-cloudwatch-config
@@ -113,23 +81,6 @@ jobs:
   - put: docker-hub-elasticsearch-24
     params:
       build: kubernetes-broker-images/custom_images/docker-elasticsearch-kubernetes-auth-24
-
-- name: elasticsearch-23
-  plan:
-  - get: kubernetes-broker-images
-    trigger: true
-  - put: docker-hub-elasticsearch-23
-    params:
-      build: kubernetes-broker-images/custom_images/docker-elasticsearch-kubernetes-auth-23
-
-- name: elasticsearch-17
-  plan:
-  - get: kubernetes-broker-images
-    trigger: true
-  - put: docker-hub-elasticsearch-17
-    params:
-      build: kubernetes-broker-images/custom_images/docker-elasticsearch-kubernetes-auth-17
-
 - name: mongo-32
   plan:
   - get: kubernetes-broker-images
@@ -296,22 +247,6 @@ jobs:
         SERVICE_NAME: elasticsearch24
         PLAN_NAME: 1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch24
-    - task: acceptance-test-elasticsearch23-persistent
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        APP_NAME: elasticsearch23-test
-        SERVICE_NAME: elasticsearch23
-        PLAN_NAME: 1x
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch23
-    - task: acceptance-test-elasticsearch17-persistent
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        APP_NAME: elasticsearch17-test
-        SERVICE_NAME: elasticsearch17
-        PLAN_NAME: 1x
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch17
     # - task: acceptance-test-mysql56-persistent
     #   file: kubernetes-config/acceptance/run-acceptance-test.yml
     #   params:
@@ -476,22 +411,6 @@ jobs:
         SERVICE_NAME: elasticsearch24
         PLAN_NAME: 1x
         TEST_PATH: kubernetes-config/acceptance/elasticsearch24
-    - task: acceptance-test-elasticsearch23-persistent
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-production-tests
-        APP_NAME: elasticsearch23-test
-        SERVICE_NAME: elasticsearch23
-        PLAN_NAME: 1x
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch23
-    - task: acceptance-test-elasticsearch17-persistent
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-production-tests
-        APP_NAME: elasticsearch17-test
-        SERVICE_NAME: elasticsearch17
-        PLAN_NAME: 1x
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch17
     # - task: acceptance-test-mysql56-persistent
     #   file: kubernetes-config/acceptance/run-acceptance-test.yml
     #   params:
@@ -513,12 +432,10 @@ jobs:
 
 resources:
 - name: master-bosh-root-cert
-  type: s3
+  type: s3-iam
   source:
-    access_key_id: {{ci-access-key-id}}
     bucket: {{kubernetes-production-private-bucket}}
     region_name: {{aws-region}}
-    secret_access_key: {{ci-secret-access-key}}
     versioned_file: master-bosh.crt
 
 - name: pipeline-tasks
@@ -545,44 +462,12 @@ resources:
     uri: {{kubernetes-config-git-url}}
     branch: {{kubernetes-config-git-branch}}
 
-- name: kubernetes-release-tarball
-  type: s3
-  source:
-    bucket: {{s3-bosh-releases-bucket}}
-    regexp: kubernetes-(.*).tgz
-    access_key_id: {{s3-bosh-releases-access-key-id}}
-    secret_access_key: {{s3-bosh-releases-secret-access-key}}
-    region_name: {{aws-region}}
-    server_side_encryption: AES256
-
-- name: kubernetes-final-builds-dir-tarball
-  type: s3
-  source:
-    bucket: {{s3-bosh-releases-bucket}}
-    versioned_file: final-builds-dir-kubernetes.tgz
-    access_key_id: {{s3-bosh-releases-access-key-id}}
-    secret_access_key: {{s3-bosh-releases-secret-access-key}}
-    region_name: {{aws-region}}
-    server_side_encryption: AES256
-
-- name: kubernetes-releases-dir-tarball
-  type: s3
-  source:
-    bucket: {{s3-bosh-releases-bucket}}
-    versioned_file: releases-dir-kubernetes.tgz
-    access_key_id: {{s3-bosh-releases-access-key-id}}
-    secret_access_key: {{s3-bosh-releases-secret-access-key}}
-    region_name: {{aws-region}}
-    server_side_encryption: AES256
-
 - name: kubernetes-stemcell
-  type: s3
+  type: s3-iam
   source:
-    access_key_id: {{ci-access-key-id}}
     bucket: {{stemcell-bucket}}
     regexp: light-bosh-stemcell-(.*)-aws-xen-hvm-ubuntu-trusty-go_agent.tgz
     region_name: {{aws-region}}
-    secret_access_key: {{ci-secret-access-key}}
 
 - name: consul-boshrelease
   type: bosh-io-release
@@ -594,8 +479,6 @@ resources:
   source:
     region: {{aws-region}}
     bucket_name: {{kubernetes-staging-private-bucket}}
-    access_key_id: {{ci-access-key-id}}
-    secret_access_key: {{ci-secret-access-key}}
     secrets_file: kubernetes.yml
     secrets_passphrase: {{kubernetes-staging-private-passphrase}}
     bosh_cert: bosh.pem
@@ -605,8 +488,6 @@ resources:
   source:
     region: {{aws-region}}
     bucket_name: {{kubernetes-production-private-bucket}}
-    access_key_id: {{ci-access-key-id}}
-    secret_access_key: {{ci-secret-access-key}}
     secrets_file: kubernetes.yml
     secrets_passphrase: {{kubernetes-production-private-passphrase}}
     bosh_cert: bosh.pem
@@ -688,24 +569,6 @@ resources:
     repository: {{docker-repo-elastic}}
     tag: {{docker-tag-elasticsearch-24}}
 
-- name: docker-hub-elasticsearch-23
-  type: docker-image
-  source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-elastic}}
-    tag: {{docker-tag-elasticsearch-23}}
-
-- name: docker-hub-elasticsearch-17
-  type: docker-image
-  source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-elastic}}
-    tag: {{docker-tag-elasticsearch-17}}
-
 - name: docker-hub-mongo-32
   type: docker-image
   source:
@@ -714,6 +577,13 @@ resources:
     password: {{docker-password}}
     repository: {{docker-repo-mongo}}
     tag: {{docker-tag-mongo-32}}
+
+- name: kubernetes-release-tarball
+  type: s3-iam
+  source:
+    bucket: {{s3-bosh-releases-bucket}}
+    regexp: kubernetes-(.*).tgz
+    region_name: us-gov-west-1
 
 resource_types:
 - name: slack-notification
@@ -730,3 +600,8 @@ resource_types:
   type: docker-image
   source:
     repository: 18fgsa/cg-common-resource
+
+- name: s3-iam
+  type: docker-image
+  source:
+    repository: 18fgsa/s3-resource
