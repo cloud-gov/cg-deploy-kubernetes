@@ -15,7 +15,7 @@ instance_groups:
     properties:
       consul:
         domain: "kubernetes"
-        default_recursor: (( grab terrafowm_outputs.vpc_cidr_dns ))
+        default_recursor: (( grab terraform_outputs.vpc_cidr_dns ))
         agent_config:
           addresses:
             http: "127.0.0.1"
@@ -65,6 +65,10 @@ instance_groups:
       docker:
         flannel: true
         log_options: [max-size=10m, max-file=1]
+  - name: flannel
+    properties:
+      apiserver:
+        ip: (( grab instance_groups.etcd.networks.services.static_ips.[0] ))
 
 - name: minion
   networks:
@@ -79,6 +83,10 @@ instance_groups:
       docker:
         flannel: true
         log_options: [max-size=10m, max-file=1]
+  - name: flannel
+    properties:
+      apiserver:
+        ip: (( grab instance_groups.etcd.networks.services.static_ips.[0] ))
 
 - name: apply-kubernetes-manifests
   jobs:
