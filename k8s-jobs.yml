@@ -10,6 +10,16 @@ instance_groups:
       - (( grab terraform_outputs.kubernetes_static_ips.[0] ))
       - (( grab terraform_outputs.kubernetes_static_ips.[1] ))
       - (( grab terraform_outputs.kubernetes_static_ips.[2] ))
+  jobs: 
+  - name: consul
+    properties:
+      consul:
+        domain: "kubernetes"
+        default_recursor: (( grab terrafowm_outputs.vpc_cidr_dns ))
+        agent_config:
+          addresses:
+            http: "127.0.0.1"
+            https: "127.0.0.1"
 
 - name: etcd
   networks:
@@ -46,9 +56,14 @@ instance_groups:
       - (( grab terraform_outputs.kubernetes_static_ips.[7] ))
       - (( grab terraform_outputs.kubernetes_static_ips.[8] ))
   jobs:
+  - name: kubernetes-master
+    properties:
+      consul:
+        encrypt: (( grab instance_groups.consul.jobs.consul.properties.consul.encrypt ))
   - name: docker
     properties:
       docker:
+        flannel: true
         log_options: [max-size=10m, max-file=1]
 
 - name: minion
@@ -62,6 +77,7 @@ instance_groups:
   - name: docker
     properties:
       docker:
+        flannel: true
         log_options: [max-size=10m, max-file=1]
 
 - name: apply-kubernetes-manifests
@@ -76,6 +92,13 @@ instance_groups:
         recreate: true
       - content: (( file "manifests/riemann-podstatus.yaml" ))
         recreate: true
+
+- name: create-kubernetes-monitoring
+  jobs:
+  - name: create-kubernetes-monitoring
+    properties:
+      heapster:
+        sink: (( concat "riemann:riemann://" terraform_outputs.monitoring_ip_address ":5555" ))
 
 update:
   canaries: 0
