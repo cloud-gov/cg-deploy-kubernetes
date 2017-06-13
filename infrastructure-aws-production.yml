@@ -1,6 +1,13 @@
-jobs:
+instance_groups:
 - name: minion
   instances: 7
   networks:
-  - name: minion
-    static_ips: (( grab terraform_outputs.kubernetes_static_ips ))
+  - name: services
+    static_ips:
+      - (( grab terraform_outputs.kubernetes_static_ips.[9] ))
+      - (( grab terraform_outputs.kubernetes_static_ips.[10] ))
+      - (( grab terraform_outputs.kubernetes_static_ips.[11] ))
+      - (( grab terraform_outputs.kubernetes_static_ips.[12] ))
+      - (( grab terraform_outputs.kubernetes_static_ips.[13] ))
+      - (( grab terraform_outputs.kubernetes_static_ips.[14] ))
+      - (( grab terraform_outputs.kubernetes_static_ips.[15] ))

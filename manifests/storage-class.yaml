@@ -5,4 +5,5 @@ metadata:
   name: default
 provisioner: kubernetes.io/aws-ebs
 parameters:
-  persistent_disk_type: kubernetes_storage_class
+  type: gp2
+  encrypted: "true"
