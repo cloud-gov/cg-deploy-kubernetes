@@ -10,6 +10,7 @@ inputs:
 - name: kubernetes-release
 - name: kubernetes-config
 - name: common-secret
+- name: terraform-yaml
 
 outputs:
 - name: kubernetes-manifest

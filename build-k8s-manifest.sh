@@ -26,8 +26,14 @@ spruce merge --prune meta kubernetes-config/manifests/riemann-podstatus-template
 
 
 export SPRUCE_FILE_BASE_PATH=./kubernetes-config
-kubernetes-release/generate_deployment_manifest \
+spruce merge \
+  -- prune meta \
+  -- prune terraform_output \
+  kubernetes-release/templates/k8s-deployment.yml \
+  kubernetes-release/templates/k8s-jobs.yml \
+  kubernetes-release/templates/k8s-infrastructure-aws.yml \
   common-secret/secrets.yml \
   kubernetes-config/k8s-jobs.yml \
   kubernetes-config/infrastructure-aws-${TARGET_ENVIRONMENT}.yml \
+  terraform-yaml/state.yml \
   > kubernetes-manifest/manifest.yml

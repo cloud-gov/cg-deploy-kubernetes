@@ -110,6 +110,8 @@ jobs:
       trigger: true
     - get: consul-boshrelease
       trigger: true
+    - get: terraform-yaml
+      resource: terraform-yaml-staging
   - task: kubernetes-manifest
     file: kubernetes-config/build-k8s-manifest.yml
     params:
@@ -294,6 +296,8 @@ jobs:
     - get: consul-boshrelease
       passed: [acceptance-tests-staging]
       trigger: false
+    - get: terraform-yaml
+      resource: terraform-yaml-production
   - task: kubernetes-manifest
     file: kubernetes-config/build-k8s-manifest.yml
     params:
@@ -584,6 +588,20 @@ resources:
     bucket: {{s3-bosh-releases-bucket}}
     regexp: kubernetes-(.*).tgz
     region_name: us-gov-west-1
+
+- name: terraform-yaml-staging
+  type: s3-iam
+  source:
+    bucket: {{tf-state-bucket-staging}}
+    versioned_file: {{tf-state-file-staging}}
+    region_name: {{aws-region}}
+
+- name: terraform-yaml-production
+  type: s3-iam
+  source:
+    bucket: {{tf-state-bucket-production}}
+    versioned_file: {{tf-state-file-production}}
+    region_name: {{aws-region}}
 
 resource_types:
 - name: slack-notification
