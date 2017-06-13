@@ -1,9 +1,0 @@
-applications:
-- name: elasticsearch17-test
-  buildpack: go_buildpack
-  command: elasticsearch17-test
-  health-check-type: none
-  no-route: true
-  memory: 128M
-  env:
-    GOPACKAGENAME: elasticsearch17-test
