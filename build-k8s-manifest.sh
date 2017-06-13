@@ -26,7 +26,7 @@ spruce merge --prune meta kubernetes-config/manifests/riemann-podstatus-template
 
 
 export SPRUCE_FILE_BASE_PATH=./kubernetes-config
-kubernetes-release/generate_deployment_manifest aws \
+kubernetes-release/generate_deployment_manifest \
   common-secret/secrets.yml \
   kubernetes-config/k8s-jobs.yml \
   kubernetes-config/infrastructure-aws-${TARGET_ENVIRONMENT}.yml \
