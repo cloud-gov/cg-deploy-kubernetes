@@ -5,12 +5,12 @@ releases:
 instance_groups:
 - name: consul
   networks:
-    - name: services
-      static_ips:
-      - (( grab terraform_outputs.kubernetes_static_ips.[0] ))
-      - (( grab terraform_outputs.kubernetes_static_ips.[1] ))
-      - (( grab terraform_outputs.kubernetes_static_ips.[2] ))
-  jobs: 
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[0] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[1] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[2] ))
+  jobs:
   - name: consul
     properties:
       consul:
@@ -22,12 +22,13 @@ instance_groups:
             https: "127.0.0.1"
 
 - name: etcd
+  vm_extensions: [kubernetes-etcd-profile]
   networks:
-    - name: services
-      static_ips:
-      - (( grab terraform_outputs.kubernetes_static_ips.[3] ))
-      - (( grab terraform_outputs.kubernetes_static_ips.[4] ))
-      - (( grab terraform_outputs.kubernetes_static_ips.[5] ))
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[3] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[4] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[5] ))
   jobs:
   - (( append ))
   - name: cron
@@ -49,12 +50,13 @@ instance_groups:
           user: root
 
 - name: master
+  vm_extensions: [kubernetes-master-profile]
   networks:
-    - name: services
-      static_ips:
-      - (( grab terraform_outputs.kubernetes_static_ips.[6] ))
-      - (( grab terraform_outputs.kubernetes_static_ips.[7] ))
-      - (( grab terraform_outputs.kubernetes_static_ips.[8] ))
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[6] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[7] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[8] ))
   jobs:
   - name: kubernetes-master
     properties:
@@ -71,12 +73,13 @@ instance_groups:
         ip: (( grab instance_groups.etcd.networks.services.static_ips.[0] ))
 
 - name: minion
+  vm_extensions: [kubernetes-minion-profile]
   networks:
-    - name: services
-      static_ips:
-      - (( grab terraform_outputs.kubernetes_static_ips.[9] ))
-      - (( grab terraform_outputs.kubernetes_static_ips.[10] ))
-      - (( grab terraform_outputs.kubernetes_static_ips.[11] ))
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[9] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[10] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[11] ))
   jobs:
   - name: docker
     properties:
