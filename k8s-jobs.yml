@@ -91,7 +91,11 @@ instance_groups:
       apiserver:
         ip: (( grab instance_groups.etcd.networks.services.static_ips.[0] ))
 
+- name: create-kubernetes-dns
+  vm_extensions: [errand-profile]
+
 - name: apply-kubernetes-manifests
+  vm_extensions: [errand-profile]
   jobs:
   - name: apply-kubernetes-manifests
     properties:
@@ -105,6 +109,7 @@ instance_groups:
         recreate: true
 
 - name: create-kubernetes-monitoring
+  vm_extensions: [errand-profile]
   jobs:
   - name: create-kubernetes-monitoring
     properties:
@@ -117,4 +122,3 @@ update:
   canary_watch_time: 30000-600000
   update_watch_time: 30000-600000
   serial: true
-
