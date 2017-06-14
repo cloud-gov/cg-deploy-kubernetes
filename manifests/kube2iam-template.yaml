@@ -13,7 +13,7 @@ spec:
     spec:
       hostNetwork: true
       containers:
-      - image: jtblin/kube2iam:0.6.2
+      - image: jtblin/kube2iam:latest
         name: kube2iam
         args:
         - "--base-role-arn=$(BASE_ROLE_ARN)"
