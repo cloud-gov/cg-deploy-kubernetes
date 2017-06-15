@@ -4,6 +4,7 @@ releases:
 
 instance_groups:
 - name: consul
+  vm_extensions: [kubernetes-sg]
   persistent_disk_type: kubernetes
   networks:
   - name: services
@@ -24,7 +25,7 @@ instance_groups:
 
 - name: etcd
   persistent_disk_type: kubernetes
-  vm_extensions: [kubernetes-etcd-profile]
+  vm_extensions: [kubernetes-sg, kubernetes-etcd-profile]
   networks:
   - name: services
     static_ips:
@@ -53,7 +54,7 @@ instance_groups:
 
 - name: master
   persistent_disk_type: kubernetes
-  vm_extensions: [kubernetes-master-profile]
+  vm_extensions: [kubernetes-lb, kubernetes-sg, kubernetes-master-profile]
   networks:
   - name: services
     static_ips:
@@ -77,7 +78,7 @@ instance_groups:
 
 - name: minion
   persistent_disk_type: kubernetes
-  vm_extensions: [kubernetes-minion-profile]
+  vm_extensions: [kubernetes-sg, kubernetes-minion-profile]
   networks:
   - name: services
     static_ips:
@@ -96,10 +97,10 @@ instance_groups:
         ip: (( grab instance_groups.etcd.networks.services.static_ips.[0] ))
 
 - name: create-kubernetes-dns
-  vm_extensions: [errand-profile]
+  vm_extensions: [kubernetes-sg, errand-profile]
 
 - name: apply-kubernetes-manifests
-  vm_extensions: [errand-profile]
+  vm_extensions: [kubernetes-sg, errand-profile]
   jobs:
   - name: apply-kubernetes-manifests
     properties:
@@ -113,7 +114,7 @@ instance_groups:
         recreate: true
 
 - name: create-kubernetes-monitoring
-  vm_extensions: [errand-profile]
+  vm_extensions: [kubernetes-sg, errand-profile]
   jobs:
   - name: create-kubernetes-monitoring
     properties:
