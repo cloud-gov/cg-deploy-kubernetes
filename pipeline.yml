@@ -200,7 +200,6 @@ jobs:
       AUTH_USER: {{broker-auth-user-staging}}
       AUTH_PASS: {{broker-auth-pass-staging}}
       SERVICES: {{broker-service-names-staging}}
-      SERVICE_ORGANIZATION: {{broker-service-organization-staging}}
 
 - name: acceptance-tests-staging
   serial: true
@@ -374,7 +373,6 @@ jobs:
       AUTH_USER: {{broker-auth-user-production}}
       AUTH_PASS: {{broker-auth-pass-production}}
       SERVICES: {{broker-service-names-production}}
-      SERVICE_ORGANIZATION: {{broker-service-organization-production}}
 
 - name: acceptance-tests-production
   serial: true
