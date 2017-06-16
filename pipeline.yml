@@ -117,7 +117,8 @@ jobs:
       KUBE2IAM_PARAMS: {{kube2iam-params-staging}}
       RIEMANN_PODSTATUS_PARAMS: {{riemann-podstatus-params-staging}}
       TARGET_ENVIRONMENT: staging
-  - task: lint-manifest
+  - &lint-manifest
+    task: lint-manifest
     file: pipeline-tasks/lint-manifest.yml
     input_mapping:
       pipeline-config: kubernetes-config
@@ -308,13 +309,7 @@ jobs:
       KUBE2IAM_PARAMS: {{kube2iam-params-production}}
       RIEMANN_PODSTATUS_PARAMS: {{riemann-podstatus-params-production}}
       TARGET_ENVIRONMENT: production
-  - task: lint-manifest
-    file: pipeline-tasks/lint-manifest.yml
-    input_mapping:
-      pipeline-config: kubernetes-config
-      lint-manifest: kubernetes-manifest
-    params:
-      LINTER_CONFIG: bosh-lint.yml
+  - *lint-manifest
   - put: kubernetes-production-deployment
     params: *deployment-params
   - task: create-kubernetes-dns
