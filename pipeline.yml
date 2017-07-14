@@ -143,6 +143,7 @@ jobs:
     - get: kubernetes-config
       trigger: true
     - get: kubernetes-release-tarball
+      resource: kubernetes-release-tarball-development
       trigger: true
     - get: common-secret
       resource: common-development
@@ -262,16 +263,6 @@ jobs:
     - get: kubernetes-broker
       passed: [deploy-kubernetes-broker-development]
       trigger: true
-    # Get resources from upstream jobs for use in production deploy
-    - get: kubernetes-release
-      passed: [deploy-kubernetes-development]
-      params:
-        submodules: none
-    - get: kubernetes-release-tarball
-      passed: [deploy-kubernetes-development]
-    - get: kubernetes-stemcell
-    - get: consul-boshrelease
-      passed: [deploy-kubernetes-development]
   - aggregate:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -319,14 +310,7 @@ jobs:
       KUBE2IAM_PARAMS: {{kube2iam-params-staging}}
       RIEMANN_PODSTATUS_PARAMS: {{riemann-podstatus-params-staging}}
       TARGET_ENVIRONMENT: staging
-  - &lint-manifest
-    task: lint-manifest
-    file: pipeline-tasks/lint-manifest.yml
-    input_mapping:
-      pipeline-config: kubernetes-config
-      lint-manifest: kubernetes-manifest
-    params:
-      LINTER_CONFIG: bosh-lint.yml
+  - *lint-manifest
   - put: kubernetes-staging-deployment
     params: &deployment-params
       cert: common/master-bosh.crt
@@ -755,12 +739,16 @@ resources:
     repository: {{docker-repo-mongo}}
     tag: {{docker-tag-mongo-32}}
 
-- name: kubernetes-release-tarball
+- &kubernetes-release-tarball
+  name: kubernetes-release-tarball
   type: s3-iam
   source:
     bucket: {{s3-bosh-releases-bucket}}
     regexp: kubernetes-(.*).tgz
     region_name: us-gov-west-1
+
+- <<: *kubernetes-release-tarball
+  name: kubernetes-release-tarball-development
 
 - name: terraform-yaml-development
   type: s3-iam
