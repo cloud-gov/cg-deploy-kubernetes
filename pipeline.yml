@@ -89,6 +89,22 @@ params:
       BOSH_PASSWORD: {{kubernetes-production-deployment-bosh-password}}
       BOSH_DEPLOYMENT_NAME: {{kubernetes-production-deployment-bosh-deployment}}
       BOSH_CACERT: common/master-bosh.crt
+  acceptance:
+    redis28-tests: &redis28-tests
+      APP_NAME: redis28-test
+      SERVICE_NAME: redis28
+      PLAN_NAME: standard
+      TEST_PATH: kubernetes-config/acceptance/redis28
+    mongodb32-tests: &mongodb32-tests
+      APP_NAME: mongodb32-test
+      SERVICE_NAME: mongodb32
+      PLAN_NAME: standard
+      TEST_PATH: kubernetes-config/acceptance/mongodb32
+    elasticsearch24-tests: &elasticsearch24-tests
+      APP_NAME: elasticsearch24-test
+      SERVICE_NAME: elasticsearch24
+      PLAN_NAME: 1x
+      TEST_PATH: kubernetes-config/acceptance/elasticsearch24
 
 jobs:
 - name: fluentd-cloudwatch
@@ -261,26 +277,17 @@ jobs:
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-development-tests
-        APP_NAME: redis28-test
-        SERVICE_NAME: redis28
-        PLAN_NAME: standard
-        TEST_PATH: kubernetes-config/acceptance/redis28
+        <<: *redis28-tests
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-development-tests
-        APP_NAME: mongodb32-test
-        SERVICE_NAME: mongodb32
-        PLAN_NAME: standard
-        TEST_PATH: kubernetes-config/acceptance/mongodb32
+        <<: *mongodb32-tests
     - task: acceptance-test-elasticsearch24-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-development-tests
-        APP_NAME: elasticsearch24-test
-        SERVICE_NAME: elasticsearch24
-        PLAN_NAME: 1x
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch24
+        <<: *elasticsearch24-tests
 
 - name: deploy-kubernetes-staging
   serial: true
@@ -429,26 +436,17 @@ jobs:
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging-tests
-        APP_NAME: redis28-test
-        SERVICE_NAME: redis28
-        PLAN_NAME: standard
-        TEST_PATH: kubernetes-config/acceptance/redis28
+        <<: *redis28-tests
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging-tests
-        APP_NAME: mongodb32-test
-        SERVICE_NAME: mongodb32
-        PLAN_NAME: standard
-        TEST_PATH: kubernetes-config/acceptance/mongodb32
+        <<: *mongodb32-tests
     - task: acceptance-test-elasticsearch24-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-staging-tests
-        APP_NAME: elasticsearch24-test
-        SERVICE_NAME: elasticsearch24
-        PLAN_NAME: 1x
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch24
+        <<: *elasticsearch24-tests
 
 - name: deploy-kubernetes-production
   serial: true
@@ -577,26 +575,17 @@ jobs:
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-production-tests
-        APP_NAME: redis28-test
-        SERVICE_NAME: redis28
-        PLAN_NAME: standard
-        TEST_PATH: kubernetes-config/acceptance/redis28
+        <<: *redis28-tests
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-production-tests
-        APP_NAME: mongodb32-test
-        SERVICE_NAME: mongodb32
-        PLAN_NAME: standard
-        TEST_PATH: kubernetes-config/acceptance/mongodb32
+        <<: *mongodb32-tests
     - task: acceptance-test-elasticsearch24-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
         <<: *cf-production-tests
-        APP_NAME: elasticsearch24-test
-        SERVICE_NAME: elasticsearch24
-        PLAN_NAME: 1x
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch24
+        <<: *elasticsearch24-tests
 
 resources:
 - name: master-bosh-root-cert
@@ -674,7 +663,6 @@ resources:
     username: {{kubernetes-development-deployment-bosh-username}}
     password: {{kubernetes-development-deployment-bosh-password}}
     deployment: {{kubernetes-development-deployment-bosh-deployment}}
-    ignore_ssl: false
 
 - name: kubernetes-staging-deployment
   type: 18f-bosh-deployment
@@ -683,7 +671,6 @@ resources:
     username: {{kubernetes-staging-deployment-bosh-username}}
     password: {{kubernetes-staging-deployment-bosh-password}}
     deployment: {{kubernetes-staging-deployment-bosh-deployment}}
-    ignore_ssl: false
 
 - name: kubernetes-production-deployment
   type: 18f-bosh-deployment
@@ -692,7 +679,6 @@ resources:
     username: {{kubernetes-production-deployment-bosh-username}}
     password: {{kubernetes-production-deployment-bosh-password}}
     deployment: {{kubernetes-production-deployment-bosh-deployment}}
-    ignore_ssl: false
 
 - name: kubernetes-broker-development-deployment
   type: cf
