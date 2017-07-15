@@ -1,17 +1,17 @@
-hash: 61d5e270d1a33c2ad83ff98ebbd41d89c69cf542972fc3792f6ba4fe6cb247c5
-updated: 2016-09-01T12:00:00.070880165-04:00
+hash: 82e52bca40a14b171e928b38c98678210ddd4904ca9639e63afe051c4924d39b
+updated: 2017-07-14T18:19:04.691502256-04:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
-  version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
+  version: f920e9562d5f951cbf11785728f67258c38a10d0
 - name: github.com/mitchellh/mapstructure
-  version: ca63d7c062ee3c9f34db231e352b60012b4fd0c1
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: golang.org/x/net
-  version: 1358eff22f0dd0c54fc521042cc607f6ff4b531a
+  version: f01ecb60fe3835d80d9a0b7b2bf24b228c89260e
   subpackages:
   - context
   - context/ctxhttp
 - name: gopkg.in/olivere/elastic.v3
-  version: f9fd15e1ea3a50bbe58c72a4b8820499fe3bb0e1
+  version: 5a75b7d18bca7420e68338600e8c9f611435f911
   subpackages:
   - backoff
   - uritemplates

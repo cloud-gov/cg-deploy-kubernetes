@@ -1,10 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"os/signal"
 
 	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/garyburd/redigo/redis"
@@ -16,11 +17,40 @@ func checkStatus(err error) {
 	}
 }
 
-func waitForExit() {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, os.Kill)
-	<-c
-	os.Exit(0)
+func writeError(w http.ResponseWriter, err error) {
+	message, _ := json.Marshal(map[string]string{
+		"error": err.Error(),
+	})
+	w.Write(message)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
+}
+
+var client redis.Conn
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	// Set and check value
+	_, err := client.Do("SET", "test", "test")
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	value, err := redis.String(client.Do("GET", "test"))
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	if value != "test" {
+		writeError(w, fmt.Errorf("incorrect value: %s", value))
+		return
+	}
+
+	_, err = client.Do("DEL", "test")
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 }
 
 func main() {
@@ -33,27 +63,15 @@ func main() {
 	creds := services[0].Credentials
 
 	// Create redis client
-	client, err := redis.Dial("tcp", fmt.Sprintf("%s:%s", creds["hostname"], creds["port"]))
+	var err error
+	client, err = redis.Dial("tcp", fmt.Sprintf("%s:%s", creds["hostname"], creds["port"]))
 	checkStatus(err)
 	defer client.Close()
 
-	// Authenticate redis
-	_, err = client.Do("AUTH", creds["password"])
+	_, err = client.Do("AUTH", creds["password"].(string))
 	checkStatus(err)
 
-	// Set and check value
-	_, err = client.Do("SET", "test", "test")
-	checkStatus(err)
-
-	value, err := redis.String(client.Do("GET", "test"))
-	checkStatus(err)
-	if value != "test" {
-		log.Fatalf("incorrect value: %s", value)
-	}
-
-	_, err = client.Do("DEL", "test")
-	checkStatus(err)
-
-	// Keep alive
-	waitForExit()
+	// Serve HTTP
+	http.HandleFunc("/", handler)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil))
 }

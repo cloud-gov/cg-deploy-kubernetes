@@ -2,6 +2,7 @@
 
 set -e
 set -u
+set -x
 
 function check_service() {
   counter=36
@@ -18,19 +19,21 @@ function check_service() {
   return 1
 }
 
-SERVICE_INSTANCE_NAME=$(mktemp "${SERVICE_NAME}-${PLAN_NAME}-XXXXXX")
+INSTANCE_NAME=$(mktemp "${SERVICE_NAME}-${PLAN_NAME}-XXXXXX")
+SERVICE_INSTANCE_NAME="${INSTANCE_NAME}"
+APP_NAME="${INSTANCE_NAME}"
 
 cd ${TEST_PATH}
 
-cf api $CF_API_URL
-cf auth $CF_USERNAME $CF_PASSWORD
+cf api ${CF_API_URL}
+(set +x; cf auth $CF_USERNAME $CF_PASSWORD)
 
-cf create-space -o $CF_ORGANIZATION $CF_SPACE
-cf target -o $CF_ORGANIZATION -s $CF_SPACE
+cf create-space -o ${CF_ORGANIZATION} ${CF_SPACE}
+cf target -o ${CF_ORGANIZATION} -s ${CF_SPACE}
 
 cf create-service ${SERVICE_NAME} ${PLAN_NAME} ${SERVICE_INSTANCE_NAME}
 
-cf push --no-start -f ${MANIFEST_FILE:-manifest.yml}
+cf push --no-start -f ${MANIFEST_FILE:-manifest.yml} ${APP_NAME}
 
 if ! check_service; then
   echo "Failed to create service ${SERVICE_NAME}"
@@ -39,6 +42,14 @@ fi
 
 cf bind-service ${APP_NAME} ${SERVICE_INSTANCE_NAME}
 cf start ${APP_NAME}
+
+url=$(cf app ${APP_NAME} | grep -e "urls: " -e "routes: " | awk '{print $2}')
+status=$(curl -w "%{http_code}" "https://${url}")
+if [ "${status}" != "200" ]; then
+  echo "Unexpected status code ${status}"
+  cf logs ${APP_NAME} --recent
+  exit 1
+fi
 
 cf delete -f ${APP_NAME}
 cf delete-service -f ${SERVICE_INSTANCE_NAME}

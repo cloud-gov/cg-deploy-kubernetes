@@ -1,10 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"os/signal"
 
 	"github.com/cloudfoundry-community/go-cfenv"
 	"gopkg.in/mgo.v2"
@@ -17,16 +18,46 @@ func checkStatus(err error) {
 	}
 }
 
-func waitForExit() {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, os.Kill)
-	<-c
-	os.Exit(0)
+func writeError(w http.ResponseWriter, err error) {
+	message, _ := json.Marshal(map[string]string{
+		"error": err.Error(),
+	})
+	w.Write(message)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
 }
 
 type Record struct {
 	Key   string
 	Value string
+}
+
+var client *mgo.Collection
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	// Set and check document
+	err := client.Insert(&Record{Key: "test", Value: "test"})
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	result := Record{}
+	err = client.Find(bson.M{"key": "test"}).One(&result)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	if result.Value != "test" {
+		writeError(w, fmt.Errorf("incorrect value: %s", result.Value))
+		return
+	}
+
+	err = client.Remove(bson.M{"key": "test"})
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 }
 
 func main() {
@@ -43,19 +74,9 @@ func main() {
 	checkStatus(err)
 	defer session.Close()
 
-	client := session.DB(fmt.Sprint(creds["dbname"])).C("test")
+	client = session.DB(fmt.Sprint(creds["dbname"])).C("test")
 
-	// Set and check document
-	checkStatus(client.Insert(&Record{Key: "test", Value: "test"}))
-
-	result := Record{}
-	checkStatus(client.Find(bson.M{"key": "test"}).One(&result))
-	if result.Value != "test" {
-		log.Fatalf("incorrect value: %s", result.Value)
-	}
-
-	checkStatus(client.Remove(bson.M{"key": "test"}))
-
-	// Keep alive
-	waitForExit()
+	// Serve HTTP
+	http.HandleFunc("/", handler)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil))
 }

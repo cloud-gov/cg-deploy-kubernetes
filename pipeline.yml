@@ -91,17 +91,14 @@ params:
       BOSH_CACERT: common/master-bosh.crt
   acceptance:
     redis28-tests: &redis28-tests
-      APP_NAME: redis28-test
       SERVICE_NAME: redis28
       PLAN_NAME: standard
       TEST_PATH: kubernetes-config/acceptance/redis28
     mongodb32-tests: &mongodb32-tests
-      APP_NAME: mongodb32-test
       SERVICE_NAME: mongodb32
       PLAN_NAME: standard
       TEST_PATH: kubernetes-config/acceptance/mongodb32
     elasticsearch24-tests: &elasticsearch24-tests
-      APP_NAME: elasticsearch24-test
       SERVICE_NAME: elasticsearch24
       PLAN_NAME: 1x
       TEST_PATH: kubernetes-config/acceptance/elasticsearch24

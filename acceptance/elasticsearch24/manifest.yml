@@ -2,8 +2,6 @@ applications:
 - name: elasticsearch24-test
   buildpack: go_buildpack
   command: elasticsearch24-test
-  health-check-type: none
-  no-route: true
   memory: 128M
   env:
     GOPACKAGENAME: elasticsearch24-test
