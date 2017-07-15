@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"os/signal"
 
 	"github.com/cloudfoundry-community/go-cfenv"
 	"gopkg.in/olivere/elastic.v3"
@@ -16,11 +18,13 @@ func checkStatus(err error) {
 	}
 }
 
-func waitForExit() {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, os.Kill)
-	<-c
-	os.Exit(0)
+func writeError(w http.ResponseWriter, err error) {
+	message, _ := json.Marshal(map[string]string{
+		"error": err.Error(),
+	})
+	w.Write(message)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
 }
 
 type Record struct {
@@ -28,44 +32,44 @@ type Record struct {
 	Value string
 }
 
-func main() {
-	// Get elasticsearch24-multinode credentials
-	env, _ := cfenv.Current()
-	services, _ := env.Services.WithLabel("elasticsearch24")
-	if len(services) != 1 {
-		log.Fatal("elasticsearch24 service not found")
-	}
-	creds := services[0].Credentials
+var client *elastic.Client
 
-	// Create elasticsearch client
-	client, err := elastic.NewClient(
-		elastic.SetURL("http://"+creds["hostname"].(string)+":"+creds["port"].(string)),
-		elastic.SetBasicAuth(creds["username"].(string), creds["password"].(string)),
-		elastic.SetSniff(false),
-	)
-	checkStatus(err)
-
+func handler(w http.ResponseWriter, r *http.Request) {
 	// Set and check document
 	record := Record{Key: "key", Value: "value"}
-	_, err = client.Index().Index("test").Type("test").Id("1").BodyJson(record).Refresh(true).Do()
-	checkStatus(err)
+	_, err := client.Index().Index("test").Type("test").Id("1").BodyJson(record).Refresh(true).Do()
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 
 	resp, err := client.Get().Index("test").Type("test").Id("1").Do()
-	checkStatus(err)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 
 	if !resp.Found {
-		log.Fatalf("record not found")
+		writeError(w, err)
+		return
 	}
 
 	result := Record{}
 	err = json.Unmarshal(*resp.Source, &result)
-	checkStatus(err)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
 	if result.Value != "value" {
-		log.Fatalf("incorrect value: %s", result.Value)
+		writeError(w, fmt.Errorf("incorrect value: %s", result.Value))
 	}
 
 	_, err = client.DeleteIndex("test").Do()
-	checkStatus(err)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 
 	/*
 		Dots in names
@@ -78,34 +82,70 @@ func main() {
 	// Set and check document
 	body := `{"server.latency.max": 100}`
 	_, err = client.Index().Index("test").Type("test").Id("1").BodyJson(body).Refresh(true).Do()
-	checkStatus(err)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 
 	resp, err = client.Get().Index("test").Type("test").Id("1").Do()
-	checkStatus(err)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 
 	if !resp.Found {
+		writeError(w, errors.New("record not found"))
 		log.Fatalf("record not found")
 	}
 
 	if string(*resp.Source) != body {
-		log.Fatalf("incorrect value: %s", string(*resp.Source))
+		writeError(w, fmt.Errorf("incorrect value: %s", string(*resp.Source)))
 	}
 
 	// Check the mapping for using dots in names.
 	expectedMapping := `{"test":{"mappings":{"test":{"properties":{"server.latency.max":{"type":"long"}}}}}}`
 	mapping, err := client.GetMapping().Index("test").Do()
-	checkStatus(err)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
 	jsonMapping, err := json.Marshal(mapping)
-	checkStatus(err)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 
 	if string(jsonMapping) != expectedMapping {
-		log.Fatalf("incorrect mapping\nvalue: %s\nexpected: %s",
-			string(jsonMapping), expectedMapping)
+		writeError(w, fmt.Errorf("incorrect mapping\nvalue: %s\nexpected: %s", string(jsonMapping), expectedMapping))
 	}
 
 	_, err = client.DeleteIndex("test").Do()
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+}
+
+func main() {
+	// Get elasticsearch24-multinode credentials
+	env, _ := cfenv.Current()
+	services, _ := env.Services.WithLabel("elasticsearch24")
+	if len(services) != 1 {
+		log.Fatal("elasticsearch24 service not found")
+	}
+	creds := services[0].Credentials
+
+	// Create elasticsearch client
+	var err error
+	client, err = elastic.NewClient(
+		elastic.SetURL("http://"+creds["hostname"].(string)+":"+creds["port"].(string)),
+		elastic.SetBasicAuth(creds["username"].(string), creds["password"].(string)),
+		elastic.SetSniff(false),
+	)
 	checkStatus(err)
 
-	// Keep alive
-	waitForExit()
+	// Serve HTTP
+	http.HandleFunc("/", handler)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil))
 }

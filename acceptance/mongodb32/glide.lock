@@ -1,15 +1,15 @@
-hash: 786dbb160fd2feedcdd18bb83facf27d213d65a9ba3c96a4f29053c85085952d
-updated: 2016-08-29T19:24:37.459673931-04:00
+hash: 1b0e9e83d385f1326f8d07cc6369ba3902e5cf9e1e040cc79cbe61cd6e5b3878
+updated: 2017-07-14T18:59:56.614715554-04:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
-  version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
+  version: f920e9562d5f951cbf11785728f67258c38a10d0
 - name: github.com/mitchellh/mapstructure
-  version: ca63d7c062ee3c9f34db231e352b60012b4fd0c1
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: gopkg.in/mgo.v2
   version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
   - bson
+  - internal/json
   - internal/sasl
   - internal/scram
-  - internal/json
 testImports: []

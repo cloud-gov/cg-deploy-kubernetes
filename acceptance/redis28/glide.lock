@@ -1,13 +1,13 @@
-hash: 58bcd47b7b1fb21cabfd823746a6b5f7e093a6491bf4338b24e09bca70ee8f6e
-updated: 2016-08-29T19:23:53.655169671-04:00
+hash: 2dd408a5a6176ab3f127531c15c13e387ace41a8623c9249276a0db4208308e6
+updated: 2017-07-14T19:20:45.6554319-04:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
-  version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
+  version: f920e9562d5f951cbf11785728f67258c38a10d0
 - name: github.com/garyburd/redigo
-  version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
+  version: 433969511232c397de61b1442f9fd49ec06ae9ba
   subpackages:
-  - redis
   - internal
+  - redis
 - name: github.com/mitchellh/mapstructure
-  version: ca63d7c062ee3c9f34db231e352b60012b4fd0c1
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 testImports: []
