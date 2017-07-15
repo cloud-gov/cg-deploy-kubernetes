@@ -135,9 +135,11 @@ jobs:
       resource: master-bosh-root-cert
     - get: pipeline-tasks
     - get: kubernetes-release
+      resource: kubernetes-release-development
       params:
         submodules: none
     - get: kubernetes-config
+      resource: kubernetes-config-development
       trigger: true
     - get: kubernetes-release-tarball
       resource: kubernetes-release-tarball-development
@@ -215,8 +217,10 @@ jobs:
   - aggregate:
     - get: pipeline-tasks
     - get: kubernetes-broker
+      resource: kubernetes-broker-development
       trigger: true
     - get: kubernetes-config
+      resource: kubernetes-config-development
       passed: [deploy-kubernetes-development]
     - get: kubernetes-development-deployment
       passed: [deploy-kubernetes-development]
@@ -255,9 +259,11 @@ jobs:
   plan:
   - aggregate:
     - get: kubernetes-config
+      resource: kubernetes-config-development
       passed: [deploy-kubernetes-broker-development]
       trigger: true
     - get: kubernetes-broker
+      resource: kubernetes-broker-development
       passed: [deploy-kubernetes-broker-development]
       trigger: true
   - aggregate:
@@ -588,17 +594,35 @@ resources:
     uri: {{kubernetes-release-git-url}}
     branch: {{kubernetes-release-git-branch}}
 
+- name: kubernetes-release-development
+  type: git
+  source:
+    uri: {{kubernetes-release-development-git-url}}
+    branch: {{kubernetes-release-development-git-branch}}
+
 - name: kubernetes-broker
   type: git
   source:
     uri: {{kubernetes-broker-git-url}}
     branch: {{kubernetes-broker-git-branch}}
 
+- name: kubernetes-broker-development
+  type: git
+  source:
+    uri: {{kubernetes-broker-development-git-url}}
+    branch: {{kubernetes-broker-development-git-branch}}
+
 - name: kubernetes-config
   type: git
   source:
     uri: {{kubernetes-config-git-url}}
     branch: {{kubernetes-config-git-branch}}
+
+- name: kubernetes-config-development
+  type: git
+  source:
+    uri: {{kubernetes-config-development-git-url}}
+    branch: {{kubernetes-config-development-git-branch}}
 
 - name: kubernetes-stemcell
   type: bosh-io-stemcell

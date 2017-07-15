@@ -2,8 +2,6 @@ applications:
 - name: redis28-test
   buildpack: go_buildpack
   command: redis-test
-  health-check-type: none
-  no-route: true
   memory: 128M
   env:
     GOPACKAGENAME: redis-test
