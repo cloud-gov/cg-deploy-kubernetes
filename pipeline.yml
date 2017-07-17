@@ -159,7 +159,7 @@ jobs:
       CLOUDWATCH_PARAMS: {{cloudwatch-params-development}}
       KUBE2IAM_PARAMS: {{kube2iam-params-development}}
       RIEMANN_PODSTATUS_PARAMS: {{riemann-podstatus-params-development}}
-      TARGET_ENVIRONMENT: staging
+      TARGET_ENVIRONMENT: development
   - &lint-manifest
     task: lint-manifest
     file: pipeline-tasks/lint-manifest.yml

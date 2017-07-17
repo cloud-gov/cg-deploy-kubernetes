@@ -1,0 +1,13 @@
+instance_groups:
+- name: master
+  jobs:
+  - name: kubernetes-minion
+    properties:
+      aws:
+        cluster-tag: kubernetes-development
+- name: minion
+  jobs:
+  - name: kubernetes-minion
+    properties:
+      aws:
+        cluster-tag: kubernetes-development
