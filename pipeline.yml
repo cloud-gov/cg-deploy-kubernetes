@@ -14,22 +14,26 @@ groups:
   - deploy-kubernetes-production
   - deploy-kubernetes-broker-production
   - acceptance-tests-production
-- name: release
-  jobs:
-  - fluentd-cloudwatch
-  - elasticsearch-24
-  - mongo-32
-- name: deploy
+- name: development
   jobs:
   - deploy-kubernetes-development
   - deploy-kubernetes-broker-development
   - acceptance-tests-development
+- name: staging
+  jobs:
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
   - acceptance-tests-staging
+- name: production
+  jobs:
   - deploy-kubernetes-production
   - deploy-kubernetes-broker-production
   - acceptance-tests-production
+- name: docker-images
+  jobs:
+  - fluentd-cloudwatch
+  - elasticsearch-24
+  - mongo-32
 
 params:
   development:
