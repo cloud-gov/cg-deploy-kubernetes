@@ -8,6 +8,7 @@ groups:
   - redis32-proxy
   - redis32-sentinel
   - redis32-server
+  - redis28
   - deploy-kubernetes-development
   - deploy-kubernetes-broker-development
   - acceptance-tests-development
@@ -42,6 +43,7 @@ groups:
   - redis32-proxy
   - redis32-sentinel
   - redis32-server
+  - redis28
 
 params:
   development:
@@ -186,6 +188,13 @@ jobs:
   - put: docker-hub-redis32-server
     params:
       build: kubernetes-broker-images/custom_images/redis-3.2/server
+- name: redis28
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - put: docker-hub-redis28
+    params:
+      build: kubernetes-broker-images/custom_images/redis
 
 - name: deploy-kubernetes-development
   serial: true
@@ -884,6 +893,15 @@ resources:
     password: {{docker-password}}
     repository: {{docker-repo-redis32-server}}
     tag: {{docker-tag-redis32-server}}
+
+- name: docker-hub-redis28
+  type: docker-image
+  source:
+    email: {{docker-email}}
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-repo-redis28}}
+    tag: {{docker-tag-redis28}}
 
 - &kubernetes-release-tarball
   name: kubernetes-release-tarball
