@@ -77,6 +77,7 @@ instance_groups:
         ip: (( grab instance_groups.etcd.networks.services.static_ips.[0] ))
 
 - name: minion
+  instances: 5
   persistent_disk_type: kubernetes
   vm_extensions: [kubernetes-sg, kubernetes-minion-profile]
   networks:
@@ -85,6 +86,8 @@ instance_groups:
     - (( grab terraform_outputs.kubernetes_static_ips.[9] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[10] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[11] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[12] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[13] ))
   jobs:
   - name: docker
     properties:
