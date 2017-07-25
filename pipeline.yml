@@ -35,6 +35,7 @@ groups:
   - elasticsearch-24
   - mongo-32
   - elasticsearch-base
+  - elasticsearch-ha
 
 params:
   development:
@@ -136,10 +137,25 @@ jobs:
   - get: erry-day
     trigger: true
   - get: dockerfile-elasticsearch-base
-    trigger: true
+    # pin ES version to 2.4.4
+    version:
+      ref: 8f00ad520c1c33b879a715700905d3c25c526331
   - put: docker-hub-elasticsearch-base
     params:
       build: dockerfile-elasticsearch-base/2.4
+- name: elasticsearch-ha
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - get: docker-hub-elasticsearch-base
+    trigger: true
+    passed:
+    - elasticsearch-base
+    params:
+      skip_download: true
+  - put: docker-hub-elasticsearch-ha
+    params:
+      build: kubernetes-broker-images/custom_images/elasticsearch-pet-24
 
 - name: deploy-kubernetes-development
   serial: true
@@ -743,7 +759,7 @@ resources:
   type: git
   source:
     uri: {{kubernetes-broker-git-url}}
-    branch: {{kubernetes-broker-git-branch}}
+    branch: {{docker-images-git-branch}}
     paths:
     - custom_images/*
 
@@ -790,6 +806,15 @@ resources:
     password: {{docker-password}}
     repository: {{docker-repo-elastic-base}}
     tag: {{docker-tag-elastic-base}}
+
+- name: docker-hub-elasticsearch-ha
+  type: docker-image
+  source:
+    email: {{docker-email}}
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-repo-elastic-ha}}
+    tag: {{docker-tag-elastic-ha}}
 
 - &kubernetes-release-tarball
   name: kubernetes-release-tarball
