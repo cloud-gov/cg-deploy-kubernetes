@@ -5,7 +5,7 @@ set -u
 set -x
 
 function check_service() {
-  counter=128
+  counter=180
   until [ $counter -le 0 ]; do
     status=$(cf service ${SERVICE_INSTANCE_NAME})
     if echo ${status} | grep "Status: create succeeded"; then
@@ -43,7 +43,8 @@ fi
 cf bind-service ${APP_NAME} ${SERVICE_INSTANCE_NAME}
 cf start ${APP_NAME}
 
-url=$(cf app ${APP_NAME} | grep -e "urls: " -e "routes: " | awk '{print $2}')
+export url=$(cf app ${APP_NAME} | grep -e "urls: " -e "routes: " | awk '{print $2}')
+
 status=$(curl -w "%{http_code}" "https://${url}")
 if [ "${status}" != "200" ]; then
   echo "Unexpected status code ${status}"

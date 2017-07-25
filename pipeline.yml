@@ -319,7 +319,8 @@ jobs:
         SERVICE_NAME: elasticsearch24
         PLAN_NAME: 3x-ha
         TEST_PATH: kubernetes-config/acceptance/elasticsearch24
-        EXTRA_TESTS: kubernetes-config/acceptance/elasticsearch24/elastic-ha.sh
+        # EXTRA TESTS are executed with CWD = TEST_PATH
+        EXTRA_TESTS: ./elastic-ha.sh
         K8S_USERNAME: {{cluster-username-development}}
         K8S_PASSWORD: {{cluster-password-development}}
         K8S_APISERVER: {{api-server-development}}
