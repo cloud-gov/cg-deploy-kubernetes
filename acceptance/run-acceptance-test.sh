@@ -5,7 +5,7 @@ set -u
 set -x
 
 function check_service() {
-  counter=36
+  counter=128
   until [ $counter -le 0 ]; do
     status=$(cf service ${SERVICE_INSTANCE_NAME})
     if echo ${status} | grep "Status: create succeeded"; then
@@ -47,13 +47,15 @@ url=$(cf app ${APP_NAME} | grep -e "urls: " -e "routes: " | awk '{print $2}')
 status=$(curl -w "%{http_code}" "https://${url}")
 if [ "${status}" != "200" ]; then
   echo "Unexpected status code ${status}"
+  curl -v "https://${url}"
   cf logs ${APP_NAME} --recent
   exit 1
 fi
 
-# show cluster health
-set +e
-curl -v "https://${url}/health"
+# run any extra tests
+if [ -n "${EXTRA_TESTS:-}" ]; then
+  ${EXTRA_TESTS}
+fi
 
 cf delete -f ${APP_NAME}
 cf delete-service -f ${SERVICE_INSTANCE_NAME}
