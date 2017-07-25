@@ -312,6 +312,13 @@ jobs:
       params:
         <<: *cf-development-tests
         <<: *elasticsearch24-tests
+    - task: acceptance-test-elasticsearch24-ha
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-development-tests
+        SERVICE_NAME: elasticsearch24
+        PLAN_NAME: 3x-ha
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch24
 
 - name: deploy-kubernetes-staging
   serial: true

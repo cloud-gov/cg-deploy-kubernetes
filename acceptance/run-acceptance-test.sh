@@ -51,5 +51,9 @@ if [ "${status}" != "200" ]; then
   exit 1
 fi
 
+# show cluster health
+set +e
+curl -v "https://${url}/health"
+
 cf delete -f ${APP_NAME}
 cf delete-service -f ${SERVICE_INSTANCE_NAME}
