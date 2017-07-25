@@ -133,6 +133,8 @@ jobs:
       build: kubernetes-broker-images/custom_images/mongo32
 - name: elasticsearch-base
   plan:
+  - get: erry-day
+    trigger: true
   - get: dockerfile-elasticsearch-base
     trigger: true
   - put: docker-hub-elasticsearch-base
@@ -748,10 +750,10 @@ resources:
 - name: dockerfile-elasticsearch-base
   type: git
   source:
-    uri: https://github.com/docker-library/elasticsearch/
+    uri: https://github.com/docker-library/elasticsearch
     branch: master
     paths: 
-    - /2.4/*
+    - 2.4/*
 
 - name: docker-hub-fluentd-cloudwatch
   type: docker-image
@@ -820,6 +822,9 @@ resources:
     bucket: {{tf-state-bucket-production}}
     versioned_file: {{tf-state-file-production}}
     region_name: {{aws-region}}
+- name: erry-day
+  type: time
+  source: {interval: 24h}
 
 resource_types:
 - name: slack-notification
