@@ -34,6 +34,7 @@ groups:
   - fluentd-cloudwatch
   - elasticsearch-24
   - mongo-32
+  - elasticsearch-base
 
 params:
   development:
@@ -130,6 +131,13 @@ jobs:
   - put: docker-hub-mongo-32
     params:
       build: kubernetes-broker-images/custom_images/mongo32
+- name: elasticsearch-base
+  plan:
+  - get: dockerfile-elasticsearch-base
+    trigger: true
+  - put: docker-hub-elasticsearch-base
+    params:
+      build: dockerfile-elasticsearch-base/2.4
 
 - name: deploy-kubernetes-development
   serial: true
@@ -737,6 +745,14 @@ resources:
     paths:
     - custom_images/*
 
+- name: dockerfile-elasticsearch-base
+  type: git
+  source:
+    uri: https://github.com/docker-library/elasticsearch/
+    branch: master
+    paths: 
+    - /2.4/*
+
 - name: docker-hub-fluentd-cloudwatch
   type: docker-image
   source:
@@ -763,6 +779,15 @@ resources:
     password: {{docker-password}}
     repository: {{docker-repo-mongo}}
     tag: {{docker-tag-mongo-32}}
+
+- name: docker-hub-elasticsearch-base
+  type: docker-image
+  source:
+    email: {{docker-email}}
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-repo-elastic-base}}
+    tag: {{docker-tag-elastic-base}}
 
 - &kubernetes-release-tarball
   name: kubernetes-release-tarball
