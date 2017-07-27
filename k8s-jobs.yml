@@ -98,6 +98,22 @@ instance_groups:
     properties:
       apiserver:
         ip: (( grab instance_groups.etcd.networks.services.static_ips.[0] ))
+  - name: cron
+    release: cron
+    properties:
+      cron:
+        variables:
+          IMAGES: "18fgsa/elasticsearch-ha:2.4.4"
+        entries:
+        - script:
+            name: pull-images.sh
+            contents: (( file "cronjobs/pull-images.sh" ))
+          minute: '0'
+          hour: '0'
+          day: '*'
+          month: '*'
+          wday: '*'
+          user: root
 
 - name: create-kubernetes-dns
   vm_extensions: [kubernetes-sg, errand-profile]
