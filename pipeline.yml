@@ -5,6 +5,9 @@ groups:
   - fluentd-cloudwatch
   - elasticsearch-24
   - mongo-32
+  - redis32-proxy
+  - redis32-sentinel
+  - redis32-server
   - deploy-kubernetes-development
   - deploy-kubernetes-broker-development
   - acceptance-tests-development
@@ -36,6 +39,9 @@ groups:
   - mongo-32
   - elasticsearch-base
   - elasticsearch-ha
+  - redis32-proxy
+  - redis32-sentinel
+  - redis32-server
 
 params:
   development:
@@ -156,6 +162,30 @@ jobs:
   - put: docker-hub-elasticsearch-ha
     params:
       build: kubernetes-broker-images/custom_images/elasticsearch-pet-24
+
+- name: redis32-proxy
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - put: docker-hub-redis32-proxy
+    params:
+      build: kubernetes-broker-images/custom_images/redis-3.2/proxy
+
+- name: redis32-sentinel
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - put: docker-hub-redis32-sentinel
+    params:
+      build: kubernetes-broker-images/custom_images/redis-3.2/sentinel
+
+- name: redis32-server
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - put: docker-hub-redis32-server
+    params:
+      build: kubernetes-broker-images/custom_images/redis-3.2/server
 
 - name: deploy-kubernetes-development
   serial: true
@@ -780,7 +810,7 @@ resources:
   source:
     uri: https://github.com/docker-library/elasticsearch
     branch: master
-    paths: 
+    paths:
     - 2.4/*
 
 - name: docker-hub-fluentd-cloudwatch
@@ -827,6 +857,33 @@ resources:
     password: {{docker-password}}
     repository: {{docker-repo-elastic-ha}}
     tag: {{docker-tag-elastic-ha}}
+
+- name: docker-hub-redis32-sentinel
+  type: docker-image
+  source:
+    email: {{docker-email}}
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-repo-redis32-sentinel}}
+    tag: {{redis32-sentinel}}
+
+- name: docker-hub-redis32-proxy
+  type: docker-image
+  source:
+    email: {{docker-email}}
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-repo-redis32-proxy}}
+    tag: {{redis32-proxy}}
+
+- name: docker-hub-redis32-server
+  type: docker-image
+  source:
+    email: {{docker-email}}
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-repo-redis32-server}}
+    tag: {{docker-tag-redis32-server}}
 
 - &kubernetes-release-tarball
   name: kubernetes-release-tarball
