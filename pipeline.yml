@@ -847,7 +847,7 @@ resources:
     username: {{docker-username}}
     password: {{docker-password}}
     repository: {{docker-repo-mongo}}
-    tag: {{docker-tag-mongo-32}}
+    tag: {{docker-tag-mongo}}
 
 - name: docker-hub-elasticsearch-base
   type: docker-image
