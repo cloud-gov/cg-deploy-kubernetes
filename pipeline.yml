@@ -865,7 +865,7 @@ resources:
     username: {{docker-username}}
     password: {{docker-password}}
     repository: {{docker-repo-redis32-sentinel}}
-    tag: {{redis32-sentinel}}
+    tag: {{docker-tag-redis32-sentinel}}
 
 - name: docker-hub-redis32-proxy
   type: docker-image
@@ -874,7 +874,7 @@ resources:
     username: {{docker-username}}
     password: {{docker-password}}
     repository: {{docker-repo-redis32-proxy}}
-    tag: {{redis32-proxy}}
+    tag: {{docker-tag-redis32-proxy}}
 
 - name: docker-hub-redis32-server
   type: docker-image
