@@ -290,7 +290,7 @@ jobs:
   - aggregate:
     - get: kubernetes-config
       resource: kubernetes-config-development
-      # passed: [deploy-kubernetes-broker-development]
+      passed: [deploy-kubernetes-broker-development]
       trigger: true
     - get: kubernetes-broker
       resource: kubernetes-broker-development
