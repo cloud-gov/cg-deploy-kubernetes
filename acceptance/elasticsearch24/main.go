@@ -34,6 +34,57 @@ type Record struct {
 
 var client *elastic.Client
 
+func state(w http.ResponseWriter, r *http.Request) {
+	resp, err := client.ClusterState().Do()
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	jresp, err := json.Marshal(resp)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jresp)
+}
+
+func nodes(w http.ResponseWriter, r *http.Request) {
+	resp, err := client.NodesInfo().Do()
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	jresp, err := json.Marshal(resp)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jresp)
+}
+
+func health(w http.ResponseWriter, r *http.Request) {
+	resp, err := client.ClusterHealth().Do()
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	jresp, err := json.Marshal(resp)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jresp)
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	// Set and check document
 	record := Record{Key: "key", Value: "value"}
@@ -147,5 +198,8 @@ func main() {
 
 	// Serve HTTP
 	http.HandleFunc("/", handler)
+	http.HandleFunc("/cluster-health", health)
+	http.HandleFunc("/cluster-nodes", nodes)
+	http.HandleFunc("/cluster-state", state)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil))
 }

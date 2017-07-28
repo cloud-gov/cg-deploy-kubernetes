@@ -34,6 +34,8 @@ groups:
   - fluentd-cloudwatch
   - elasticsearch-24
   - mongo-32
+  - elasticsearch-base
+  - elasticsearch-ha
 
 params:
   development:
@@ -130,6 +132,30 @@ jobs:
   - put: docker-hub-mongo-32
     params:
       build: kubernetes-broker-images/custom_images/mongo32
+- name: elasticsearch-base
+  plan:
+  - get: erry-day
+    trigger: true
+  - get: dockerfile-elasticsearch-base
+    # pin ES version to 2.4.4
+    version:
+      ref: 8f00ad520c1c33b879a715700905d3c25c526331
+  - put: docker-hub-elasticsearch-base
+    params:
+      build: dockerfile-elasticsearch-base/2.4
+- name: elasticsearch-ha
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - get: docker-hub-elasticsearch-base
+    trigger: true
+    passed:
+    - elasticsearch-base
+    params:
+      skip_download: true
+  - put: docker-hub-elasticsearch-ha
+    params:
+      build: kubernetes-broker-images/custom_images/elasticsearch-pet-24
 
 - name: deploy-kubernetes-development
   serial: true
@@ -286,6 +312,18 @@ jobs:
       params:
         <<: *cf-development-tests
         <<: *elasticsearch24-tests
+    - task: acceptance-test-elasticsearch24-ha
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-development-tests
+        SERVICE_NAME: elasticsearch24
+        PLAN_NAME: 3x-ha
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch24
+        # EXTRA TESTS are executed with CWD = TEST_PATH
+        EXTRA_TESTS: ./elastic-ha.sh
+        K8S_USERNAME: {{cluster-username-development}}
+        K8S_PASSWORD: {{cluster-password-development}}
+        K8S_APISERVER: {{api-server-development}}
 
 - name: deploy-kubernetes-staging
   serial: true
@@ -733,9 +771,17 @@ resources:
   type: git
   source:
     uri: {{kubernetes-broker-git-url}}
-    branch: {{kubernetes-broker-git-branch}}
+    branch: {{docker-images-git-branch}}
     paths:
     - custom_images/*
+
+- name: dockerfile-elasticsearch-base
+  type: git
+  source:
+    uri: https://github.com/docker-library/elasticsearch
+    branch: master
+    paths: 
+    - 2.4/*
 
 - name: docker-hub-fluentd-cloudwatch
   type: docker-image
@@ -763,6 +809,24 @@ resources:
     password: {{docker-password}}
     repository: {{docker-repo-mongo}}
     tag: {{docker-tag-mongo-32}}
+
+- name: docker-hub-elasticsearch-base
+  type: docker-image
+  source:
+    email: {{docker-email}}
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-repo-elastic-base}}
+    tag: {{docker-tag-elastic-base}}
+
+- name: docker-hub-elasticsearch-ha
+  type: docker-image
+  source:
+    email: {{docker-email}}
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-repo-elastic-ha}}
+    tag: {{docker-tag-elastic-ha}}
 
 - &kubernetes-release-tarball
   name: kubernetes-release-tarball
@@ -795,6 +859,9 @@ resources:
     bucket: {{tf-state-bucket-production}}
     versioned_file: {{tf-state-file-production}}
     region_name: {{aws-region}}
+- name: erry-day
+  type: time
+  source: {interval: 24h}
 
 resource_types:
 - name: slack-notification
