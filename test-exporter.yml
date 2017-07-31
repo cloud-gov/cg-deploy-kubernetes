@@ -1,0 +1,16 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: "1.8-jessie"
+
+inputs:
+- name: exporter-src
+  path: gopath/src/github.com/18F/kubernetes-broker-exporter
+- name: kubernetes-config
+
+run:
+  path: kubernetes-config/test-exporter.sh

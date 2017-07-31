@@ -18,20 +18,28 @@ groups:
   - deploy-kubernetes-production
   - deploy-kubernetes-broker-production
   - acceptance-tests-production
+  - test-exporter
+  - test-exporter-development
+  - deploy-exporter-development
+  - deploy-exporter-staging
+  - deploy-exporter-production
 - name: development
   jobs:
   - deploy-kubernetes-development
   - deploy-kubernetes-broker-development
+  - deploy-exporter-development
   - acceptance-tests-development
 - name: staging
   jobs:
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
+  - deploy-exporter-staging
   - acceptance-tests-staging
 - name: production
   jobs:
   - deploy-kubernetes-production
   - deploy-kubernetes-broker-production
+  - deploy-exporter-production
   - acceptance-tests-production
 - name: docker-images
   jobs:
@@ -48,60 +56,60 @@ groups:
 params:
   development:
     cf: &cf-development
-      CF_API_URL: {{cf-api-url-development}}
-      CF_USERNAME: {{cf-deploy-username-development}}
-      CF_PASSWORD: {{cf-deploy-password-development}}
-      CF_ORGANIZATION: {{cf-organization-development}}
-      CF_SPACE: {{cf-space-development}}
+      CF_API_URL: ((cf-api-url-development))
+      CF_USERNAME: ((cf-deploy-username-development))
+      CF_PASSWORD: ((cf-deploy-password-development))
+      CF_ORGANIZATION: ((cf-organization-development))
+      CF_SPACE: ((cf-space-development))
     cf-tests: &cf-development-tests
-      CF_API_URL: {{cf-api-url-development}}
-      CF_USERNAME: {{cf-deploy-username-development}}
-      CF_PASSWORD: {{cf-deploy-password-development}}
-      CF_ORGANIZATION: {{cf-organization-development}}
-      CF_SPACE: {{cf-space-development-acctests}}
+      CF_API_URL: ((cf-api-url-development))
+      CF_USERNAME: ((cf-deploy-username-development))
+      CF_PASSWORD: ((cf-deploy-password-development))
+      CF_ORGANIZATION: ((cf-organization-development))
+      CF_SPACE: ((cf-space-development-acctests))
     bosh-errand: &bosh-errand-development
-      BOSH_TARGET: {{kubernetes-development-deployment-bosh-target}}
-      BOSH_USERNAME: {{kubernetes-development-deployment-bosh-username}}
-      BOSH_PASSWORD: {{kubernetes-development-deployment-bosh-password}}
-      BOSH_DEPLOYMENT_NAME: {{kubernetes-development-deployment-bosh-deployment}}
+      BOSH_TARGET: ((kubernetes-development-deployment-bosh-target))
+      BOSH_USERNAME: ((kubernetes-development-deployment-bosh-username))
+      BOSH_PASSWORD: ((kubernetes-development-deployment-bosh-password))
+      BOSH_DEPLOYMENT_NAME: ((kubernetes-development-deployment-bosh-deployment))
       BOSH_CACERT: common/master-bosh.crt
   staging:
     cf: &cf-staging
-      CF_API_URL: {{cf-api-url-staging}}
-      CF_USERNAME: {{cf-deploy-username-staging}}
-      CF_PASSWORD: {{cf-deploy-password-staging}}
-      CF_ORGANIZATION: {{cf-organization-staging}}
-      CF_SPACE: {{cf-space-staging}}
+      CF_API_URL: ((cf-api-url-staging))
+      CF_USERNAME: ((cf-deploy-username-staging))
+      CF_PASSWORD: ((cf-deploy-password-staging))
+      CF_ORGANIZATION: ((cf-organization-staging))
+      CF_SPACE: ((cf-space-staging))
     cf-tests: &cf-staging-tests
-      CF_API_URL: {{cf-api-url-staging}}
-      CF_USERNAME: {{cf-deploy-username-staging}}
-      CF_PASSWORD: {{cf-deploy-password-staging}}
-      CF_ORGANIZATION: {{cf-organization-staging}}
-      CF_SPACE: {{cf-space-staging-acctests}}
+      CF_API_URL: ((cf-api-url-staging))
+      CF_USERNAME: ((cf-deploy-username-staging))
+      CF_PASSWORD: ((cf-deploy-password-staging))
+      CF_ORGANIZATION: ((cf-organization-staging))
+      CF_SPACE: ((cf-space-staging-acctests))
     bosh-errand: &bosh-errand-staging
-      BOSH_TARGET: {{kubernetes-staging-deployment-bosh-target}}
-      BOSH_USERNAME: {{kubernetes-staging-deployment-bosh-username}}
-      BOSH_PASSWORD: {{kubernetes-staging-deployment-bosh-password}}
-      BOSH_DEPLOYMENT_NAME: {{kubernetes-staging-deployment-bosh-deployment}}
+      BOSH_TARGET: ((kubernetes-staging-deployment-bosh-target))
+      BOSH_USERNAME: ((kubernetes-staging-deployment-bosh-username))
+      BOSH_PASSWORD: ((kubernetes-staging-deployment-bosh-password))
+      BOSH_DEPLOYMENT_NAME: ((kubernetes-staging-deployment-bosh-deployment))
       BOSH_CACERT: common/master-bosh.crt
   production:
     cf: &cf-production
-      CF_API_URL: {{cf-api-url-production}}
-      CF_USERNAME: {{cf-deploy-username-production}}
-      CF_PASSWORD: {{cf-deploy-password-production}}
-      CF_ORGANIZATION: {{cf-organization-production}}
-      CF_SPACE: {{cf-space-production}}
+      CF_API_URL: ((cf-api-url-production))
+      CF_USERNAME: ((cf-deploy-username-production))
+      CF_PASSWORD: ((cf-deploy-password-production))
+      CF_ORGANIZATION: ((cf-organization-production))
+      CF_SPACE: ((cf-space-production))
     cf-tests: &cf-production-tests
-      CF_API_URL: {{cf-api-url-production}}
-      CF_USERNAME: {{cf-deploy-username-production}}
-      CF_PASSWORD: {{cf-deploy-password-production}}
-      CF_ORGANIZATION: {{cf-organization-production}}
-      CF_SPACE: {{cf-space-production-acctests}}
+      CF_API_URL: ((cf-api-url-production))
+      CF_USERNAME: ((cf-deploy-username-production))
+      CF_PASSWORD: ((cf-deploy-password-production))
+      CF_ORGANIZATION: ((cf-organization-production))
+      CF_SPACE: ((cf-space-production-acctests))
     bosh-errand: &bosh-errand-production
-      BOSH_TARGET: {{kubernetes-production-deployment-bosh-target}}
-      BOSH_USERNAME: {{kubernetes-production-deployment-bosh-username}}
-      BOSH_PASSWORD: {{kubernetes-production-deployment-bosh-password}}
-      BOSH_DEPLOYMENT_NAME: {{kubernetes-production-deployment-bosh-deployment}}
+      BOSH_TARGET: ((kubernetes-production-deployment-bosh-target))
+      BOSH_USERNAME: ((kubernetes-production-deployment-bosh-username))
+      BOSH_PASSWORD: ((kubernetes-production-deployment-bosh-password))
+      BOSH_DEPLOYMENT_NAME: ((kubernetes-production-deployment-bosh-deployment))
       BOSH_CACERT: common/master-bosh.crt
   acceptance:
     redis28-tests: &redis28-tests
@@ -225,9 +233,9 @@ jobs:
   - task: kubernetes-manifest
     file: kubernetes-config/build-k8s-manifest.yml
     params:
-      CLOUDWATCH_PARAMS: {{cloudwatch-params-development}}
-      KUBE2IAM_PARAMS: {{kube2iam-params-development}}
-      RIEMANN_PODSTATUS_PARAMS: {{riemann-podstatus-params-development}}
+      CLOUDWATCH_PARAMS: ((cloudwatch-params-development))
+      KUBE2IAM_PARAMS: ((kube2iam-params-development))
+      RIEMANN_PODSTATUS_PARAMS: ((riemann-podstatus-params-development))
       TARGET_ENVIRONMENT: development
   - &lint-manifest
     task: lint-manifest
@@ -267,18 +275,18 @@ jobs:
       text: |
         :x: FAILED to deploy kubernetes on development
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_success:
     put: slack
     params:
       text: |
         :white_check_mark: Successfully deployed kubernetes on development
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 - name: deploy-kubernetes-broker-development
   serial: true
@@ -302,26 +310,26 @@ jobs:
       path: kubernetes-broker
       current_app_name: kubernetes-broker
       environment_variables:
-        AUTH_USER: {{broker-auth-user-development}}
-        AUTH_PASS: {{broker-auth-pass-development}}
+        AUTH_USER: ((broker-auth-user-development))
+        AUTH_PASS: ((broker-auth-pass-development))
         CONNECTOR_TYPE: static
-        CONSUL_DOMAIN: {{consul-domain-development}}
-        CLUSTER_API_SERVER: {{api-server-development}}
-        CLUSTER_USERNAME: {{cluster-username-development}}
-        CLUSTER_PASSWORD: {{cluster-password-development}}
+        CONSUL_DOMAIN: ((consul-domain-development))
+        CLUSTER_API_SERVER: ((api-server-development))
+        CLUSTER_USERNAME: ((cluster-username-development))
+        CLUSTER_PASSWORD: ((cluster-password-development))
         CF_CLIENT_ID: kubernetes-client
-        CF_CLIENT_SECRET: {{cf-client-secret-development}}
-        CF_TOKEN_URL: {{cf-token-url-development}}
-        CF_API_ENDPOINT: {{cf-api-url-development}}
-        CF_TOKEN_KEY: {{cf-token-key-development}}
+        CF_CLIENT_SECRET: ((cf-client-secret-development))
+        CF_TOKEN_URL: ((cf-token-url-development))
+        CF_API_ENDPOINT: ((cf-api-url-development))
+        CF_TOKEN_KEY: ((cf-token-key-development))
   - task: register-service-broker-development
     file: pipeline-tasks/register-service-broker.yml
     params:
       <<: *cf-development
       BROKER_NAME: kubernetes-broker
-      AUTH_USER: {{broker-auth-user-development}}
-      AUTH_PASS: {{broker-auth-pass-development}}
-      SERVICES: {{broker-service-names-development}}
+      AUTH_USER: ((broker-auth-user-development))
+      AUTH_PASS: ((broker-auth-pass-development))
+      SERVICES: ((broker-service-names-development))
 
 - name: acceptance-tests-development
   serial: true
@@ -360,9 +368,9 @@ jobs:
         TEST_PATH: kubernetes-config/acceptance/elasticsearch24
         # EXTRA TESTS are executed with CWD = TEST_PATH
         EXTRA_TESTS: ./elastic-ha.sh
-        K8S_USERNAME: {{cluster-username-development}}
-        K8S_PASSWORD: {{cluster-password-development}}
-        K8S_APISERVER: {{api-server-development}}
+        K8S_USERNAME: ((cluster-username-development))
+        K8S_PASSWORD: ((cluster-password-development))
+        K8S_APISERVER: ((api-server-development))
 
 - name: deploy-kubernetes-staging
   serial: true
@@ -390,9 +398,9 @@ jobs:
   - task: kubernetes-manifest
     file: kubernetes-config/build-k8s-manifest.yml
     params:
-      CLOUDWATCH_PARAMS: {{cloudwatch-params-staging}}
-      KUBE2IAM_PARAMS: {{kube2iam-params-staging}}
-      RIEMANN_PODSTATUS_PARAMS: {{riemann-podstatus-params-staging}}
+      CLOUDWATCH_PARAMS: ((cloudwatch-params-staging))
+      KUBE2IAM_PARAMS: ((kube2iam-params-staging))
+      RIEMANN_PODSTATUS_PARAMS: ((riemann-podstatus-params-staging))
       TARGET_ENVIRONMENT: staging
   - *lint-manifest
   - put: kubernetes-staging-deployment
@@ -425,18 +433,18 @@ jobs:
       text: |
         :x: FAILED to deploy kubernetes on staging
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_success:
     put: slack
     params:
       text: |
         :white_check_mark: Successfully deployed kubernetes on staging
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 - name: deploy-kubernetes-broker-staging
   serial: true
@@ -458,26 +466,26 @@ jobs:
       path: kubernetes-broker
       current_app_name: kubernetes-broker
       environment_variables:
-        AUTH_USER: {{broker-auth-user-staging}}
-        AUTH_PASS: {{broker-auth-pass-staging}}
+        AUTH_USER: ((broker-auth-user-staging))
+        AUTH_PASS: ((broker-auth-pass-staging))
         CONNECTOR_TYPE: static
-        CONSUL_DOMAIN: {{consul-domain-staging}}
-        CLUSTER_API_SERVER: {{api-server-staging}}
-        CLUSTER_USERNAME: {{cluster-username-staging}}
-        CLUSTER_PASSWORD: {{cluster-password-staging}}
+        CONSUL_DOMAIN: ((consul-domain-staging))
+        CLUSTER_API_SERVER: ((api-server-staging))
+        CLUSTER_USERNAME: ((cluster-username-staging))
+        CLUSTER_PASSWORD: ((cluster-password-staging))
         CF_CLIENT_ID: kubernetes-client
-        CF_CLIENT_SECRET: {{cf-client-secret-staging}}
-        CF_TOKEN_URL: {{cf-token-url-staging}}
-        CF_API_ENDPOINT: {{cf-api-url-staging}}
-        CF_TOKEN_KEY: {{cf-token-key-staging}}
+        CF_CLIENT_SECRET: ((cf-client-secret-staging))
+        CF_TOKEN_URL: ((cf-token-url-staging))
+        CF_API_ENDPOINT: ((cf-api-url-staging))
+        CF_TOKEN_KEY: ((cf-token-key-staging))
   - task: register-service-broker-staging
     file: pipeline-tasks/register-service-broker.yml
     params:
       <<: *cf-staging
       BROKER_NAME: kubernetes-broker
-      AUTH_USER: {{broker-auth-user-staging}}
-      AUTH_PASS: {{broker-auth-pass-staging}}
-      SERVICES: {{broker-service-names-staging}}
+      AUTH_USER: ((broker-auth-user-staging))
+      AUTH_PASS: ((broker-auth-pass-staging))
+      SERVICES: ((broker-service-names-staging))
 
 - name: acceptance-tests-staging
   serial: true
@@ -549,9 +557,9 @@ jobs:
   - task: kubernetes-manifest
     file: kubernetes-config/build-k8s-manifest.yml
     params:
-      CLOUDWATCH_PARAMS: {{cloudwatch-params-production}}
-      KUBE2IAM_PARAMS: {{kube2iam-params-production}}
-      RIEMANN_PODSTATUS_PARAMS: {{riemann-podstatus-params-production}}
+      CLOUDWATCH_PARAMS: ((cloudwatch-params-production))
+      KUBE2IAM_PARAMS: ((kube2iam-params-production))
+      RIEMANN_PODSTATUS_PARAMS: ((riemann-podstatus-params-production))
       TARGET_ENVIRONMENT: production
   - *lint-manifest
   - put: kubernetes-production-deployment
@@ -577,18 +585,18 @@ jobs:
       text: |
         :x: FAILED to deploy kubernetes on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_success:
     put: slack
     params:
       text: |
         :white_check_mark: Successfully deployed kubernetes on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 - name: deploy-kubernetes-broker-production
   serial: true
@@ -607,26 +615,26 @@ jobs:
       path: kubernetes-broker
       current_app_name: kubernetes-broker
       environment_variables:
-        AUTH_USER: {{broker-auth-user-production}}
-        AUTH_PASS: {{broker-auth-pass-production}}
+        AUTH_USER: ((broker-auth-user-production))
+        AUTH_PASS: ((broker-auth-pass-production))
         CONNECTOR_TYPE: static
-        CONSUL_DOMAIN: {{consul-domain-production}}
-        CLUSTER_API_SERVER: {{api-server-production}}
-        CLUSTER_USERNAME: {{cluster-username-production}}
-        CLUSTER_PASSWORD: {{cluster-password-production}}
+        CONSUL_DOMAIN: ((consul-domain-production))
+        CLUSTER_API_SERVER: ((api-server-production))
+        CLUSTER_USERNAME: ((cluster-username-production))
+        CLUSTER_PASSWORD: ((cluster-password-production))
         CF_CLIENT_ID: kubernetes-client
-        CF_CLIENT_SECRET: {{cf-client-secret-production}}
-        CF_TOKEN_URL: {{cf-token-url-production}}
-        CF_API_ENDPOINT: {{cf-api-url-production}}
-        CF_TOKEN_KEY: {{cf-token-key-production}}
+        CF_CLIENT_SECRET: ((cf-client-secret-production))
+        CF_TOKEN_URL: ((cf-token-url-production))
+        CF_API_ENDPOINT: ((cf-api-url-production))
+        CF_TOKEN_KEY: ((cf-token-key-production))
   - task: register-service-broker-production
     file: pipeline-tasks/register-service-broker.yml
     params:
       <<: *cf-production
       BROKER_NAME: kubernetes-broker
-      AUTH_USER: {{broker-auth-user-production}}
-      AUTH_PASS: {{broker-auth-pass-production}}
-      SERVICES: {{broker-service-names-production}}
+      AUTH_USER: ((broker-auth-user-production))
+      AUTH_PASS: ((broker-auth-pass-production))
+      SERVICES: ((broker-service-names-production))
 
 - name: acceptance-tests-production
   serial: true
@@ -655,55 +663,205 @@ jobs:
         <<: *cf-production-tests
         <<: *elasticsearch24-tests
 
+- name: test-exporter
+  plan:
+  - aggregate:
+    - get: exporter-src
+      trigger: true
+    - get: kubernetes-config
+  - task: test
+    file: kubernetes-config/test-exporter.yml
+
+- name: test-exporter-development
+  plan:
+  - aggregate:
+    - get: exporter-src
+      resource: exporter-src-development
+      trigger: true
+    - get: kubernetes-config
+      resource: kubernetes-config-development
+  - task: test
+    file: kubernetes-config/test-exporter.yml
+
+- name: deploy-exporter-development
+  plan:
+  - get: exporter-src
+    resource: exporter-src-development
+    passed: [test-exporter-development]
+    trigger: true
+  - put: exporter-app-development
+    params:
+      path: exporter-src
+      manifest: exporter-src/manifest.yml
+      current_app_name: kubernetes-broker-exporter
+      environment_variables:
+        BROKER_EXPORTER_KUBERNETES_URL: ((api-server-development))
+        BROKER_EXPORTER_KUBERNETES_USERNAME: ((cluster-username-development))
+        BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-development))
+        BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
+        BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
+        BROKER_EXPORTER_ELASTICSEARCH_SERVICES: ff6d38ab-2a06-4a07-81fb-7cee98531b9d
+        BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-development))
+        BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-development))
+        BROKER_EXPORTER_METRICS_ENVIRONMENT: development
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy kubernetes broker exporter on development
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed kubernetes broker exporter on development
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
+- name: deploy-exporter-staging
+  plan:
+  - get: exporter-src
+    passed: [test-exporter]
+    trigger: true
+  - put: exporter-app-staging
+    params:
+      path: exporter-src
+      manifest: exporter-src/manifest.yml
+      current_app_name: kubernetes-broker-exporter
+      environment_variables:
+        BROKER_EXPORTER_KUBERNETES_URL: ((api-server-staging))
+        BROKER_EXPORTER_KUBERNETES_USERNAME: ((cluster-username-staging))
+        BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-staging))
+        BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
+        BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
+        BROKER_EXPORTER_ELASTICSEARCH_SERVICES: ff6d38ab-2a06-4a07-81fb-7cee98531b9d
+        BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-staging))
+        BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-staging))
+        BROKER_EXPORTER_METRICS_ENVIRONMENT: staging
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy kubernetes broker exporter on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed kubernetes broker exporter on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
+- name: deploy-exporter-production
+  plan:
+  - get: exporter-src
+    passed: [deploy-exporter-staging]
+    trigger: true
+  - put: exporter-app-production
+    params:
+      path: exporter-src
+      manifest: exporter-src/manifest.yml
+      current_app_name: kubernetes-broker-exporter
+      environment_variables:
+        BROKER_EXPORTER_KUBERNETES_URL: ((api-server-production))
+        BROKER_EXPORTER_KUBERNETES_USERNAME: ((cluster-username-production))
+        BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-production))
+        BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
+        BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
+        BROKER_EXPORTER_ELASTICSEARCH_SERVICES: ff6d38ab-2a06-4a07-81fb-7cee98531b9d
+        BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-production))
+        BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-production))
+        BROKER_EXPORTER_METRICS_ENVIRONMENT: production
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy kubernetes broker exporter on production
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed kubernetes broker exporter on production
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
 resources:
 - name: master-bosh-root-cert
   type: s3-iam
   source:
-    bucket: {{kubernetes-production-private-bucket}}
-    region_name: {{aws-region}}
+    bucket: ((kubernetes-production-private-bucket))
+    region_name: ((aws-region))
     versioned_file: master-bosh.crt
 
 - name: pipeline-tasks
   type: git
   source:
-    uri: {{pipeline-tasks-git-url}}
-    branch: {{pipeline-tasks-git-branch}}
+    uri: ((pipeline-tasks-git-url))
+    branch: ((pipeline-tasks-git-branch))
 
 - name: kubernetes-release
   type: git
   source:
-    uri: {{kubernetes-release-git-url}}
-    branch: {{kubernetes-release-git-branch}}
+    uri: ((kubernetes-release-git-url))
+    branch: ((kubernetes-release-git-branch))
 
 - name: kubernetes-release-development
   type: git
   source:
-    uri: {{kubernetes-release-development-git-url}}
-    branch: {{kubernetes-release-development-git-branch}}
+    uri: ((kubernetes-release-development-git-url))
+    branch: ((kubernetes-release-development-git-branch))
 
 - name: kubernetes-broker
   type: git
   source:
-    uri: {{kubernetes-broker-git-url}}
-    branch: {{kubernetes-broker-git-branch}}
+    uri: ((kubernetes-broker-git-url))
+    branch: ((kubernetes-broker-git-branch))
 
 - name: kubernetes-broker-development
   type: git
   source:
-    uri: {{kubernetes-broker-development-git-url}}
-    branch: {{kubernetes-broker-development-git-branch}}
+    uri: ((kubernetes-broker-development-git-url))
+    branch: ((kubernetes-broker-development-git-branch))
 
 - name: kubernetes-config
   type: git
   source:
-    uri: {{kubernetes-config-git-url}}
-    branch: {{kubernetes-config-git-branch}}
+    uri: ((kubernetes-config-git-url))
+    branch: ((kubernetes-config-git-branch))
 
 - name: kubernetes-config-development
   type: git
   source:
-    uri: {{kubernetes-config-development-git-url}}
-    branch: {{kubernetes-config-development-git-branch}}
+    uri: ((kubernetes-config-development-git-url))
+    branch: ((kubernetes-config-development-git-branch))
+
+- name: exporter-src
+  type: git
+  source:
+    uri: ((exporter-src-git-uri))
+    branch: ((exporter-src-git-branch))
+
+- name: exporter-src-development
+  type: git
+  source:
+    uri: ((exporter-src-development-git-uri))
+    branch: ((exporter-src-development-git-branch))
 
 - name: kubernetes-stemcell
   type: bosh-io-stemcell
@@ -718,99 +876,126 @@ resources:
 - name: common-development
   type: cg-common
   source:
-    region: {{aws-region}}
-    bucket_name: {{kubernetes-development-private-bucket}}
+    region: ((aws-region))
+    bucket_name: ((kubernetes-development-private-bucket))
     secrets_file: kubernetes-development.yml
-    secrets_passphrase: {{kubernetes-development-private-passphrase}}
+    secrets_passphrase: ((kubernetes-development-private-passphrase))
     bosh_cert: bosh.pem
 
 - name: common-staging
   type: cg-common
   source:
-    region: {{aws-region}}
-    bucket_name: {{kubernetes-staging-private-bucket}}
+    region: ((aws-region))
+    bucket_name: ((kubernetes-staging-private-bucket))
     secrets_file: kubernetes.yml
-    secrets_passphrase: {{kubernetes-staging-private-passphrase}}
+    secrets_passphrase: ((kubernetes-staging-private-passphrase))
     bosh_cert: bosh.pem
 
 - name: common-production
   type: cg-common
   source:
-    region: {{aws-region}}
-    bucket_name: {{kubernetes-production-private-bucket}}
+    region: ((aws-region))
+    bucket_name: ((kubernetes-production-private-bucket))
     secrets_file: kubernetes.yml
-    secrets_passphrase: {{kubernetes-production-private-passphrase}}
+    secrets_passphrase: ((kubernetes-production-private-passphrase))
     bosh_cert: bosh.pem
 
 - name: kubernetes-development-deployment
   type: 18f-bosh-deployment
   source:
-    target: {{kubernetes-development-deployment-bosh-target}}
-    username: {{kubernetes-development-deployment-bosh-username}}
-    password: {{kubernetes-development-deployment-bosh-password}}
-    deployment: {{kubernetes-development-deployment-bosh-deployment}}
+    target: ((kubernetes-development-deployment-bosh-target))
+    username: ((kubernetes-development-deployment-bosh-username))
+    password: ((kubernetes-development-deployment-bosh-password))
+    deployment: ((kubernetes-development-deployment-bosh-deployment))
 
 - name: kubernetes-staging-deployment
   type: 18f-bosh-deployment
   source:
-    target: {{kubernetes-staging-deployment-bosh-target}}
-    username: {{kubernetes-staging-deployment-bosh-username}}
-    password: {{kubernetes-staging-deployment-bosh-password}}
-    deployment: {{kubernetes-staging-deployment-bosh-deployment}}
+    target: ((kubernetes-staging-deployment-bosh-target))
+    username: ((kubernetes-staging-deployment-bosh-username))
+    password: ((kubernetes-staging-deployment-bosh-password))
+    deployment: ((kubernetes-staging-deployment-bosh-deployment))
 
 - name: kubernetes-production-deployment
   type: 18f-bosh-deployment
   source:
-    target: {{kubernetes-production-deployment-bosh-target}}
-    username: {{kubernetes-production-deployment-bosh-username}}
-    password: {{kubernetes-production-deployment-bosh-password}}
-    deployment: {{kubernetes-production-deployment-bosh-deployment}}
+    target: ((kubernetes-production-deployment-bosh-target))
+    username: ((kubernetes-production-deployment-bosh-username))
+    password: ((kubernetes-production-deployment-bosh-password))
+    deployment: ((kubernetes-production-deployment-bosh-deployment))
 
 - name: kubernetes-broker-development-deployment
   type: cf
   source:
-    api: {{cf-api-url-development}}
-    username: {{cf-deploy-username-development}}
-    password: {{cf-deploy-password-development}}
-    organization: {{cf-organization-development}}
-    space: {{cf-space-development}}
+    api: ((cf-api-url-development))
+    username: ((cf-deploy-username-development))
+    password: ((cf-deploy-password-development))
+    organization: ((cf-organization-development))
+    space: ((cf-space-development))
 
 - name: kubernetes-broker-staging-deployment
   type: cf
   source:
-    api: {{cf-api-url-staging}}
-    username: {{cf-deploy-username-staging}}
-    password: {{cf-deploy-password-staging}}
-    organization: {{cf-organization-staging}}
-    space: {{cf-space-staging}}
+    api: ((cf-api-url-staging))
+    username: ((cf-deploy-username-staging))
+    password: ((cf-deploy-password-staging))
+    organization: ((cf-organization-staging))
+    space: ((cf-space-staging))
 
 - name: kubernetes-broker-production-deployment
   type: cf
   source:
-    api: {{cf-api-url-production}}
-    username: {{cf-deploy-username-production}}
-    password: {{cf-deploy-password-production}}
-    organization: {{cf-organization-production}}
-    space: {{cf-space-production}}
+    api: ((cf-api-url-production))
+    username: ((cf-deploy-username-production))
+    password: ((cf-deploy-password-production))
+    organization: ((cf-organization-production))
+    space: ((cf-space-production))
+
+- name: exporter-app-development
+  type: cf
+  source:
+    api: ((cf-api-url-development))
+    username: ((cf-deploy-username-development))
+    password: ((cf-deploy-password-development))
+    organization: ((cf-organization-development))
+    space: ((cf-space-development))
+
+- name: exporter-app-staging
+  type: cf
+  source:
+    api: ((cf-api-url-staging))
+    username: ((cf-deploy-username-staging))
+    password: ((cf-deploy-password-staging))
+    organization: ((cf-organization-staging))
+    space: ((cf-space-staging))
+
+- name: exporter-app-production
+  type: cf
+  source:
+    api: ((cf-api-url-production))
+    username: ((cf-deploy-username-production))
+    password: ((cf-deploy-password-production))
+    organization: ((cf-organization-production))
+    space: ((cf-space-production))
 
 - name: slack
   type: slack-notification
   source:
-    url: {{slack-webhook-url}}
+    url: ((slack-webhook-url))
 
 - name: fluentd-cloudwatch-config
   type: git
   source:
-    uri: {{kubernetes-config-git-url}}
-    branch: {{kubernetes-config-git-branch}}
+    uri: ((kubernetes-config-git-url))
+    branch: ((kubernetes-config-git-branch))
     paths:
     - images/fluentd-cloudwatch/*
 
 - name: kubernetes-broker-images
   type: git
   source:
-    uri: {{kubernetes-broker-git-url}}
-    branch: {{docker-images-git-branch}}
+    uri: ((kubernetes-broker-git-url))
+    branch: ((docker-images-git-branch))
     paths:
     - custom_images/*
 
@@ -825,89 +1010,89 @@ resources:
 - name: docker-hub-fluentd-cloudwatch
   type: docker-image
   source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-fluentd}}
-    tag: {{docker-tag-fluentd-cloudwatch}}
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-fluentd))
+    tag: ((docker-tag-fluentd-cloudwatch))
 
 - name: docker-hub-elasticsearch-24
   type: docker-image
   source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-elastic}}
-    tag: {{docker-tag-elasticsearch-24}}
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-elastic))
+    tag: ((docker-tag-elasticsearch-24))
 
 - name: docker-hub-mongo-32
   type: docker-image
   source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-mongo}}
-    tag: {{docker-tag-mongo}}
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-mongo))
+    tag: ((docker-tag-mongo))
 
 - name: docker-hub-elasticsearch-base
   type: docker-image
   source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-elastic-base}}
-    tag: {{docker-tag-elastic-base}}
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-elastic-base))
+    tag: ((docker-tag-elastic-base))
 
 - name: docker-hub-elasticsearch-ha
   type: docker-image
   source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-elastic-ha}}
-    tag: {{docker-tag-elastic-ha}}
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-elastic-ha))
+    tag: ((docker-tag-elastic-ha))
 
 - name: docker-hub-redis32-sentinel
   type: docker-image
   source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-redis32-sentinel}}
-    tag: {{docker-tag-redis32-sentinel}}
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-redis32-sentinel))
+    tag: ((docker-tag-redis32-sentinel))
 
 - name: docker-hub-redis32-proxy
   type: docker-image
   source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-redis32-proxy}}
-    tag: {{docker-tag-redis32-proxy}}
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-redis32-proxy))
+    tag: ((docker-tag-redis32-proxy))
 
 - name: docker-hub-redis32-server
   type: docker-image
   source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-redis32-server}}
-    tag: {{docker-tag-redis32-server}}
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-redis32-server))
+    tag: ((docker-tag-redis32-server))
 
 - name: docker-hub-redis28
   type: docker-image
   source:
-    email: {{docker-email}}
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: {{docker-repo-redis28}}
-    tag: {{docker-tag-redis28}}
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-redis28))
+    tag: ((docker-tag-redis28))
 
 - &kubernetes-release-tarball
   name: kubernetes-release-tarball
   type: s3-iam
   source:
-    bucket: {{s3-bosh-releases-bucket}}
+    bucket: ((s3-bosh-releases-bucket))
     regexp: kubernetes-(.*).tgz
     region_name: us-gov-west-1
 
@@ -917,23 +1102,23 @@ resources:
 - name: terraform-yaml-development
   type: s3-iam
   source:
-    bucket: {{tf-state-bucket-development}}
-    versioned_file: {{tf-state-file-development}}
-    region_name: {{aws-region}}
+    bucket: ((tf-state-bucket-development))
+    versioned_file: ((tf-state-file-development))
+    region_name: ((aws-region))
 
 - name: terraform-yaml-staging
   type: s3-iam
   source:
-    bucket: {{tf-state-bucket-staging}}
-    versioned_file: {{tf-state-file-staging}}
-    region_name: {{aws-region}}
+    bucket: ((tf-state-bucket-staging))
+    versioned_file: ((tf-state-file-staging))
+    region_name: ((aws-region))
 
 - name: terraform-yaml-production
   type: s3-iam
   source:
-    bucket: {{tf-state-bucket-production}}
-    versioned_file: {{tf-state-file-production}}
-    region_name: {{aws-region}}
+    bucket: ((tf-state-bucket-production))
+    versioned_file: ((tf-state-file-production))
+    region_name: ((aws-region))
 - name: erry-day
   type: time
   source: {interval: 24h}
