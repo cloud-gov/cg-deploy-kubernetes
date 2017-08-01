@@ -326,6 +326,8 @@ jobs:
 - name: acceptance-tests-development
   serial: true
   plan:
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       resource: kubernetes-config-development
@@ -482,6 +484,8 @@ jobs:
 - name: acceptance-tests-staging
   serial: true
   plan:
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-staging]
@@ -631,6 +635,8 @@ jobs:
 - name: acceptance-tests-production
   serial: true
   plan:
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-production]
