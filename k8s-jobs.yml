@@ -92,10 +92,12 @@ instance_groups:
   - name: docker
     properties:
       docker:
+        ip_masq: false
         flannel: true
         log_options: [max-size=10m, max-file=1]
   - name: flannel
     properties:
+      ip_masq: false
       apiserver:
         ip: (( grab instance_groups.etcd.networks.services.static_ips.[0] ))
   - name: cron
