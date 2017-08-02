@@ -97,7 +97,7 @@ instance_groups:
         log_options: [max-size=10m, max-file=1]
   - name: flannel
     properties:
-      ip_masq: false
+      ip_masq: true
       apiserver:
         ip: (( grab instance_groups.etcd.networks.services.static_ips.[0] ))
   - name: cron
