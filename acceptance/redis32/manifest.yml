@@ -1,0 +1,7 @@
+applications:
+- name: redis28-test
+  buildpack: go_buildpack
+  command: redis-test
+  memory: 128M
+  env:
+    GOPACKAGENAME: redis-test
