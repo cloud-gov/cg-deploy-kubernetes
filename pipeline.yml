@@ -116,6 +116,10 @@ params:
       SERVICE_NAME: redis28
       PLAN_NAME: standard
       TEST_PATH: kubernetes-config/acceptance/redis28
+    redis32-tests: &redis32-tests
+      SERVICE_NAME: redis32
+      PLAN_NAME: 3x-ha
+      TEST_PATH: kubernetes-config/acceptance/redis32
     mongodb32-tests: &mongodb32-tests
       SERVICE_NAME: mongodb32
       PLAN_NAME: standard
@@ -352,6 +356,11 @@ jobs:
       params:
         <<: *cf-development-tests
         <<: *redis28-tests
+    - task: acceptance-test-redis32-ha
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-development-tests
+        <<: *redis32-tests
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -512,6 +521,11 @@ jobs:
       params:
         <<: *cf-staging-tests
         <<: *redis28-tests
+    - task: acceptance-test-redis32-ha
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-staging-tests
+        <<: *redis32-tests
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -654,6 +668,11 @@ jobs:
       params:
         <<: *cf-production-tests
         <<: *redis28-tests
+    - task: acceptance-test-redis32-ha
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-production-tests
+        <<: *redis32-tests
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
