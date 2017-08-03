@@ -398,14 +398,7 @@ jobs:
       TARGET_ENVIRONMENT: staging
   - *lint-manifest
   - put: kubernetes-staging-deployment
-    params: &deployment-params
-      cert: common/master-bosh.crt
-      manifest: kubernetes-manifest/manifest.yml
-      releases:
-      - kubernetes-release-tarball/*.tgz
-      - consul-boshrelease/*.tgz
-      stemcells:
-      - kubernetes-stemcell/*.tgz
+    params: *deployment-params
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
     params:
