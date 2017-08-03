@@ -5,9 +5,9 @@ groups:
   - fluentd-cloudwatch
   - elasticsearch-24
   - mongo-32
-  - redis32-proxy
-  - redis32-sentinel
-  - redis32-server
+  - redis-sentinel-proxy
+  - redis-sentinel-init
+  - redis-server-init
   - redis28
   - deploy-kubernetes-development
   - deploy-kubernetes-broker-development
@@ -48,9 +48,9 @@ groups:
   - mongo-32
   - elasticsearch-base
   - elasticsearch-ha
-  - redis32-proxy
-  - redis32-sentinel
-  - redis32-server
+  - redis-sentinel-proxy
+  - redis-sentinel-init
+  - redis-server-init
   - redis28
 
 params:
@@ -173,27 +173,27 @@ jobs:
     params:
       build: kubernetes-broker-images/custom_images/elasticsearch-pet-24
 
-- name: redis32-proxy
+- name: redis-sentinel-proxy
   plan:
   - get: kubernetes-broker-images
     trigger: true
-  - put: docker-hub-redis32-proxy
+  - put: docker-hub-redis-sentinel-proxy
     params:
       build: kubernetes-broker-images/custom_images/redis-3.2/proxy
 
-- name: redis32-sentinel
+- name: redis-sentinel-init
   plan:
   - get: kubernetes-broker-images
     trigger: true
-  - put: docker-hub-redis32-sentinel
+  - put: docker-hub-redis-sentinel-init
     params:
       build: kubernetes-broker-images/custom_images/redis-3.2/sentinel
 
-- name: redis32-server
+- name: redis-server-init
   plan:
   - get: kubernetes-broker-images
     trigger: true
-  - put: docker-hub-redis32-server
+  - put: docker-hub-redis-server-init
     params:
       build: kubernetes-broker-images/custom_images/redis-3.2/server
 - name: redis28
@@ -1052,32 +1052,32 @@ resources:
     repository: ((docker-repo-elastic-ha))
     tag: ((docker-tag-elastic-ha))
 
-- name: docker-hub-redis32-sentinel
+- name: docker-hub-redis-sentinel-init
   type: docker-image
   source:
     email: ((docker-email))
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-repo-redis32-sentinel))
-    tag: ((docker-tag-redis32-sentinel))
+    repository: ((docker-repo-redis-sentinel-init))
+    tag: ((docker-tag-redis-sentinel-init))
 
-- name: docker-hub-redis32-proxy
+- name: docker-hub-redis-sentinel-proxy
   type: docker-image
   source:
     email: ((docker-email))
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-repo-redis32-proxy))
-    tag: ((docker-tag-redis32-proxy))
+    repository: ((docker-repo-redis-sentinel-proxy))
+    tag: ((docker-tag-redis-sentinel-proxy))
 
-- name: docker-hub-redis32-server
+- name: docker-hub-redis-server-init
   type: docker-image
   source:
     email: ((docker-email))
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-repo-redis32-server))
-    tag: ((docker-tag-redis32-server))
+    repository: ((docker-repo-redis-server-init))
+    tag: ((docker-tag-redis-server-init))
 
 - name: docker-hub-redis28
   type: docker-image
