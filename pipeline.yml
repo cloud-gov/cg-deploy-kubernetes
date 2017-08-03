@@ -334,6 +334,8 @@ jobs:
 - name: acceptance-tests-development
   serial: true
   plan:
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       resource: kubernetes-config-development
@@ -404,14 +406,7 @@ jobs:
       TARGET_ENVIRONMENT: staging
   - *lint-manifest
   - put: kubernetes-staging-deployment
-    params: &deployment-params
-      cert: common/master-bosh.crt
-      manifest: kubernetes-manifest/manifest.yml
-      releases:
-      - kubernetes-release-tarball/*.tgz
-      - consul-boshrelease/*.tgz
-      stemcells:
-      - kubernetes-stemcell/*.tgz
+    params: *deployment-params
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
     params:
@@ -490,6 +485,8 @@ jobs:
 - name: acceptance-tests-staging
   serial: true
   plan:
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-staging]
@@ -639,6 +636,8 @@ jobs:
 - name: acceptance-tests-production
   serial: true
   plan:
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-production]
