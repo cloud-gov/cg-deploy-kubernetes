@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/garyburd/redigo/redis"
@@ -27,8 +28,11 @@ func writeError(w http.ResponseWriter, err error) {
 }
 
 var client redis.Conn
+var pool *redis.Pool
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	client = pool.Get()
+	log.Printf("active connections: %d", pool.ActiveCount())
 	// Set and check value
 	_, err := client.Do("SET", "test", "test")
 	if err != nil {
@@ -51,6 +55,34 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 		return
 	}
+	client.Close()
+}
+
+func newPool(addr string, password string) *redis.Pool {
+	return &redis.Pool{
+		MaxIdle:     3,
+		MaxActive:   10,
+		IdleTimeout: 2 * time.Second,
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", addr)
+			if err != nil {
+				return nil, err
+			}
+			if _, err := c.Do("AUTH", password); err != nil {
+				c.Close()
+				return nil, err
+			}
+			return c, nil
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			threshold := 5 * time.Second
+			if time.Since(t) < threshold {
+				return nil
+			}
+			_, err := c.Do("PING")
+			return err
+		},
+	}
 }
 
 func main() {
@@ -62,13 +94,9 @@ func main() {
 	}
 	creds := services[0].Credentials
 
-	// Create redis client
+	// Create redis pool
 	var err error
-	client, err = redis.Dial("tcp", fmt.Sprintf("%s:%s", creds["hostname"], creds["port"]))
-	checkStatus(err)
-	defer client.Close()
-
-	_, err = client.Do("AUTH", creds["password"].(string))
+	pool = newPool(fmt.Sprintf("%s:%s", creds["hostname"], creds["port"]), creds["password"].(string))
 	checkStatus(err)
 
 	// Serve HTTP
