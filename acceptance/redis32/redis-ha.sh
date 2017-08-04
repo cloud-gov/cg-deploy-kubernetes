@@ -8,6 +8,16 @@ set -xue
 curl -ks -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}/api/v1/namespaces/default/pods/" | \
 jq '.items[] | select( .metadata.name | test( "'"${SERVICE_ID}"'" ) ) | { name: .metadata.name, node: .status.hostIP, ip: .status.podIP }'
 
+# check proxy for address change.
+# TODO: Will propbably do this with the sentinel logs rather than the proxy logs
+# TODO: Better yet, the acceptance test app should actually make it easy to query this data from the sentinels I think.
+curl -ks -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}/api/v1/namespaces/default/pods/${POD_NAME}/log" | \
+grep 'Master Address changed' | tail
+
+# delete a pod
+curl -ks -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}/api/v1/namespaces/default/pods/${POD_NAME}" -XDELETE
+
+
 # run a few tests
 
 # destroy server/0 via k8s API
