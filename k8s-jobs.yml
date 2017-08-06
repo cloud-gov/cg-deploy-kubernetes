@@ -106,7 +106,13 @@ instance_groups:
     properties:
       cron:
         variables:
-          IMAGES: "18fgsa/elasticsearch-ha:2.4.4"
+          IMAGES: >-
+            busybox
+            18fgsa/elasticsearch-ha:2.4.4
+            redis:3.2.10
+            18fgsa/redis-server-init:3.2.10
+            18fgsa/redis-sentinel-init:3.2.10
+            18fgsa/redis-sentinel-proxy:1.0.0
         entries:
         - script:
             name: pull-images.sh

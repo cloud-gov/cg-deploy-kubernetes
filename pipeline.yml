@@ -702,7 +702,6 @@ jobs:
         BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-development))
         BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
         BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
-        BROKER_EXPORTER_ELASTICSEARCH_SERVICES: ff6d38ab-2a06-4a07-81fb-7cee98531b9d
         BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-development))
         BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-development))
         BROKER_EXPORTER_METRICS_ENVIRONMENT: development
@@ -741,7 +740,6 @@ jobs:
         BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-staging))
         BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
         BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
-        BROKER_EXPORTER_ELASTICSEARCH_SERVICES: ff6d38ab-2a06-4a07-81fb-7cee98531b9d
         BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-staging))
         BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-staging))
         BROKER_EXPORTER_METRICS_ENVIRONMENT: staging
@@ -780,7 +778,6 @@ jobs:
         BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-production))
         BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
         BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
-        BROKER_EXPORTER_ELASTICSEARCH_SERVICES: ff6d38ab-2a06-4a07-81fb-7cee98531b9d
         BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-production))
         BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-production))
         BROKER_EXPORTER_METRICS_ENVIRONMENT: production
