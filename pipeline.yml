@@ -334,8 +334,6 @@ jobs:
 - name: acceptance-tests-development
   serial: true
   plan:
-  - task: clear-acceptance-space
-    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       resource: kubernetes-config-development
@@ -345,6 +343,9 @@ jobs:
       resource: kubernetes-broker-development
       passed: [deploy-kubernetes-broker-development]
       trigger: true
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
+    params: *cf-development-tests
   - aggregate:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -485,8 +486,6 @@ jobs:
 - name: acceptance-tests-staging
   serial: true
   plan:
-  - task: clear-acceptance-space
-    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-staging]
@@ -504,6 +503,9 @@ jobs:
     - get: kubernetes-stemcell
     - get: consul-boshrelease
       passed: [deploy-kubernetes-staging]
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
+    params: *cf-staging-tests
   - aggregate:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -636,8 +638,6 @@ jobs:
 - name: acceptance-tests-production
   serial: true
   plan:
-  - task: clear-acceptance-space
-    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-production]
@@ -645,6 +645,9 @@ jobs:
     - get: kubernetes-broker
       passed: [deploy-kubernetes-broker-production]
       trigger: true
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
+    params: *cf-production-tests
   - aggregate:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
