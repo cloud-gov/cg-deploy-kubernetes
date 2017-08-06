@@ -334,8 +334,6 @@ jobs:
 - name: acceptance-tests-development
   serial: true
   plan:
-  - task: clear-acceptance-space
-    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       resource: kubernetes-config-development
@@ -345,6 +343,9 @@ jobs:
       resource: kubernetes-broker-development
       passed: [deploy-kubernetes-broker-development]
       trigger: true
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
+    params: *cf-development-tests
   - aggregate:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -485,8 +486,6 @@ jobs:
 - name: acceptance-tests-staging
   serial: true
   plan:
-  - task: clear-acceptance-space
-    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-staging]
@@ -504,6 +503,9 @@ jobs:
     - get: kubernetes-stemcell
     - get: consul-boshrelease
       passed: [deploy-kubernetes-staging]
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
+    params: *cf-staging-tests
   - aggregate:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -636,8 +638,6 @@ jobs:
 - name: acceptance-tests-production
   serial: true
   plan:
-  - task: clear-acceptance-space
-    file: kubernetes-config/acceptance/clear-acceptance-space.yml
   - aggregate:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-production]
@@ -645,6 +645,9 @@ jobs:
     - get: kubernetes-broker
       passed: [deploy-kubernetes-broker-production]
       trigger: true
+  - task: clear-acceptance-space
+    file: kubernetes-config/acceptance/clear-acceptance-space.yml
+    params: *cf-production-tests
   - aggregate:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
@@ -699,7 +702,6 @@ jobs:
         BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-development))
         BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
         BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
-        BROKER_EXPORTER_ELASTICSEARCH_SERVICES: ff6d38ab-2a06-4a07-81fb-7cee98531b9d
         BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-development))
         BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-development))
         BROKER_EXPORTER_METRICS_ENVIRONMENT: development
@@ -738,7 +740,6 @@ jobs:
         BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-staging))
         BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
         BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
-        BROKER_EXPORTER_ELASTICSEARCH_SERVICES: ff6d38ab-2a06-4a07-81fb-7cee98531b9d
         BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-staging))
         BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-staging))
         BROKER_EXPORTER_METRICS_ENVIRONMENT: staging
@@ -777,7 +778,6 @@ jobs:
         BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-production))
         BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
         BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
-        BROKER_EXPORTER_ELASTICSEARCH_SERVICES: ff6d38ab-2a06-4a07-81fb-7cee98531b9d
         BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-production))
         BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-production))
         BROKER_EXPORTER_METRICS_ENVIRONMENT: production
