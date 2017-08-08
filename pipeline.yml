@@ -361,6 +361,11 @@ jobs:
       params:
         <<: *cf-development-tests
         <<: *redis32-tests
+        # EXTRA TESTS are executed with CWD = TEST_PATH
+        EXTRA_TESTS: ./redis-ha.sh
+        K8S_USERNAME: ((cluster-username-development))
+        K8S_PASSWORD: ((cluster-password-development))
+        K8S_APISERVER: ((api-server-development))
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
