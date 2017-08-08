@@ -4,7 +4,7 @@ set -xe
 
 # Test Redis is working by running `SET`, `GET`, and `DEL`.
 run_tests() {
-  if $(curl -kfs "https://${url}/")
+  if ! $(curl -kfs "https://${url}/")
   then
     echo "error with testing Redis."
     exit 99
