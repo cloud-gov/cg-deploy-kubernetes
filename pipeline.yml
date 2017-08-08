@@ -521,11 +521,11 @@ jobs:
       params:
         <<: *cf-staging-tests
         <<: *redis28-tests
-    - task: acceptance-test-redis32-ha
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        <<: *redis32-tests
+    #- task: acceptance-test-redis32-ha
+      #file: kubernetes-config/acceptance/run-acceptance-test.yml
+      #params:
+        #<<: *cf-staging-tests
+        #<<: *redis32-tests
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -668,11 +668,11 @@ jobs:
       params:
         <<: *cf-production-tests
         <<: *redis28-tests
-    - task: acceptance-test-redis32-ha
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-production-tests
-        <<: *redis32-tests
+    #- task: acceptance-test-redis32-ha
+      #file: kubernetes-config/acceptance/run-acceptance-test.yml
+      #params:
+        #<<: *cf-production-tests
+        #<<: *redis32-tests
     - task: acceptance-test-mongo32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
