@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/cloudfoundry-community/go-cfenv"
@@ -22,40 +23,9 @@ func writeError(w http.ResponseWriter, err error) {
 	message, _ := json.Marshal(map[string]string{
 		"error": err.Error(),
 	})
-	w.Write(message)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
-}
-
-var client redis.Conn
-var pool *redis.Pool
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	client = pool.Get()
-	log.Printf("active connections: %d", pool.ActiveCount())
-	// Set and check value
-	_, err := client.Do("SET", "test", "test")
-	if err != nil {
-		writeError(w, err)
-		return
-	}
-
-	value, err := redis.String(client.Do("GET", "test"))
-	if err != nil {
-		writeError(w, err)
-		return
-	}
-	if value != "test" {
-		writeError(w, fmt.Errorf("incorrect value: %s", value))
-		return
-	}
-
-	_, err = client.Do("DEL", "test")
-	if err != nil {
-		writeError(w, err)
-		return
-	}
-	client.Close()
+	w.Write(message)
 }
 
 func newPool(addr string, password string) *redis.Pool {
@@ -85,6 +55,103 @@ func newPool(addr string, password string) *redis.Pool {
 	}
 }
 
+var client redis.Conn
+var pool *redis.Pool
+
+func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
+	client = pool.Get()
+	defer client.Close()
+	log.Printf("active connections: %d", pool.ActiveCount())
+	// Set and check value
+	_, err := client.Do("SET", "test", "test")
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	value, err := redis.String(client.Do("GET", "test"))
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	if value != "test" {
+		writeError(w, fmt.Errorf("incorrect value: %s", value))
+		return
+	}
+
+	_, err = client.Do("DEL", "test")
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+}
+
+func info(w http.ResponseWriter, r *http.Request) {
+	client = pool.Get()
+	defer client.Close()
+
+	parameter := r.URL.Query().Get("s")
+
+	if parameter == "" {
+		parameter = "all"
+	}
+
+	infoString, err := redis.String(client.Do("INFO", parameter))
+
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	infoMap := make(map[string]string)
+
+	for _, line := range strings.Split(infoString, "\r\n") {
+		part := strings.Split(line, ":")
+		if len(part) == 2 {
+			infoMap[string(part[0])] = string(part[1])
+		}
+	}
+
+	jresp, _ := json.Marshal(infoMap)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jresp)
+
+}
+
+func configGet(w http.ResponseWriter, r *http.Request) {
+	client = pool.Get()
+	defer client.Close()
+
+	parameter := r.URL.Query().Get("p")
+
+	if parameter == "" {
+		parameter = "*"
+	}
+
+	primaryConfig, err := redis.StringMap(client.Do("CONFIG", "GET", parameter))
+
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+	if parameter == "*" {
+		jresp, _ := json.Marshal(primaryConfig)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jresp)
+	} else {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(primaryConfig[parameter]))
+	}
+
+}
+
 func main() {
 	// Get redis32-multinode credentials
 	env, _ := cfenv.Current()
@@ -100,6 +167,8 @@ func main() {
 	checkStatus(err)
 
 	// Serve HTTP
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", testSetGetDelete)
+	http.HandleFunc("/config-get", configGet)
+	http.HandleFunc("/info", info)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil))
 }
