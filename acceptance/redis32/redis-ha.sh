@@ -1,51 +1,82 @@
 #!/bin/bash
 
+set -xe
 
-set -xue
+# Test Redis is working by running `SET`, `GET`, and `DEL`.
+run_tests() {
+  if $(curl -kfs "https://${URL}/")
+  then
+    echo "error with testing Redis."
+    exit 99
+  fi
+}
 
+# Get all pods from Kubernetes matching $idx_and_short_serviceid
+get_k8s_pods() {
+  curl -ksf -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}api/v1/namespaces/default/pods?labelSelector=idx_and_short_serviceid%3D${SHORT_SERVICE_ID}" | \
+  jq '.items[] | { name: .metadata.name, node: .status.hostIP, ip: .status.podIP, status: .status.phase }' \ |
+  jq -s '.'
+}
 
-# get all pods by service_id
-curl -ks -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}/api/v1/namespaces/default/pods/" | \
-jq '.items[] | select( .metadata.name | test( "'"${SERVICE_ID}"'" ) ) | { name: .metadata.name, node: .status.hostIP, ip: .status.podIP }'
+# Get the current primary server's IP address
+get_primary_ip() {
+  curl -kfs "https://${url}/config-get?p=slave-annouce-ip" | \
+  jq -re '."slave-announce-ip"'
+}
 
-# check proxy for address change.
-# TODO: Will propbably do this with the sentinel logs rather than the proxy logs
-# TODO: Better yet, the acceptance test app should actually make it easy to query this data from the sentinels I think.
-curl -ks -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}/api/v1/namespaces/default/pods/${POD_NAME}/log" | \
-grep 'Master Address changed' | tail
+# Get the current primary server's role
+get_primary_role() {
+  curl -kfs "https://${url}/info?s=replication" | \
+  jq -re ".role"
+}
 
-# delete a pod
-curl -ks -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}/api/v1/namespaces/default/pods/${POD_NAME}" -XDELETE
+# Get the number of replicas that the primary server knows about
+get_replica_count() {
+  curl -kfs "https://${url}/info?s=replication" | \
+  jq -re '.connected_slaves'
+}
 
+# Iterate on number of replicas to verify that we're at 3x servers
+check_number_of_replicas() {
+  counter=120
+  until [ $counter -le 0 ]
+  do
+    if [[ $(get_primary_role) != "master" ]]
+    then
+      echo "The proxy isn't connected to the master. This shouldn't happen"
+      return 1
+    fi
+    if [ $(get_replica_count) -lt 2 ]
+    then
+      let counter-=1
+      sleep 5
+    else
+      return 0
+    fi
+  done
+  return 1
+}
 
-# run a few tests
+run_tests
 
-# destroy server/0 via k8s API
+primary_server_ip=$(get_primary_ip)
 
-sleep 5
+primary_server_name=$(
+  echo "$(get_k8s_pods)" | \
+  jq '.[] | select( .ip == "'${primary_server_ip}'") | .name'
+)
 
-# run a few tests
+# Delete the current master
+curl -ks -u"${K8S_USERNAME}:${K8S_PASSWORD}" \
+  "${K8S_APISERVER}/api/v1/namespaces/default/pods/${primary_server_name}" \
+  -XDELETE
 
-# destroy server/0 & server/0 via k8s API
+if ! check_number_of_replicas
+then
+  echo "Number of servers never hit 3x"
+  curl -kv "https://${url}/info"
+  curl -kv "https://${url}/config-get"
+  exit 1
+fi
 
-sleep 10
-
-# run a few tests
-
-# destroy all servers via k8s API
-
-sleep 20
-
-# run a few tests
-
-# Destroy a random sentinel
-
-sleep 10
-
-# run a few tests
-
-# destroy a random proxy via k8s API
-
-sleep 5
-
-# run a few tests
+run_tests
