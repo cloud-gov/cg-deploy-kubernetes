@@ -13,6 +13,9 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
+var client redis.Conn
+var pool *redis.Pool
+
 func checkStatus(err error) {
 	if err != nil {
 		log.Fatalf("error: %s", err.Error())
@@ -32,7 +35,7 @@ func newPool(addr string, password string) *redis.Pool {
 	return &redis.Pool{
 		MaxIdle:     3,
 		MaxActive:   10,
-		IdleTimeout: 2 * time.Second,
+		IdleTimeout: 1 * time.Second,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", addr)
 			if err != nil {
@@ -54,9 +57,6 @@ func newPool(addr string, password string) *redis.Pool {
 		},
 	}
 }
-
-var client redis.Conn
-var pool *redis.Pool
 
 func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 	client = pool.Get()
