@@ -13,14 +13,14 @@ run_tests() {
 
 # Get all pods from Kubernetes matching $idx_and_short_serviceid
 get_k8s_pods() {
-  curl -ksf -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}api/v1/namespaces/default/pods?labelSelector=idx_and_short_serviceid%3D${SHORT_SERVICE_ID}" | \
+  curl -ksf -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}api/v1/namespaces/default/pods?labelSelector=idx_and_short_serviceid%3D${idx_and_short_serviceid}" | \
   jq '.items[] | { name: .metadata.name, node: .status.hostIP, ip: .status.podIP, status: .status.phase }' \ |
   jq -s '.'
 }
 
 # Get the current primary server's IP address
 get_primary_ip() {
-  curl -kfs "https://${url}/config-get?p=slave-annouce-ip" | \
+  curl -kfs "https://${url}/config-get?p=slave-announce-ip" | \
   jq -re '."slave-announce-ip"'
 }
 
