@@ -37,6 +37,9 @@ get_replica_count() {
 
 # Iterate on number of replicas to verify that we're at 3x servers
 check_number_of_replicas() {
+  echo "Sleeping for 1 min; do your debugging now!"
+  echo "try running => curl -kfs 'https://${url}/info?s=replication' | jq -re '.role'"
+  sleep 60
   counter=120
   until [ $counter -le 0 ]
   do
