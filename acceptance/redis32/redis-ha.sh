@@ -14,7 +14,7 @@ run_tests() {
 # Get all pods from Kubernetes matching $idx_and_short_serviceid
 get_k8s_pods() {
   curl -G -ksf -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}/api/v1/namespaces/default/pods?labelSelector=idx_and_short_serviceid%3D${idx_and_short_serviceid}" | \
-  jq '.items[] | { name: .metadata.name, node: .status.hostIP, ip: .status.podIP, status: .status.phase }' \ |
+  jq '.items[] | { name: .metadata.name, node: .status.hostIP, ip: .status.podIP, status: .status.phase }' | \
   jq -s '.'
 }
 
