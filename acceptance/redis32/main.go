@@ -114,7 +114,12 @@ func info(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	jresp, _ := json.Marshal(infoMap)
+	jresp, err := json.Marshal(infoMap)
+
+	if err != nil {
+		writeError(w, err)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
