@@ -62,11 +62,11 @@ primary_server_ip=$(get_primary_ip)
 
 primary_server_name=$(
   echo "$(get_k8s_pods)" | \
-  jq -re '.[] | select( .ip == "'${primary_server_ip}'") | .name'
+  jq -re '.[] | select( .ip == "'"${primary_server_ip}"'") | .name'
 )
 
 # Check to see if there were any errors retrieving $primary_server_name
-if ! echo $primary_server_name | grep -oE 'x[a-zA-Z0-9]{3,15}' > /dev/null
+if ! echo "${primary_server_name}" | grep -oE 'x[a-zA-Z0-9]{3,15}' > /dev/null
 then
   echo "There was an error getting the primary server's name for ${primary_server_ip}"
   exit 1

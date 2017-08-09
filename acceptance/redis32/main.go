@@ -48,7 +48,8 @@ func newPool(addr string, password string) *redis.Pool {
 			return c, nil
 		},
 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			threshold := 5 * time.Second
+			fmt.Printf("running TestOnBorrow, %#v\n", t)
+			threshold := 250 * time.Millisecond
 			if time.Since(t) < threshold {
 				return nil
 			}
