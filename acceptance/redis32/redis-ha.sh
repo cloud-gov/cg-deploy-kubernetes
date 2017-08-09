@@ -25,21 +25,16 @@ get_primary_ip() {
 
 # Get the current primary server's role
 get_primary_role() {
-  curl -kfs "https://${url}/info?s=replication" | \
-  jq -re ".role"
+  curl -kfv "https://${url}/info?s=replication" | jq -re ".role"
 }
 
 # Get the number of replicas that the primary server knows about
 get_replica_count() {
-  curl -kfs "https://${url}/info?s=replication" | \
-  jq -re '.connected_slaves'
+  curl -kfs "https://${url}/info?s=replication" | jq -re '.connected_slaves'
 }
 
 # Iterate on number of replicas to verify that we're at 3x servers
 check_number_of_replicas() {
-  echo "Sleeping for 1 min; do your debugging now!"
-  echo "try running => curl -kfs 'https://${url}/info?s=replication' | jq -re '.role'"
-  sleep 60
   counter=120
   until [ $counter -le 0 ]
   do
