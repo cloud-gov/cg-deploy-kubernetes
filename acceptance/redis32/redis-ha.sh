@@ -45,7 +45,7 @@ check_number_of_replicas() {
       echo "The proxy isn't connected to the master. This shouldn't happen"
       return 1
     fi
-    if [ $(($(get_replica_count) + 0)) -lt 2 ]
+    if [ $(($(get_replica_count) + 0)) -lt $replica_count ]
     then
       let counter-=1
       sleep 5
@@ -55,6 +55,8 @@ check_number_of_replicas() {
   done
   return 1
 }
+
+export replica_count=$(($(get_replica_count) + 0))
 
 run_tests
 
