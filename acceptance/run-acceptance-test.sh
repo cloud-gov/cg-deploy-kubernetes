@@ -44,6 +44,8 @@ cf bind-service ${APP_NAME} ${SERVICE_INSTANCE_NAME}
 cf start ${APP_NAME}
 
 export url=$(cf app ${APP_NAME} | grep -e "urls: " -e "routes: " | awk '{print $2}')
+export idx_and_short_serviceid=$(cf env ${APP_NAME} | grep -E "hostname.*service.kubernetes" | grep -oE 'x[a-zA-Z0-9]{3,15}')
+
 
 status=$(curl -w "%{http_code}" "https://${url}")
 if [ "${status}" != "200" ]; then
