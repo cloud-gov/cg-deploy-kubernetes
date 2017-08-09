@@ -14,7 +14,7 @@ run_tests() {
 # Get all pods from Kubernetes matching $idx_and_short_serviceid
 get_k8s_pods() {
   curl -G -ksf -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}/api/v1/namespaces/default/pods?labelSelector=idx_and_short_serviceid%3D${idx_and_short_serviceid}" | \
-  jq '.items[] | { name: .metadata.name, node: .status.hostIP, ip: .status.podIP, status: .status.phase }' | \
+  jq -re '.items[] | { name: .metadata.name, node: .status.hostIP, ip: .status.podIP, status: .status.phase }' | \
   jq -s '.'
 }
 
@@ -62,7 +62,7 @@ primary_server_ip=$(get_primary_ip)
 
 primary_server_name=$(
   echo "$(get_k8s_pods)" | \
-  jq '.[] | select( .ip == "'${primary_server_ip}'") | .name'
+  jq -re '.[] | select( .ip == "'${primary_server_ip}'") | .name'
 )
 
 # Check to see if there were any errors retrieving $primary_server_name
