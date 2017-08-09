@@ -40,12 +40,12 @@ check_number_of_replicas() {
   counter=120
   until [ $counter -le 0 ]
   do
-    #if [[ $(get_primary_role) != "master" ]]
+    #if [[ get_primary_role != "master" ]]
     #then
       #echo "The proxy isn't connected to the master. This shouldn't happen"
       #return 1
     #fi
-    if [ $(get_replica_count) -lt 2 ]
+    if [ get_replica_count -lt 2 ]
     then
       let counter-=1
       sleep 5
