@@ -110,7 +110,7 @@ func info(w http.ResponseWriter, r *http.Request) {
 	for _, line := range strings.Split(infoString, "\r\n") {
 		part := strings.Split(line, ":")
 		if len(part) == 2 {
-			infoMap[string(part[0])] = string(part[1])
+			infoMap[part[0]] = part[1]
 		}
 	}
 
