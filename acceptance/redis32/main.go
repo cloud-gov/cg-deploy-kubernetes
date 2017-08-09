@@ -35,7 +35,7 @@ func newPool(addr string, password string) *redis.Pool {
 	return &redis.Pool{
 		MaxIdle:     3,
 		MaxActive:   10,
-		IdleTimeout: 1 * time.Second,
+		IdleTimeout: 250 * time.Millisecond
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", addr)
 			if err != nil {
@@ -61,7 +61,7 @@ func newPool(addr string, password string) *redis.Pool {
 
 func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 	client = pool.Get()
-	defer client.Close()
+
 	log.Printf("active connections: %d", pool.ActiveCount())
 	// Set and check value
 	_, err := client.Do("SET", "test", "test")
@@ -87,11 +87,12 @@ func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+
+	client.Close()
 }
 
 func info(w http.ResponseWriter, r *http.Request) {
 	client = pool.Get()
-	defer client.Close()
 
 	parameter := r.URL.Query().Get("s")
 
@@ -126,11 +127,11 @@ func info(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(jresp)
 
+	client.Close()
 }
 
 func configGet(w http.ResponseWriter, r *http.Request) {
 	client = pool.Get()
-	defer client.Close()
 
 	parameter := r.URL.Query().Get("p")
 
@@ -156,6 +157,7 @@ func configGet(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(primaryConfig[parameter]))
 	}
 
+	client.Close()
 }
 
 func main() {
