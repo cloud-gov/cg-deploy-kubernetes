@@ -13,7 +13,6 @@ import (
 )
 
 var client redis.Conn
-var pool *redis.Pool
 
 func checkStatus(err error) {
 	if err != nil {
@@ -50,7 +49,6 @@ func newConnection() redis.Conn {
 func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 	client = newConnection()
 
-	log.Printf("active connections: %d", pool.ActiveCount())
 	// Set and check value
 	_, err := client.Do("SET", "test", "test")
 	if err != nil {
