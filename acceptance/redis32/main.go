@@ -48,6 +48,7 @@ func newConnection() redis.Conn {
 
 func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 	client = newConnection()
+	defer client.Close()
 
 	// Set and check value
 	_, err := client.Do("SET", "test", "test")
@@ -74,11 +75,11 @@ func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	client.Close()
 }
 
 func info(w http.ResponseWriter, r *http.Request) {
 	client = newConnection()
+	defer client.Close()
 
 	parameter := r.URL.Query().Get("s")
 
@@ -113,11 +114,11 @@ func info(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(jresp)
 
-	client.Close()
 }
 
 func configGet(w http.ResponseWriter, r *http.Request) {
 	client = newConnection()
+	defer client.Close()
 
 	parameter := r.URL.Query().Get("p")
 
@@ -143,7 +144,6 @@ func configGet(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(primaryConfig[parameter]))
 	}
 
-	client.Close()
 }
 
 func main() {
