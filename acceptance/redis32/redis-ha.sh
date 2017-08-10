@@ -77,6 +77,9 @@ curl -ks -u"${K8S_USERNAME}:${K8S_PASSWORD}" \
   "${K8S_APISERVER}/api/v1/namespaces/default/pods/${primary_server_name}" \
   -XDELETE
 
+# Wait for Sentinels to elect a new primaryserver
+sleep 15
+
 if ! check_number_of_replicas
 then
   echo "Number of servers never hit 3x"
