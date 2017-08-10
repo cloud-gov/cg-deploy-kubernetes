@@ -25,7 +25,7 @@ get_primary_ip() {
 
 # Get the current primary server's role
 get_primary_role() {
-  curl -kfv "https://${url}/info?s=replication" | jq -re ".role"
+  curl -kfs "https://${url}/info?s=replication" | jq -re ".role"
 }
 
 # Get the number of replicas that the primary server knows about
