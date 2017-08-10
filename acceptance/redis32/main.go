@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/garyburd/redigo/redis"
@@ -31,36 +30,25 @@ func writeError(w http.ResponseWriter, err error) {
 	w.Write(message)
 }
 
-func newPool(addr string, password string) *redis.Pool {
-	return &redis.Pool{
-		MaxIdle:     3,
-		MaxActive:   10,
-		IdleTimeout: 250 * time.Millisecond,
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", addr)
-			if err != nil {
-				return nil, err
-			}
-			if _, err := c.Do("AUTH", password); err != nil {
-				c.Close()
-				return nil, err
-			}
-			return c, nil
-		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			fmt.Printf("running TestOnBorrow, %#v\n", t)
-			threshold := 250 * time.Millisecond
-			if time.Since(t) < threshold {
-				return nil
-			}
-			_, err := c.Do("PING")
-			return err
-		},
+func newConnection() redis.Conn {
+	// Get redis32-multinode credentials
+	env, _ := cfenv.Current()
+	services, _ := env.Services.WithLabel("redis32")
+	if len(services) != 1 {
+		log.Fatal("redis32 service not found")
 	}
+	creds := services[0].Credentials
+	newClient, err := redis.Dial("tcp", fmt.Sprintf("%s:%s", creds["hostname"], creds["port"]))
+	checkStatus(err)
+
+	_, err = newClient.Do("AUTH", creds["password"].(string))
+	checkStatus(err)
+
+	return newClient
 }
 
 func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
-	client = pool.Get()
+	client = newConnection()
 
 	log.Printf("active connections: %d", pool.ActiveCount())
 	// Set and check value
@@ -92,7 +80,7 @@ func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 func info(w http.ResponseWriter, r *http.Request) {
-	client = pool.Get()
+	client = newConnection()
 
 	parameter := r.URL.Query().Get("s")
 
@@ -131,7 +119,7 @@ func info(w http.ResponseWriter, r *http.Request) {
 }
 
 func configGet(w http.ResponseWriter, r *http.Request) {
-	client = pool.Get()
+	client = newConnection()
 
 	parameter := r.URL.Query().Get("p")
 
@@ -161,19 +149,6 @@ func configGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Get redis32-multinode credentials
-	env, _ := cfenv.Current()
-	services, _ := env.Services.WithLabel("redis32")
-	if len(services) != 1 {
-		log.Fatal("redis32 service not found")
-	}
-	creds := services[0].Credentials
-
-	// Create redis pool
-	var err error
-	pool = newPool(fmt.Sprintf("%s:%s", creds["hostname"], creds["port"]), creds["password"].(string))
-	checkStatus(err)
-
 	// Serve HTTP
 	http.HandleFunc("/", testSetGetDelete)
 	http.HandleFunc("/config-get", configGet)
