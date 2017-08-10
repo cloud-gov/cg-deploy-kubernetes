@@ -21,6 +21,7 @@ func checkStatus(err error) {
 }
 
 func writeError(w http.ResponseWriter, err error) {
+	log.Printf("There was an error, %s\n", err.Error())
 	message, _ := json.Marshal(map[string]string{
 		"error": err.Error(),
 	})
