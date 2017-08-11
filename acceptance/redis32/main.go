@@ -71,9 +71,8 @@ func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
+	w.WriteHeader(http.StatusOK)
 }
 
 func info(w http.ResponseWriter, r *http.Request) {
