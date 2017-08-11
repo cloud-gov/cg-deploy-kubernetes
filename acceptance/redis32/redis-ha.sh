@@ -38,11 +38,6 @@ check_number_of_replicas() {
   counter=120
   until [ $counter -le 0 ]
   do
-    if [[ $(get_primary_role) == "" ]]
-    then
-      echo "The proxy isn't connected to Redis. This shouldn't happen"
-      exit 1
-    fi
     if [[ $(get_primary_role) != "master" ]]
     then
       let counter-=1
