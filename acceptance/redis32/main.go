@@ -12,8 +12,6 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-var client redis.Conn
-
 func checkStatus(err error) {
 	if err != nil {
 		log.Fatalf("error: %s", err.Error())
@@ -48,7 +46,7 @@ func newConnection() redis.Conn {
 }
 
 func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
-	client = newConnection()
+	client := newConnection()
 	defer client.Close()
 
 	// Set and check value
@@ -79,7 +77,7 @@ func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 func info(w http.ResponseWriter, r *http.Request) {
-	client = newConnection()
+	client := newConnection()
 	defer client.Close()
 
 	parameter := r.URL.Query().Get("s")
@@ -118,7 +116,7 @@ func info(w http.ResponseWriter, r *http.Request) {
 }
 
 func configGet(w http.ResponseWriter, r *http.Request) {
-	client = newConnection()
+	client := newConnection()
 	defer client.Close()
 
 	parameter := r.URL.Query().Get("p")
