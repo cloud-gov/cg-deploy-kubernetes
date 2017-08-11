@@ -87,4 +87,7 @@ then
   exit 1
 fi
 
+# Allow for the proxies to find the new master.
+sleep 1
+
 run_tests
