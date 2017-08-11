@@ -20,7 +20,7 @@ get_k8s_pods() {
 
 # Get the current primary server's IP address
 get_primary_ip() {
-  curl -kfs "https://${url}/config-get?p=slave-announce-ip"
+  curl -kfs "https://${url}/config-get?p=slave-announce-ip" | jq -re '.["slave-announce-ip"]'
 }
 
 # Get the current primary server's role
