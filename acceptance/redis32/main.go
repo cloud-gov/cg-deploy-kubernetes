@@ -131,16 +131,16 @@ func configGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	jresp, err := json.Marshal(primaryConfig)
 
-	if parameter == "*" {
-		jresp, _ := json.Marshal(primaryConfig)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(jresp)
-	} else {
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(primaryConfig[parameter]))
+	if err != nil {
+		writeError(w, err)
+		return
 	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jresp)
 
 }
 
