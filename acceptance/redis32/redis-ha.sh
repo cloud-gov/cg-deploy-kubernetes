@@ -38,10 +38,15 @@ check_number_of_replicas() {
   counter=120
   until [ $counter -le 0 ]
   do
+    if [[ $(get_primary_role) == "" ]]
+    then
+      echo "The proxy isn't connected to Redis. This shouldn't happen"
+      exit 1
+    fi
     if [[ $(get_primary_role) != "master" ]]
     then
-      echo "The proxy isn't connected to the master. This shouldn't happen"
-      return 1
+      let counter-=1
+      sleep 5
     fi
     if [ $(($(get_replica_count) + 0)) -lt $replica_count ]
     then
@@ -77,14 +82,13 @@ curl -ks -u"${K8S_USERNAME}:${K8S_PASSWORD}" \
   "${K8S_APISERVER}/api/v1/namespaces/default/pods/${primary_server_name}" \
   -XDELETE
 
-# Wait for Sentinels to elect a new primaryserver
-sleep 15
-
 if ! check_number_of_replicas
 then
-  echo "Number of servers never hit 3x"
-  curl -kv "https://${url}/info"
-  curl -kv "https://${url}/config-get"
+  echo "Number of servers never hit 3x or the proxy dropped the connection"
+  echo "redis-cli INFO"
+  curl -kfs "https://${url}/info"
+  echo "redis-cli CONFIG GET *"
+  curl -kfs "https://${url}/config-get"
   exit 1
 fi
 
