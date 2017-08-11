@@ -4,7 +4,7 @@ set -xue
 
 # Test Redis is working by running `SET`, `GET`, and `DEL`.
 run_tests() {
-  if ! $(curl -kfv "https://${url}/")
+  if ! $(curl -m 2 -kfv "https://${url}/")
   then
     echo "error with testing Redis."
     exit 99
@@ -13,24 +13,24 @@ run_tests() {
 
 # Get all pods from Kubernetes matching $idx_and_short_serviceid
 get_k8s_pods() {
-  curl -G -kfv -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}/api/v1/namespaces/default/pods?labelSelector=idx_and_short_serviceid%3D${idx_and_short_serviceid}" | \
+  curl -m 2 -G -kfv -u"${K8S_USERNAME}:${K8S_PASSWORD}" "${K8S_APISERVER}/api/v1/namespaces/default/pods?labelSelector=idx_and_short_serviceid%3D${idx_and_short_serviceid}" | \
   jq -re '.items[] | { name: .metadata.name, node: .status.hostIP, ip: .status.podIP, status: .status.phase }' | \
   jq -s '.'
 }
 
 # Get the current primary server's IP address
 get_primary_ip() {
-  curl -kfv "https://${url}/config-get?p=slave-announce-ip" | jq -re '.["slave-announce-ip"]'
+  curl -m 2 -kfv "https://${url}/config-get?p=slave-announce-ip" | jq -re '.["slave-announce-ip"]'
 }
 
 # Get the current primary server's role
 get_primary_role() {
-  curl -kfv "https://${url}/info?s=replication" | jq -re ".role"
+  curl -m 2 -kfv "https://${url}/info?s=replication" | jq -re ".role"
 }
 
 # Get the number of replicas that the primary server knows about
 get_replica_count() {
-  curl -kfv "https://${url}/info?s=replication" | jq -re '.connected_slaves'
+  curl -m 2 -kfv "https://${url}/info?s=replication" | jq -re '.connected_slaves'
 }
 
 # Iterate on number of replicas to verify that we're at 3x servers
@@ -73,7 +73,7 @@ then
 fi
 
 # Delete the current master
-curl -kv -u"${K8S_USERNAME}:${K8S_PASSWORD}" \
+curl -m 2 -kv -u"${K8S_USERNAME}:${K8S_PASSWORD}" \
   "${K8S_APISERVER}/api/v1/namespaces/default/pods/${primary_server_name}" \
   -XDELETE
 
@@ -81,9 +81,9 @@ if ! check_number_of_replicas
 then
   echo "Number of servers never hit 3x or the proxy dropped the connection"
   echo "redis-cli INFO"
-  curl -kfv "https://${url}/info"
+  curl -m 2 -kfv "https://${url}/info"
   echo "redis-cli CONFIG GET *"
-  curl -kfv "https://${url}/config-get"
+  curl -m 2 -kfv "https://${url}/config-get"
   exit 1
 fi
 
