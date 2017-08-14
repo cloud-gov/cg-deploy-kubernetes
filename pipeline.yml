@@ -118,7 +118,7 @@ params:
       TEST_PATH: kubernetes-config/acceptance/redis28
     redis32-tests: &redis32-tests
       SERVICE_NAME: redis32
-      PLAN_NAME: 3x-ha
+      PLAN_NAME: standard-ha
       TEST_PATH: kubernetes-config/acceptance/redis32
     mongodb32-tests: &mongodb32-tests
       SERVICE_NAME: mongodb32
