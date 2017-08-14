@@ -33,9 +33,6 @@ get_replica_count() {
   curl -m 2 -kfv "https://${url}/info?s=replication" | jq -re '.connected_slaves'
 }
 
-# Allow for the pre-stop script to execute
-sleep 1
-
 # Iterate on number of replicas to verify that we're at 3x servers
 check_number_of_replicas() {
   counter=120
@@ -80,6 +77,9 @@ fi
 curl -m 2 -kv -u"${K8S_USERNAME}:${K8S_PASSWORD}" \
   "${K8S_APISERVER}/api/v1/namespaces/default/pods/${primary_server_name}" \
   -XDELETE
+
+# Allow for the pre-stop script to execute
+sleep 1
 
 if ! check_number_of_replicas
 then
