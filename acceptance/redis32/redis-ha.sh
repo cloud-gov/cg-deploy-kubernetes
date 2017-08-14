@@ -33,6 +33,9 @@ get_replica_count() {
   curl -m 2 -kfv "https://${url}/info?s=replication" | jq -re '.connected_slaves'
 }
 
+# Allow for the pre-stop script to execute
+sleep 1
+
 # Iterate on number of replicas to verify that we're at 3x servers
 check_number_of_replicas() {
   counter=120
@@ -42,6 +45,7 @@ check_number_of_replicas() {
     then
       let counter-=1
       sleep 5
+      continue
     fi
     if [ $(($(get_replica_count) + 0)) -lt $replica_count ]
     then
@@ -86,8 +90,5 @@ then
   curl -m 2 -kfv "https://${url}/config-get"
   exit 1
 fi
-
-# Allow for the proxies to find the new master.
-sleep 1
 
 run_tests
