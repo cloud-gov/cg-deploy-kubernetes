@@ -111,7 +111,7 @@ instance_groups:
           IMAGES: >-
             busybox
             18fgsa/elasticsearch-ha:2.4.4
-            redis:3.2.10
+            18fgsa/redis:3.2.10
             18fgsa/redis-server-init:3.2.10
             18fgsa/redis-sentinel-init:3.2.10
             18fgsa/redis-sentinel-proxy:1.0.0

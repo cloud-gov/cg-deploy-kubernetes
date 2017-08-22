@@ -173,6 +173,8 @@ jobs:
 
 - name: redis32
   plan:
+  - get: erry-day
+    trigger: true
   - get: kubernetes-broker-images
     trigger: true
   - put: docker-hub-redis32
