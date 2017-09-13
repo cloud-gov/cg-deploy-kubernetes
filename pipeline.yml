@@ -927,7 +927,7 @@ resources:
   source:
     region: ((aws-region))
     bucket_name: ((kubernetes-development-private-bucket))
-    secrets_file: kubernetes-development.yml
+    secrets_file: development-kubernetes.yml
     secrets_passphrase: ((kubernetes-development-private-passphrase))
     bosh_cert: bosh.pem
 
@@ -936,7 +936,7 @@ resources:
   source:
     region: ((aws-region))
     bucket_name: ((kubernetes-staging-private-bucket))
-    secrets_file: kubernetes.yml
+    secrets_file: staging-kubernetes.yml
     secrets_passphrase: ((kubernetes-staging-private-passphrase))
     bosh_cert: bosh.pem
 
@@ -945,7 +945,7 @@ resources:
   source:
     region: ((aws-region))
     bucket_name: ((kubernetes-production-private-bucket))
-    secrets_file: kubernetes.yml
+    secrets_file: production-kubernetes.yml
     secrets_passphrase: ((kubernetes-production-private-passphrase))
     bosh_cert: bosh.pem
 
