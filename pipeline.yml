@@ -112,6 +112,10 @@ params:
       TEST_PATH: kubernetes-config/acceptance/redis28
     redis32-tests: &redis32-tests
       SERVICE_NAME: redis32
+      PLAN_NAME: micro
+      TEST_PATH: kubernetes-config/acceptance/redis32
+    redis32-tests: &redis32-tests
+      SERVICE_NAME: redis32
       PLAN_NAME: standard
       TEST_PATH: kubernetes-config/acceptance/redis32
     redis32-ha-tests: &redis32-ha-tests
@@ -333,6 +337,11 @@ jobs:
       params:
         <<: *cf-development-tests
         <<: *redis28-tests
+    - task: acceptance-test-redis32-micro
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-development-tests
+        <<: *redis32-tests
     - task: acceptance-test-redis32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -508,6 +517,11 @@ jobs:
       params:
         <<: *cf-staging-tests
         <<: *redis28-tests
+    - task: acceptance-test-redis32-micro
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-staging-tests
+        <<: *redis32-tests
     - task: acceptance-test-redis32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -677,6 +691,11 @@ jobs:
       params:
         <<: *cf-production-tests
         <<: *redis28-tests
+    - task: acceptance-test-redis32-micro
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-production-tests
+        <<: *redis32-tests
     - task: acceptance-test-redis32-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
