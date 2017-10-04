@@ -232,7 +232,6 @@ jobs:
       LINTER_CONFIG: bosh-lint.yml
   - put: kubernetes-development-deployment
     params: &deployment-params
-      cert: common/master-bosh.crt
       manifest: kubernetes-manifest/manifest.yml
       releases:
       - kubernetes-release-tarball/*.tgz
@@ -969,28 +968,31 @@ resources:
     bosh_cert: bosh.pem
 
 - name: kubernetes-development-deployment
-  type: 18f-bosh-deployment
+  type: bosh-deployment
   source:
     target: ((kubernetes-development-deployment-bosh-target))
-    username: ((kubernetes-development-deployment-bosh-username))
-    password: ((kubernetes-development-deployment-bosh-password))
-    deployment: ((kubernetes-development-deployment-bosh-deployment))
+    client: ((kubernetes-development-deployment-bosh-client))
+    client_secret: ((kubernetes-development-deployment-bosh-client-secret))
+    ca_cert: ((kubernetes-development-ca-cert))
+    deployment: kubernetes
 
 - name: kubernetes-staging-deployment
-  type: 18f-bosh-deployment
+  type: bosh-deployment
   source:
     target: ((kubernetes-staging-deployment-bosh-target))
-    username: ((kubernetes-staging-deployment-bosh-username))
-    password: ((kubernetes-staging-deployment-bosh-password))
-    deployment: ((kubernetes-staging-deployment-bosh-deployment))
+    client: ((kubernetes-staging-deployment-bosh-client))
+    client_secret: ((kubernetes-staging-deployment-bosh-client-secret))
+    ca_cert: ((kubernetes-staging-ca-cert))
+    deployment: kubernetes
 
 - name: kubernetes-production-deployment
-  type: 18f-bosh-deployment
+  type: bosh-deployment
   source:
     target: ((kubernetes-production-deployment-bosh-target))
-    username: ((kubernetes-production-deployment-bosh-username))
-    password: ((kubernetes-production-deployment-bosh-password))
-    deployment: ((kubernetes-production-deployment-bosh-deployment))
+    client: ((kubernetes-production-deployment-bosh-client))
+    client_secret: ((kubernetes-production-deployment-bosh-client-secret))
+    ca_cert: ((kubernetes-production-ca-cert))
+    deployment: kubernetes
 
 - name: kubernetes-broker-development-deployment
   type: cf
@@ -1171,10 +1173,10 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
 
-- name: 18f-bosh-deployment
+- name: bosh-deployment
   type: docker-image
   source:
-    repository: 18fgsa/bosh-deployment-resource
+    repository: cloudfoundry/bosh-deployment-resource
 
 - name: cg-common
   type: docker-image
