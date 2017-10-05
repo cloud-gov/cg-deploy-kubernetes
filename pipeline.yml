@@ -24,12 +24,14 @@ groups:
   jobs:
   - deploy-kubernetes-development
   - deploy-kubernetes-broker-development
+  - test-exporter-development
   - deploy-exporter-development
   - acceptance-tests-development
 - name: staging
   jobs:
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
+  - test-exporter
   - deploy-exporter-staging
   - acceptance-tests-staging
 - name: production
