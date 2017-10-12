@@ -198,10 +198,6 @@ jobs:
     - get: common
       resource: master-bosh-root-cert
     - get: pipeline-tasks
-    - get: kubernetes-release
-      resource: kubernetes-release-development
-      params:
-        submodules: none
     - get: kubernetes-config
       resource: kubernetes-config-development
       trigger: true
@@ -388,9 +384,6 @@ jobs:
     - get: common
       resource: master-bosh-root-cert
     - get: pipeline-tasks
-    - get: kubernetes-release
-      params:
-        submodules: none
     - get: kubernetes-config
       trigger: true
     - get: kubernetes-release-tarball
@@ -500,10 +493,6 @@ jobs:
       passed: [deploy-kubernetes-broker-staging]
       trigger: true
     # Get resources from upstream jobs for use in production deploy
-    - get: kubernetes-release
-      passed: [deploy-kubernetes-staging]
-      params:
-        submodules: none
     - get: kubernetes-release-tarball
       passed: [deploy-kubernetes-staging]
     - get: kubernetes-stemcell
@@ -568,10 +557,6 @@ jobs:
     - get: common
       resource: master-bosh-root-cert
     - get: pipeline-tasks
-    - get: kubernetes-release
-      passed: [acceptance-tests-staging]
-      params:
-        submodules: none
     # all triggers set to false until k8s AWS volume issues are sorted
     # once that happens it's ok to set all triggers below back to true
     - get: kubernetes-config
@@ -883,18 +868,6 @@ resources:
   source:
     uri: ((pipeline-tasks-git-url))
     branch: ((pipeline-tasks-git-branch))
-
-- name: kubernetes-release
-  type: git
-  source:
-    uri: ((kubernetes-release-git-url))
-    branch: ((kubernetes-release-git-branch))
-
-- name: kubernetes-release-development
-  type: git
-  source:
-    uri: ((kubernetes-release-development-git-url))
-    branch: ((kubernetes-release-development-git-branch))
 
 - name: kubernetes-broker
   type: git
