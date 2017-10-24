@@ -16,7 +16,7 @@ run:
   args:
   - -exc
   - |
-    export GOPATH=$(pwd)/gopath:$GOPATH
-    export GOBIN=$(pwd)/gopath/bin
+    export GOPATH="$(pwd)/gopath:$GOPATH"
+    export GOBIN="$(pwd)/gopath/bin"
     cd gopath/src/github.com/trustedanalytics/kubernetes-broker
     make tests
