@@ -13,16 +13,22 @@ NC='\033[0m'
 if [[ -n $1 && $1 =~ (-h|--help)$ ]]
 then
   echo "
-  ./generate-consul-certs.sh [--help, -h] [--grab-cert, -g] [<ca-cert> <ca-private-key>]
+  ./generate-k8s-release-certs.sh [--help, -h] [--grab-cert, -g] [<ca-cert> <ca-private-key>]
 
-  For generating Consul certificates and private keys based on a
-  'single' root CA certificate.
+  For generating the Consul & K8s certificates and private keys based on a
+  'single' root CA certificate for the 18F/cg-deploy-kubernetes.
   "
   exit
 fi
 
 local_ca_cert_name='consul_ca'
-depot_path="consul-certs"
+depot_path="k8s-certs"
+
+if [[ -z $SAN_IPS ]]
+then
+  echo -e "${RED}ERROR${NC} Please set a ${YELLOW}\$SAN_IPS${NC} variable containing a comma-separated list of Kubernetes cluster member IPs"
+  exit 97
+fi
 
 mkdir -p "${depot_path}"
 
@@ -31,14 +37,14 @@ then
   if [[ -z $CG_PIPELINE ]]
   then
     echo -e "${RED}ERROR${NC} Please set a ${YELLOW}\$CG_PIPELINE${NC} variable pointing to a clone of ${YELLOW}https://github.com/18F/cg-pipeline-tasks${NC}"
-    echo -e "eg, ${PURPLE}CG_PIPELINE=~/dev/cg-pipeline-tasks ./generate-consul-certs.sh --grab-cert${NC}"
+    echo -e "eg, ${PURPLE}CG_PIPELINE=~/dev/cg-pipeline-tasks ./generate-k8s-release-certs.sh --grab-cert${NC}"
     exit 98
   fi
 
   if [[ -z "${ci_env}" ]]
   then
     echo -e "${RED}ERROR${NC} Please set a ${YELLOW}\$ci_env${NC} variable to continue from ${YELLOW}fly targets${NC}"
-    echo -e "eg, ${PURPLE}ci_env=fr ./generate-consul-certs.sh --grab-cert${NC}"
+    echo -e "eg, ${PURPLE}ci_env=fr ./generate-k8s-release-certs.sh --grab-cert${NC}"
     exit 99
   fi
 
@@ -125,3 +131,8 @@ certstrap --depot-path ${depot_path} sign 'consul_agent' --CA "${local_ca_cert_n
 mv -f ${depot_path}/consul_agent.key ${depot_path}/consul_agent.key
 mv -f ${depot_path}/consul_agent.csr ${depot_path}/consul_agent.csr
 mv -f ${depot_path}/consul_agent.crt ${depot_path}/consul_agent.crt
+
+
+echo -e "${CYAN}Generating${NC} Kubernetes key and certificate pairs"
+certstrap --depot-path ${depot_path} request-cert --passphrase '' --cn kubernetes --domain kubernetes.default.svc.cluster.local,kubernetes.default.svc --ip "${SAN_IPS}",127.0.0.1,10.0.0.1
+certstrap --depot-path ${depot_path} sign 'kubernetes' --CA "${local_ca_cert_name}"
