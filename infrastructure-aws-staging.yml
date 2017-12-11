@@ -1,4 +1,11 @@
 instance_groups:
+- name: etcd
+  jobs:
+  - name: cron
+    properties:
+      cron:
+        variables:
+          ENVIRONMENT: staging
 - name: master
   jobs:
   - name: kubernetes-minion

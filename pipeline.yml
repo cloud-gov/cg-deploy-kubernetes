@@ -222,7 +222,6 @@ jobs:
     params:
       CLOUDWATCH_PARAMS: ((cloudwatch-params-development))
       KUBE2IAM_PARAMS: ((kube2iam-params-development))
-      RIEMANN_PODSTATUS_PARAMS: ((riemann-podstatus-params-development))
       TARGET_ENVIRONMENT: development
   - &lint-manifest
     task: lint-manifest
@@ -244,11 +243,6 @@ jobs:
     file: pipeline-tasks/bosh-errand.yml
     params:
       BOSH_ERRAND: create-kubernetes-dns
-      <<: *bosh-errand-development
-  - task: create-kubernetes-monitoring
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: create-kubernetes-monitoring
       <<: *bosh-errand-development
   - task: apply-kubernetes-manifests
     file: pipeline-tasks/bosh-errand.yml
@@ -409,7 +403,6 @@ jobs:
     params:
       CLOUDWATCH_PARAMS: ((cloudwatch-params-staging))
       KUBE2IAM_PARAMS: ((kube2iam-params-staging))
-      RIEMANN_PODSTATUS_PARAMS: ((riemann-podstatus-params-staging))
       TARGET_ENVIRONMENT: staging
   - *lint-manifest
   - put: kubernetes-staging-deployment
@@ -418,11 +411,6 @@ jobs:
     file: pipeline-tasks/bosh-errand.yml
     params:
       BOSH_ERRAND: create-kubernetes-dns
-      <<: *bosh-errand-staging
-  - task: create-kubernetes-monitoring
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: create-kubernetes-monitoring
       <<: *bosh-errand-staging
   - task: apply-kubernetes-manifests
     file: pipeline-tasks/bosh-errand.yml
@@ -596,7 +584,6 @@ jobs:
     params:
       CLOUDWATCH_PARAMS: ((cloudwatch-params-production))
       KUBE2IAM_PARAMS: ((kube2iam-params-production))
-      RIEMANN_PODSTATUS_PARAMS: ((riemann-podstatus-params-production))
       TARGET_ENVIRONMENT: production
   - *lint-manifest
   - put: kubernetes-production-deployment
@@ -605,11 +592,6 @@ jobs:
     file: pipeline-tasks/bosh-errand.yml
     params:
       BOSH_ERRAND: create-kubernetes-dns
-      <<: *bosh-errand-production
-  - task: create-kubernetes-monitoring
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: create-kubernetes-monitoring
       <<: *bosh-errand-production
   - task: apply-kubernetes-manifests
     file: pipeline-tasks/bosh-errand.yml

@@ -140,16 +140,6 @@ instance_groups:
         recreate: true
       - content: (( file "manifests/fluentd-cloudwatch.yaml" ))
         recreate: true
-      - content: (( file "manifests/riemann-podstatus.yaml" ))
-        recreate: true
-
-- name: create-kubernetes-monitoring
-  vm_extensions: [kubernetes-sg, errand-profile]
-  jobs:
-  - name: create-kubernetes-monitoring
-    properties:
-      heapster:
-        sink: (( concat "riemann:riemann://" terraform_outputs.monitoring_ip_address ":5555" ))
 
 update:
   canaries: 0
