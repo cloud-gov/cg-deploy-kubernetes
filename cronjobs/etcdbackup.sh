@@ -3,7 +3,6 @@
 set -eux
 
 # the tools we need
-RIEMANNC=/var/vcap/jobs/riemannc/bin/riemannc
 AWSCLI=/var/vcap/packages/awslogs/bin/aws
 ETCDCTL=/var/vcap/packages/etcd/etcdctl
 
@@ -33,6 +32,12 @@ ${AWSCLI} s3 cp --sse AES256 ${ARCHIVE} s3://${S3_BUCKET_NAME}/$(date +%Y%m%d-%H
 rm ${ARCHIVE}
 rm -r ${BACKUP_DIR}
 
-# ping riemann
-TTL=1800
-${RIEMANNC} --service "kubernetes.etcd.backup" --host $(hostname) --ttl ${TTL} --metric_sint64 $(date +%s)
+# Write backup timestamp to prometheus
+tempfile=`mktemp`
+
+cat <<EOF > ${tempfile}
+# HELP kubernetes_etcd_backup Kubernetes etcd backup timestamp
+kubernetes_etcd_backup {environment="${ENVIRONMENT}"} $(date +%s)
+EOF
+
+mv ${tempfile} /var/vcap/jobs/node_exporter/config/etcd-backup.prom
