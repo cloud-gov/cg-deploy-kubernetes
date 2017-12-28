@@ -33,11 +33,11 @@ rm ${ARCHIVE}
 rm -r ${BACKUP_DIR}
 
 # Write backup timestamp to prometheus
-tempfile=`mktemp`
+tempfile=$(mktemp)
 
-cat <<EOF > ${tempfile}
+cat <<METRICS > ${tempfile}
 # HELP kubernetes_etcd_backup Kubernetes etcd backup timestamp
 kubernetes_etcd_backup {environment="${ENVIRONMENT}"} $(date +%s)
-EOF
+METRICS
 
 mv ${tempfile} /var/vcap/jobs/node_exporter/config/etcd-backup.prom
