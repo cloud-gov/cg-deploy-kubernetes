@@ -1,0 +1,7 @@
+applications:
+- name: elasticsearch56-test
+  buildpack: go_buildpack
+  command: elasticsearch56-test
+  memory: 128M
+  env:
+    GOPACKAGENAME: elasticsearch56-test

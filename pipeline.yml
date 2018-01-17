@@ -374,6 +374,18 @@ jobs:
         K8S_USERNAME: ((cluster-username-development))
         K8S_PASSWORD: ((cluster-password-development))
         K8S_APISERVER: ((api-server-development))
+    - task: acceptance-test-elasticsearch56-ha
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-development-tests
+        SERVICE_NAME: elasticsearch56
+        PLAN_NAME: medium-ha
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch56
+        # EXTRA TESTS are executed with CWD = TEST_PATH
+        EXTRA_TESTS: ./elastic-ha.sh
+        K8S_USERNAME: ((cluster-username-development))
+        K8S_PASSWORD: ((cluster-password-development))
+        K8S_APISERVER: ((api-server-development))
 
 - name: deploy-kubernetes-staging
   serial: true

@@ -14,7 +14,7 @@ function check_service() {
       return 1
     fi
     let counter-=1
-    sleep 5
+    sleep 30
   done
   return 1
 }
