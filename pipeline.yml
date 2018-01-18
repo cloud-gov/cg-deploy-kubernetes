@@ -132,6 +132,10 @@ params:
       SERVICE_NAME: elasticsearch24
       PLAN_NAME: 1x
       TEST_PATH: kubernetes-config/acceptance/elasticsearch24
+    elasticsearch56-tests: &elasticsearch56-tests
+      SERVICE_NAME: elasticsearch56
+      PLAN_NAME: medium
+      TEST_PATH: kubernetes-config/acceptance/elasticsearch56
 
 jobs:
 - name: fluentd-cloudwatch
@@ -317,7 +321,7 @@ jobs:
   - aggregate:
     - get: kubernetes-config
       resource: kubernetes-config-development
-      passed: [deploy-kubernetes-broker-development]
+      # passed: [deploy-kubernetes-broker-development]
       trigger: true
     - get: kubernetes-broker
       resource: kubernetes-broker-development
@@ -374,6 +378,11 @@ jobs:
         K8S_USERNAME: ((cluster-username-development))
         K8S_PASSWORD: ((cluster-password-development))
         K8S_APISERVER: ((api-server-development))
+    - task: acceptance-test-elasticsearch56
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-development-tests
+        <<: *elasticsearch56-tests
     - task: acceptance-test-elasticsearch56-ha
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:

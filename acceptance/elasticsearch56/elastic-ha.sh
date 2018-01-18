@@ -128,7 +128,7 @@ fi
 NUM_DATA=$(data_count)
 
 # get a random data node
-DATA_NODE=$(curl -s https://${url}/cluster-state | jq -r '.nodes | map(select(.attributes.master=="false")) | .[].name' | shuf | head -1)
+DATA_NODE=$(curl -s "https://${url}/cluster-nodes" | jq -r '.nodes | map(select(.settings.node.data=="true")) | .[].name' | shuf | head -1)
 
 # kill it
 curl -ks -u"${K8S_USERNAME}:${K8S_PASSWORD}" ${K8S_APISERVER}/api/v1/namespaces/default/pods/${DATA_NODE} -XDELETE
