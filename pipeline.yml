@@ -4,6 +4,8 @@ groups:
   jobs:
   - fluentd-cloudwatch
   - elasticsearch-24
+  - elasticsearch-56
+  - nginx
   - mongo-32
   - redis32
   - deploy-kubernetes-development
@@ -44,6 +46,8 @@ groups:
   jobs:
   - fluentd-cloudwatch
   - elasticsearch-24
+  - elasticsearch-56
+  - nginx
   - mongo-32
   - elasticsearch-base
   - elasticsearch-ha
@@ -153,6 +157,20 @@ jobs:
   - put: docker-hub-elasticsearch-24
     params:
       build: kubernetes-broker-images/custom_images/docker-elasticsearch-kubernetes-auth-24
+- name: elasticsearch-56
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - put: docker-hub-elasticsearch-56
+    params:
+      build: kubernetes-broker-images/custom_images/elasticsearch-56
+- name: nginx
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - put: docker-hub-nginx
+    params:
+      build: kubernetes-broker-images/custom_images/nginx
 - name: mongo-32
   plan:
   - get: kubernetes-broker-images
@@ -321,7 +339,7 @@ jobs:
   - aggregate:
     - get: kubernetes-config
       resource: kubernetes-config-development
-      # passed: [deploy-kubernetes-broker-development]
+      passed: [deploy-kubernetes-broker-development]
       trigger: true
     - get: kubernetes-broker
       resource: kubernetes-broker-development
@@ -1097,8 +1115,26 @@ resources:
     email: ((docker-email))
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-repo-elastic))
+    repository: ((docker-repo-elastic24))
     tag: ((docker-tag-elasticsearch-24))
+
+- name: docker-hub-elasticsearch-56
+  type: docker-image
+  source:
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-elastic56))
+    tag: ((docker-tag-elasticsearch-56))
+
+- name: docker-hub-nginx
+  type: docker-image
+  source:
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-nginx))
+    tag: ((docker-tag-nginx))
 
 - name: docker-hub-mongo-32
   type: docker-image
