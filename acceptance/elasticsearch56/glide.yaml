@@ -1,0 +1,6 @@
+package: elasticsearch56-test
+import:
+- package: github.com/cloudfoundry-community/go-cfenv
+  version: ~1.17.0
+- package: gopkg.in/olivere/elastic.v5
+  version: ~6.1.2

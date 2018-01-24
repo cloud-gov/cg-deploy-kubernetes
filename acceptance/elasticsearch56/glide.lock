@@ -1,0 +1,23 @@
+hash: 7d1b50912959e111fe6d024e668dfe47cc20b2a453af42148185d24e4f230d53
+updated: 2018-01-17T11:44:23.32533-05:00
+imports:
+- name: github.com/cloudfoundry-community/go-cfenv
+  version: f920e9562d5f951cbf11785728f67258c38a10d0
+- name: github.com/mailru/easyjson
+  version: 32fa128f234d041f196a9f3e0fea5ac9772c08e1
+  subpackages:
+  - buffer
+  - jlexer
+  - jwriter
+- name: github.com/mitchellh/mapstructure
+  version: d2dd0262208475919e1a362f675cfc0e7c10e905
+- name: github.com/olivere/elastic
+  version: e771061479895d1c7dffafd0d90ead7c9456d7cb
+  subpackages:
+  - config
+  - uritemplates
+- name: github.com/pkg/errors
+  version: 2b3a18b5f0fb6b4f9190549597d3f962c02bc5eb
+- name: gopkg.in/olivere/elastic.v5
+  version: e771061479895d1c7dffafd0d90ead7c9456d7cb
+testImports: []

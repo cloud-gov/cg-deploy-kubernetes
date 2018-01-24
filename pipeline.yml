@@ -4,6 +4,8 @@ groups:
   jobs:
   - fluentd-cloudwatch
   - elasticsearch-24
+  - elasticsearch-56
+  - nginx
   - mongo-32
   - redis32
   - deploy-kubernetes-development
@@ -44,6 +46,8 @@ groups:
   jobs:
   - fluentd-cloudwatch
   - elasticsearch-24
+  - elasticsearch-56
+  - nginx
   - mongo-32
   - elasticsearch-base
   - elasticsearch-ha
@@ -132,6 +136,10 @@ params:
       SERVICE_NAME: elasticsearch24
       PLAN_NAME: 1x
       TEST_PATH: kubernetes-config/acceptance/elasticsearch24
+    elasticsearch56-tests: &elasticsearch56-tests
+      SERVICE_NAME: elasticsearch56
+      PLAN_NAME: medium
+      TEST_PATH: kubernetes-config/acceptance/elasticsearch56
 
 jobs:
 - name: fluentd-cloudwatch
@@ -149,6 +157,20 @@ jobs:
   - put: docker-hub-elasticsearch-24
     params:
       build: kubernetes-broker-images/custom_images/docker-elasticsearch-kubernetes-auth-24
+- name: elasticsearch-56
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - put: docker-hub-elasticsearch-56
+    params:
+      build: kubernetes-broker-images/custom_images/elasticsearch-56
+- name: nginx
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - put: docker-hub-nginx
+    params:
+      build: kubernetes-broker-images/custom_images/nginx
 - name: mongo-32
   plan:
   - get: kubernetes-broker-images
@@ -369,6 +391,23 @@ jobs:
         SERVICE_NAME: elasticsearch24
         PLAN_NAME: medium-ha
         TEST_PATH: kubernetes-config/acceptance/elasticsearch24
+        # EXTRA TESTS are executed with CWD = TEST_PATH
+        EXTRA_TESTS: ./elastic-ha.sh
+        K8S_USERNAME: ((cluster-username-development))
+        K8S_PASSWORD: ((cluster-password-development))
+        K8S_APISERVER: ((api-server-development))
+    - task: acceptance-test-elasticsearch56
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-development-tests
+        <<: *elasticsearch56-tests
+    - task: acceptance-test-elasticsearch56-ha
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-development-tests
+        SERVICE_NAME: elasticsearch56
+        PLAN_NAME: medium-ha
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch56
         # EXTRA TESTS are executed with CWD = TEST_PATH
         EXTRA_TESTS: ./elastic-ha.sh
         K8S_USERNAME: ((cluster-username-development))
@@ -1076,8 +1115,26 @@ resources:
     email: ((docker-email))
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-repo-elastic))
+    repository: ((docker-repo-elastic24))
     tag: ((docker-tag-elasticsearch-24))
+
+- name: docker-hub-elasticsearch-56
+  type: docker-image
+  source:
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-elastic56))
+    tag: ((docker-tag-elasticsearch-56))
+
+- name: docker-hub-nginx
+  type: docker-image
+  source:
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-nginx))
+    tag: ((docker-tag-nginx))
 
 - name: docker-hub-mongo-32
   type: docker-image
