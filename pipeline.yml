@@ -587,6 +587,23 @@ jobs:
         K8S_USERNAME: ((cluster-username-staging))
         K8S_PASSWORD: ((cluster-password-staging))
         K8S_APISERVER: ((api-server-staging))
+    - task: acceptance-test-elasticsearch56
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-staging-tests
+        <<: *elasticsearch56-tests
+    - task: acceptance-test-elasticsearch56-ha
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-staging-tests
+        SERVICE_NAME: elasticsearch56
+        PLAN_NAME: medium-ha
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch56
+        # EXTRA TESTS are executed with CWD = TEST_PATH
+        EXTRA_TESTS: ./elastic-ha.sh
+        K8S_USERNAME: ((cluster-username-staging))
+        K8S_PASSWORD: ((cluster-password-staging))
+        K8S_APISERVER: ((api-server-staging))
 
 - name: deploy-kubernetes-production
   serial: true
@@ -755,6 +772,23 @@ jobs:
         K8S_USERNAME: ((cluster-username-production))
         K8S_PASSWORD: ((cluster-password-production))
         K8S_APISERVER: ((api-server-production))
+    - task: acceptance-test-elasticsearch56
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-staging-tests
+        <<: *elasticsearch56-tests
+    - task: acceptance-test-elasticsearch56-ha
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-staging-tests
+        SERVICE_NAME: elasticsearch56
+        PLAN_NAME: medium-ha
+        TEST_PATH: kubernetes-config/acceptance/elasticsearch56
+        # EXTRA TESTS are executed with CWD = TEST_PATH
+        EXTRA_TESTS: ./elastic-ha.sh
+        K8S_USERNAME: ((cluster-username-staging))
+        K8S_PASSWORD: ((cluster-password-staging))
+        K8S_APISERVER: ((api-server-staging))
 
 - name: test-exporter
   plan:
