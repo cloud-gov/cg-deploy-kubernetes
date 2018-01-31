@@ -135,6 +135,15 @@ func main() {
 
 	// Create elasticsearch client
 	var err error
+
+	client, err = elastic.NewClient(
+		elastic.SetURL("http://"+creds["hostname"].(string)+":"+creds["port"].(string)),
+		elastic.SetSniff(false),
+	)
+	if err == nil {
+		log.Fatalf("error: must not be able to connect without credentials")
+	}
+
 	client, err = elastic.NewClient(
 		elastic.SetURL("http://"+creds["hostname"].(string)+":"+creds["port"].(string)),
 		elastic.SetBasicAuth(creds["username"].(string), creds["password"].(string)),
