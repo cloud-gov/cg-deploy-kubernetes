@@ -61,11 +61,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Get mongodb32 credentials
+	// Get service credentials
 	env, _ := cfenv.Current()
-	services, _ := env.Services.WithLabel("mongodb32")
+	services, _ := env.Services.WithTag("mongo")
 	if len(services) != 1 {
-		log.Fatal("mongodb32service not found")
+		log.Fatal("mongo service not found")
 	}
 	creds := services[0].Credentials
 
