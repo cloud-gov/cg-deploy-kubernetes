@@ -1,7 +1,7 @@
 applications:
-- name: mongodb32-test
+- name: mongodb-test
   buildpack: go_buildpack
-  command: mongodb32-test
+  command: mongodb-test
   memory: 128M
   env:
-    GOPACKAGENAME: mongodb32-test
+    GOPACKAGENAME: mongodb-test

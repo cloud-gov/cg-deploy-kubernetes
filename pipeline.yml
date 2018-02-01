@@ -7,6 +7,7 @@ groups:
   - elasticsearch-56
   - nginx
   - mongo-32
+  - mongo-36
   - redis32
   - deploy-kubernetes-development
   - deploy-kubernetes-broker-development
@@ -49,6 +50,7 @@ groups:
   - elasticsearch-56
   - nginx
   - mongo-32
+  - mongo-36
   - elasticsearch-base
   - elasticsearch-ha
   - redis32
@@ -130,6 +132,12 @@ params:
       TEST_PATH: kubernetes-config/acceptance/redis32
     mongodb32-tests: &mongodb32-tests
       SERVICE_NAME: mongodb32
+      SERVICE_LABEL: mongodb32
+      PLAN_NAME: standard
+      TEST_PATH: kubernetes-config/acceptance/mongodb32
+    mongodb36-tests: &mongodb36-tests
+      SERVICE_NAME: mongodb36
+      SERVICE_LABEL: mongodb36
       PLAN_NAME: standard
       TEST_PATH: kubernetes-config/acceptance/mongodb32
     elasticsearch24-tests: &elasticsearch24-tests
@@ -178,6 +186,13 @@ jobs:
   - put: docker-hub-mongo-32
     params:
       build: kubernetes-broker-images/custom_images/mongo32
+- name: mongo-36
+  plan:
+  - get: kubernetes-broker-images
+    trigger: true
+  - put: docker-hub-mongo-36
+    params:
+      build: kubernetes-broker-images/custom_images/mongo36
 - name: elasticsearch-base
   plan:
   - get: erry-day
@@ -379,6 +394,11 @@ jobs:
       params:
         <<: *cf-development-tests
         <<: *mongodb32-tests
+    - task: acceptance-test-mongo36-standard
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-development-tests
+        <<: *mongodb36-tests
     - task: acceptance-test-elasticsearch24-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -1176,8 +1196,17 @@ resources:
     email: ((docker-email))
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-repo-mongo))
-    tag: ((docker-tag-mongo))
+    repository: ((docker-repo-mongo-32))
+    tag: ((docker-tag-mongo-32))
+
+- name: docker-hub-mongo-36
+  type: docker-image
+  source:
+    email: ((docker-email))
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repo-mongo-36))
+    tag: ((docker-tag-mongo-36))
 
 - name: docker-hub-elasticsearch-base
   type: docker-image
