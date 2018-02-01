@@ -590,6 +590,11 @@ jobs:
       params:
         <<: *cf-staging-tests
         <<: *mongodb32-tests
+    - task: acceptance-test-mongo36-standard
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-staging-tests
+        <<: *mongodb36-tests
     - task: acceptance-test-elasticsearch24-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -722,14 +727,24 @@ jobs:
         CF_TOKEN_URL: ((cf-token-url-production))
         CF_API_ENDPOINT: ((cf-api-url-production))
         CF_TOKEN_KEY: ((cf-token-key-production))
-  - task: register-service-broker-production
-    file: pipeline-tasks/register-service-broker.yml
-    params:
-      <<: *cf-production
-      BROKER_NAME: kubernetes-broker
-      AUTH_USER: ((broker-auth-user-production))
-      AUTH_PASS: ((broker-auth-pass-production))
-      SERVICES: ((broker-service-names-production))
+  - aggregate:
+    - task: register-service-broker-production
+      file: pipeline-tasks/register-service-broker.yml
+      params:
+        <<: *cf-production
+        BROKER_NAME: kubernetes-broker
+        AUTH_USER: ((broker-auth-user-production))
+        AUTH_PASS: ((broker-auth-pass-production))
+        SERVICES: ((broker-service-names-production))
+    - task: register-service-broker-restricted-production
+      file: pipeline-tasks/register-service-broker.yml
+      params:
+        <<: *cf-production
+        BROKER_NAME: kubernetes-broker
+        AUTH_USER: ((broker-auth-user-production))
+        AUTH_PASS: ((broker-auth-pass-production))
+        SERVICES: ((broker-service-names-restricted-production))
+        SERVICE_ORGANIZATION: ((broker-service-organization-restricted-production))
 
 - name: acceptance-tests-production
   serial: true
@@ -775,6 +790,11 @@ jobs:
       params:
         <<: *cf-production-tests
         <<: *mongodb32-tests
+    - task: acceptance-test-mongo36-standard
+      file: kubernetes-config/acceptance/run-acceptance-test.yml
+      params:
+        <<: *cf-production-tests
+        <<: *mongodb36-tests
     - task: acceptance-test-elasticsearch24-persistent
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
