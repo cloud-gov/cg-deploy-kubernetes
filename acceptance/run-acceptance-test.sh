@@ -7,10 +7,10 @@ set -x
 function check_service() {
   counter=180
   until [ $counter -le 0 ]; do
-    status=$(cf service ${SERVICE_INSTANCE_NAME})
-    if echo ${status} | grep "Status: create succeeded"; then
+    status=$(cf service ${SERVICE_INSTANCE_NAME} | grep "status:")
+    if echo ${status} | grep "create succeeded"; then
       return 0
-    elif echo ${status} | grep "Status: create failed"; then
+    elif echo ${status} | grep "create failed"; then
       return 1
     fi
     let counter-=1
