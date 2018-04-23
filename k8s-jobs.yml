@@ -110,6 +110,14 @@ instance_groups:
         variables:
           IMAGES: >-
             busybox
+            18fgsa/docker-elasticsearch-kubernetes-auth:2.4.1
+            18fgsa/k8s-elasticsearch:5.6.5
+            18fgsa/k8s-nginx-elasticsearch:1.13.8
+            18fgsa/fluentd-cloudwatch:0.1.0
+            18fgsa/elasticsearch:2.4.4
+            18fgsa/elasticsearch-ha:2.4.4
+            18fgsa/mongo:3.2.10
+            18fgsa/k8s-mongo:3.6.2
             18fgsa/elasticsearch-ha:2.4.4
             18fgsa/redis:3.2.10
             18fgsa/redis-server-init:3.2.10
