@@ -346,7 +346,10 @@ jobs:
       BROKER_NAME: kubernetes-broker
       AUTH_USER: ((broker-auth-user-development))
       AUTH_PASS: ((broker-auth-pass-development))
-      SERVICES: ((broker-service-names-development))
+      SERVICES: redis28:standard redis32:standard redis32:standard-ha
+        elasticsearch24:1x elasticsearch24:3x elasticsearch24:6x elasticsearch24:12x elasticsearch24:medium-ha
+        elasticsearch56:medium elasticsearch56:medium-ha
+        mongodb36:standard
 
 - name: acceptance-tests-development
   serial: true
@@ -534,7 +537,10 @@ jobs:
       BROKER_NAME: kubernetes-broker
       AUTH_USER: ((broker-auth-user-staging))
       AUTH_PASS: ((broker-auth-pass-staging))
-      SERVICES: ((broker-service-names-staging))
+      SERVICES: redis28:standard redis32:standard redis32:standard-ha
+        elasticsearch24:1x elasticsearch24:3x elasticsearch24:6x elasticsearch24:12x elasticsearch24:medium-ha
+        elasticsearch56:medium elasticsearch56:medium-ha
+        mongodb36:standard
 
 - name: acceptance-tests-staging
   serial: true
@@ -735,7 +741,9 @@ jobs:
         BROKER_NAME: kubernetes-broker
         AUTH_USER: ((broker-auth-user-production))
         AUTH_PASS: ((broker-auth-pass-production))
-        SERVICES: ((broker-service-names-production))
+        SERVICES: redis28:standard redis32:standard redis32:standard-ha
+          elasticsearch24:1x elasticsearch24:3x elasticsearch24:6x elasticsearch24:medium-ha
+          elasticsearch56:medium elasticsearch56:medium-ha
     - task: register-service-broker-restricted-production
       file: pipeline-tasks/register-service-broker.yml
       params:
@@ -743,7 +751,7 @@ jobs:
         BROKER_NAME: kubernetes-broker
         AUTH_USER: ((broker-auth-user-production))
         AUTH_PASS: ((broker-auth-pass-production))
-        SERVICES: ((broker-service-names-restricted-production))
+        SERVICES: mongodb36:standard
         SERVICE_ORGANIZATION: ((broker-service-organization-restricted-production))
 
 - name: acceptance-tests-production
