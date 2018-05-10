@@ -793,11 +793,6 @@ jobs:
         K8S_USERNAME: ((cluster-username-production))
         K8S_PASSWORD: ((cluster-password-production))
         K8S_APISERVER: ((api-server-production))
-    - task: acceptance-test-mongo32-standard
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-production-tests
-        <<: *mongodb32-tests
     - task: acceptance-test-mongo36-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
