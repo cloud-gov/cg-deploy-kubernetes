@@ -6,7 +6,6 @@ groups:
   - elasticsearch-24
   - elasticsearch-56
   - nginx
-  - mongo-32
   - mongo-36
   - redis32
   - deploy-kubernetes-development
@@ -49,7 +48,6 @@ groups:
   - elasticsearch-24
   - elasticsearch-56
   - nginx
-  - mongo-32
   - mongo-36
   - elasticsearch-base
   - elasticsearch-ha
@@ -130,16 +128,11 @@ params:
       SERVICE_NAME: redis32
       PLAN_NAME: standard-ha
       TEST_PATH: kubernetes-config/acceptance/redis32
-    mongodb32-tests: &mongodb32-tests
-      SERVICE_NAME: mongodb32
-      SERVICE_LABEL: mongodb32
-      PLAN_NAME: standard
-      TEST_PATH: kubernetes-config/acceptance/mongodb32
     mongodb36-tests: &mongodb36-tests
       SERVICE_NAME: mongodb36
       SERVICE_LABEL: mongodb36
       PLAN_NAME: standard
-      TEST_PATH: kubernetes-config/acceptance/mongodb32
+      TEST_PATH: kubernetes-config/acceptance/mongodb36
     elasticsearch24-tests: &elasticsearch24-tests
       SERVICE_NAME: elasticsearch24
       PLAN_NAME: 1x
@@ -179,13 +172,6 @@ jobs:
   - put: docker-hub-nginx
     params:
       build: kubernetes-broker-images/custom_images/nginx
-- name: mongo-32
-  plan:
-  - get: kubernetes-broker-images
-    trigger: true
-  - put: docker-hub-mongo-32
-    params:
-      build: kubernetes-broker-images/custom_images/mongo32
 - name: mongo-36
   plan:
   - get: kubernetes-broker-images
@@ -392,11 +378,6 @@ jobs:
         K8S_USERNAME: ((cluster-username-development))
         K8S_PASSWORD: ((cluster-password-development))
         K8S_APISERVER: ((api-server-development))
-    - task: acceptance-test-mongo32-standard
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-development-tests
-        <<: *mongodb32-tests
     - task: acceptance-test-mongo36-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -591,11 +572,6 @@ jobs:
         K8S_USERNAME: ((cluster-username-staging))
         K8S_PASSWORD: ((cluster-password-staging))
         K8S_APISERVER: ((api-server-staging))
-    - task: acceptance-test-mongo32-standard
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        <<: *mongodb32-tests
     - task: acceptance-test-mongo36-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -1212,15 +1188,6 @@ resources:
     password: ((docker-password))
     repository: ((docker-repo-nginx))
     tag: ((docker-tag-nginx))
-
-- name: docker-hub-mongo-32
-  type: docker-image
-  source:
-    email: ((docker-email))
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-repo-mongo-32))
-    tag: ((docker-tag-mongo-32))
 
 - name: docker-hub-mongo-36
   type: docker-image
