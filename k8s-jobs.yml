@@ -133,6 +133,15 @@ instance_groups:
           month: '*'
           wday: '*'
           user: root
+        - script:
+            name: docker-cleanup.sh
+            contents: (( file "cronjobs/docker-cleanup.sh" ))
+          minute: '0'
+          hour: '12'
+          day: '*'
+          month: '*'
+          wday: '*'
+          user: root
 
 - name: create-kubernetes-dns
   vm_extensions: [kubernetes-sg, errand-profile]
