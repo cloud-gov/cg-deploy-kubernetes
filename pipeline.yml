@@ -432,8 +432,7 @@ jobs:
       trigger: true
     - get: kubernetes-release-tarball
       trigger: true
-    - get: common-secret
-      resource: common-staging
+    - get: common-staging
       trigger: true
     - get: kubernetes-stemcell
       trigger: true
@@ -450,6 +449,8 @@ jobs:
   - *lint-manifest
   - put: kubernetes-staging-deployment
     params: *deployment-params
+      vars_files:
+      - common-staging/kubernetes-staging-decrypted.yml
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
     params:
@@ -1026,12 +1027,12 @@ resources:
     bosh_cert: bosh.pem
 
 - name: common-staging
-  type: cg-common
+  type: s3_iam
   source:
-    region: ((aws-region))
-    bucket_name: ((kubernetes-staging-private-bucket))
-    secrets_file: staging-kubernetes.yml
-    secrets_passphrase: ((kubernetes-staging-private-passphrase))
+    region_name: ((aws-region))
+    bucket: ((kubernetes-staging-private-bucket))
+    versioned_file: staging-kubernetes-decrypted.yml
+
     bosh_cert: bosh.pem
 
 - name: common-production
