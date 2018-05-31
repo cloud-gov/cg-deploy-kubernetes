@@ -24,7 +24,7 @@ spruce merge \
   kubernetes-release/templates/k8s-deployment.yml \
   kubernetes-release/templates/k8s-jobs.yml \
   kubernetes-release/templates/k8s-infrastructure-aws.yml \
-  common-secret/secrets.yml \
+  common-secret/${TARGET_ENVIRONMENT}-kubernetes-decrypted.yml \
   kubernetes-config/k8s-jobs.yml \
   kubernetes-config/infrastructure-aws-${TARGET_ENVIRONMENT}.yml \
   terraform-yaml/state.yml \
