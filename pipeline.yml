@@ -448,9 +448,15 @@ jobs:
       TARGET_ENVIRONMENT: staging
   - *lint-manifest
   - put: kubernetes-staging-deployment
-    params: *deployment-params
+    params:
+      manifest: kubernetes-manifest/manifest.yml
+      releases:
+      - kubernetes-release-tarball/*.tgz
+      - consul-boshrelease/*.tgz
+      stemcells:
+      - kubernetes-stemcell/*.tgz
       vars_files:
-      - common-staging/kubernetes-staging-decrypted.yml
+      - common-staging/staging-kubernetes-decrypted.yml
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
     params:
@@ -1027,13 +1033,11 @@ resources:
     bosh_cert: bosh.pem
 
 - name: common-staging
-  type: s3_iam
+  type: s3-iam
   source:
     region_name: ((aws-region))
     bucket: ((kubernetes-staging-private-bucket))
     versioned_file: staging-kubernetes-decrypted.yml
-
-    bosh_cert: bosh.pem
 
 - name: common-production
   type: cg-common
