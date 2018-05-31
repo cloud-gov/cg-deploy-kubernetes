@@ -432,7 +432,8 @@ jobs:
       trigger: true
     - get: kubernetes-release-tarball
       trigger: true
-    - get: common-staging
+    - get: common-secret
+      resource: common-staging
       trigger: true
     - get: kubernetes-stemcell
       trigger: true
@@ -448,15 +449,7 @@ jobs:
       TARGET_ENVIRONMENT: staging
   - *lint-manifest
   - put: kubernetes-staging-deployment
-    params:
-      manifest: kubernetes-manifest/manifest.yml
-      releases:
-      - kubernetes-release-tarball/*.tgz
-      - consul-boshrelease/*.tgz
-      stemcells:
-      - kubernetes-stemcell/*.tgz
-      vars_files:
-      - common-staging/staging-kubernetes-decrypted.yml
+    params: *deployment-params
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
     params:
