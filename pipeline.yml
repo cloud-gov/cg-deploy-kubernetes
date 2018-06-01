@@ -1017,31 +1017,25 @@ resources:
     repository: cloudfoundry-community/consul-boshrelease
 
 - name: common-development
-  type: cg-common
+  type: s3-iam
   source:
-    region: ((aws-region))
-    bucket_name: ((kubernetes-development-private-bucket))
-    secrets_file: development-kubernetes.yml
-    secrets_passphrase: ((kubernetes-development-private-passphrase))
-    bosh_cert: bosh.pem
+    region_name: ((aws-region))
+    bucket: ((kubernetes-development-private-bucket))
+    versioned_file: development-kubernetes.yml
 
 - name: common-staging
-  type: cg-common
+  type: s3-iam
   source:
-    region: ((aws-region))
-    bucket_name: ((kubernetes-staging-private-bucket))
-    secrets_file: staging-kubernetes.yml
-    secrets_passphrase: ((kubernetes-staging-private-passphrase))
-    bosh_cert: bosh.pem
+    region_name: ((aws-region))
+    bucket: ((kubernetes-staging-private-bucket))
+    versioned_file: staging-kubernetes.yml
 
 - name: common-production
-  type: cg-common
+  type: s3-iam
   source:
-    region: ((aws-region))
-    bucket_name: ((kubernetes-production-private-bucket))
-    secrets_file: production-kubernetes.yml
-    secrets_passphrase: ((kubernetes-production-private-passphrase))
-    bosh_cert: bosh.pem
+    region_name: ((aws-region))
+    bucket: ((kubernetes-production-private-bucket))
+    versioned_file: production-kubernetes.yml
 
 - name: kubernetes-development-deployment
   type: bosh-deployment
