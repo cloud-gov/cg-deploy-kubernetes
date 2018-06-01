@@ -1030,13 +1030,12 @@ resources:
     bucket: ((kubernetes-staging-private-bucket))
     versioned_file: staging-kubernetes.yml
 
-
 - name: common-production
   type: s3-iam
   source:
     region_name: ((aws-region))
     bucket: ((kubernetes-production-private-bucket))
-    secrets_file: production-kubernetes.yml
+    versioned_file: production-kubernetes.yml
 
 - name: kubernetes-development-deployment
   type: bosh-deployment
