@@ -948,7 +948,7 @@ resources:
 - name: master-bosh-root-cert
   type: s3-iam
   source:
-    bucket: ((kubernetes-production-private-bucket))
+    bucket: ((kubernetes-private-bucket))
     region_name: ((aws-region))
     versioned_file: master-bosh.crt
 
@@ -1020,21 +1020,21 @@ resources:
   type: s3-iam
   source:
     region_name: ((aws-region))
-    bucket: ((kubernetes-development-private-bucket))
+    bucket: ((kubernetes-private-bucket))
     versioned_file: development-kubernetes.yml
 
 - name: common-staging
   type: s3-iam
   source:
     region_name: ((aws-region))
-    bucket: ((kubernetes-staging-private-bucket))
+    bucket: ((kubernetes-private-bucket))
     versioned_file: staging-kubernetes.yml
 
 - name: common-production
   type: s3-iam
   source:
     region_name: ((aws-region))
-    bucket: ((kubernetes-production-private-bucket))
+    bucket: ((kubernetes-private-bucket))
     versioned_file: production-kubernetes.yml
 
 - name: kubernetes-development-deployment
