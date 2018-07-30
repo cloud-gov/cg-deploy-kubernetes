@@ -62,10 +62,17 @@ instance_groups:
     - (( grab terraform_outputs.kubernetes_static_ips.[7] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[8] ))
   jobs:
+  - name: kubernetes-minion
+    properties:
+      labels:
+        role: master
   - name: kubernetes-master
     properties:
       consul:
         encrypt: (( grab instance_groups.consul.jobs.consul.properties.consul.encrypt ))
+      kube2consul:
+        args:
+          node-selector: "role!=master"
   - name: docker
     properties:
       docker:
