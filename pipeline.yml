@@ -234,7 +234,7 @@ jobs:
     - get: common-secret
       resource: common-development
       trigger: true
-    - get: kubernetes-stemcell
+    - get: kubernetes-stemcell-xenial
       trigger: true
     - get: consul-boshrelease
       trigger: true
@@ -261,7 +261,7 @@ jobs:
       - kubernetes-release-tarball/*.tgz
       - consul-boshrelease/*.tgz
       stemcells:
-      - kubernetes-stemcell/*.tgz
+      - kubernetes-stemcell-xenial/*.tgz
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
     params:
@@ -435,7 +435,7 @@ jobs:
     - get: common-secret
       resource: common-staging
       trigger: true
-    - get: kubernetes-stemcell
+    - get: kubernetes-stemcell-xenial
       trigger: true
     - get: consul-boshrelease
       trigger: true
@@ -540,7 +540,7 @@ jobs:
         submodules: none
     - get: kubernetes-release-tarball
       passed: [deploy-kubernetes-staging]
-    - get: kubernetes-stemcell
+    - get: kubernetes-stemcell-xenial
     - get: consul-boshrelease
       passed: [deploy-kubernetes-staging]
   - task: clear-acceptance-space
@@ -634,7 +634,7 @@ jobs:
     - get: common-secret
       resource: common-production
       trigger: false
-    - get: kubernetes-stemcell
+    - get: kubernetes-stemcell-xenial
       passed: [acceptance-tests-staging]
       trigger: false
     - get: consul-boshrelease
@@ -1006,10 +1006,10 @@ resources:
     uri: ((exporter-src-development-git-uri))
     branch: ((exporter-src-development-git-branch))
 
-- name: kubernetes-stemcell
+- name: kubernetes-stemcell-xenial
   type: bosh-io-stemcell
   source:
-    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+    name: bosh-aws-xen-hvm-ubuntu-xenial-go_agent
 
 - name: consul-boshrelease
   type: bosh-io-release
