@@ -17,17 +17,11 @@ spruce merge --prune meta kubernetes-config/manifests/kube2iam-template.yaml \
   ./kube2iam-params.yaml \
   > kubernetes-config/manifests/kube2iam.yaml
 
-cat << EOF > ./tags.yaml
-tags:
-  KubernetesCluster: kubernetes-${TARGET_ENVIRONMENT}
-EOF
-
 export SPRUCE_FILE_BASE_PATH=./kubernetes-config
 spruce merge \
   --prune meta \
   --prune terraform_outputs \
   kubernetes-release/templates/k8s-deployment.yml \
-  ./tags.yaml \
   kubernetes-release/templates/k8s-jobs.yml \
   kubernetes-release/templates/k8s-infrastructure-aws.yml \
   common-secret/${TARGET_ENVIRONMENT}-kubernetes.yml \
