@@ -3,7 +3,7 @@
 set -eux
 
 # the tools we need
-AWSCLI=/var/vcap/packages/awslogs/bin/aws
+AWSCLI=/var/vcap/packages/awslogs-xenial/venv/bin/aws
 ETCDCTL=/var/vcap/packages/etcd/etcdctl
 
 # location of etcd data store
@@ -25,7 +25,7 @@ ${ETCDCTL} backup --data-dir ${ETCD_DATA_DIR} --backup-dir ${BACKUP_DIR}
 tar -czvf ${ARCHIVE} -C $BACKUP_DIR .
 
 # copy it into s3
-export LD_LIBRARY_PATH=/var/vcap/packages/awslogs/lib
+export LD_LIBRARY_PATH=/var/vcap/packages/awslogs-xenial/venv/lib
 ${AWSCLI} s3 cp --sse AES256 ${ARCHIVE} s3://${S3_BUCKET_NAME}/$(date +%Y%m%d-%H%M).tar.gz
 
 # clean up
