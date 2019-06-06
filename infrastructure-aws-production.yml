@@ -13,7 +13,7 @@ instance_groups:
       aws:
         cluster-tag: kubernetes-production
 - name: minion
-  instances: 14
+  instances: 16
   networks:
   - name: services
     static_ips:
@@ -31,6 +31,8 @@ instance_groups:
     - (( grab terraform_outputs.kubernetes_static_ips.[20] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[21] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[22] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[23] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[24] ))
   jobs:
   - name: kubernetes-minion
     properties:
