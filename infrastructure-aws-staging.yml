@@ -15,6 +15,7 @@ instance_groups:
 - name: minion
   jobs:
   - name: kubernetes-minion
+    instances: 9
     properties:
       aws:
         cluster-tag: kubernetes-staging
