@@ -13,7 +13,7 @@ instance_groups:
       aws:
         cluster-tag: kubernetes-production
 - name: minion
-  instances: 16
+  instances: 19
   networks:
   - name: services
     static_ips:
