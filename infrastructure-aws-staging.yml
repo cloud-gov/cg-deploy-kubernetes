@@ -24,13 +24,13 @@ instance_groups:
     - (( grab terraform_outputs.kubernetes_static_ips.[13] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[14] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[15] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[16] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[17] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[18] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[19] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[20] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[21] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[22] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[23] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[24] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[25] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[26] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[27] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[28] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[29] ))
   jobs:
   - name: kubernetes-minion
     properties:
