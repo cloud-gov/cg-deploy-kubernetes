@@ -217,7 +217,7 @@ jobs:
 - name: deploy-kubernetes-development
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: common
       resource: master-bosh-root-cert
     - get: pipeline-tasks
@@ -294,7 +294,7 @@ jobs:
 - name: deploy-kubernetes-broker-development
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: pipeline-tasks
     - get: kubernetes-broker
       resource: kubernetes-broker-development
@@ -340,7 +340,7 @@ jobs:
 - name: acceptance-tests-development
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: kubernetes-config
       resource: kubernetes-config-development
       passed: [deploy-kubernetes-broker-development]
@@ -352,7 +352,7 @@ jobs:
   - task: clear-acceptance-space
     file: kubernetes-config/acceptance/clear-acceptance-space.yml
     params: *cf-development-tests
-  - aggregate:
+  - in_parallel:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -421,7 +421,7 @@ jobs:
 - name: deploy-kubernetes-staging
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: common
       resource: master-bosh-root-cert
     - get: pipeline-tasks
@@ -482,7 +482,7 @@ jobs:
 - name: deploy-kubernetes-broker-staging
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: pipeline-tasks
     - get: kubernetes-broker
       trigger: true
@@ -526,7 +526,7 @@ jobs:
 - name: acceptance-tests-staging
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-staging]
       trigger: true
@@ -546,7 +546,7 @@ jobs:
   - task: clear-acceptance-space
     file: kubernetes-config/acceptance/clear-acceptance-space.yml
     params: *cf-staging-tests
-  - aggregate:
+  - in_parallel:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -615,7 +615,7 @@ jobs:
 - name: deploy-kubernetes-production
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: common
       resource: master-bosh-root-cert
     - get: pipeline-tasks
@@ -683,7 +683,7 @@ jobs:
 - name: deploy-kubernetes-broker-production
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: pipeline-tasks
     - get: kubernetes-broker
       passed: [acceptance-tests-staging]
@@ -709,7 +709,7 @@ jobs:
         CF_TOKEN_URL: ((cf-token-url-production))
         CF_API_ENDPOINT: ((cf-api-url-production))
         CF_TOKEN_KEY: ((cf-token-key-production))
-  - aggregate:
+  - in_parallel:
     - task: register-service-broker-production
       file: pipeline-tasks/register-service-broker.yml
       params:
@@ -733,7 +733,7 @@ jobs:
 - name: acceptance-tests-production
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-production]
       trigger: true
@@ -743,7 +743,7 @@ jobs:
   - task: clear-acceptance-space
     file: kubernetes-config/acceptance/clear-acceptance-space.yml
     params: *cf-production-tests
-  - aggregate:
+  - in_parallel:
     - task: acceptance-test-redis28-standard
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
@@ -811,7 +811,7 @@ jobs:
 
 - name: test-exporter
   plan:
-  - aggregate:
+  - in_parallel:
     - get: exporter-src
       trigger: true
     - get: kubernetes-config
@@ -820,7 +820,7 @@ jobs:
 
 - name: test-exporter-development
   plan:
-  - aggregate:
+  - in_parallel:
     - get: exporter-src
       resource: exporter-src-development
       trigger: true
