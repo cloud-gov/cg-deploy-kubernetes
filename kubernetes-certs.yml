@@ -1,0 +1,21 @@
+cert1: ((consul_server))
+cert2: ((consul_agent))
+cert3: ((kubernetes))
+variables:
+- name: consul_server
+  type: certificate
+  options:
+    ca: default_ca
+    common_name: server.dc1.cf.internal
+    alternative_names: [127.0.0.1]
+- name: consul_agent
+  type: certificate
+  options:
+    ca: default_ca
+    common_name: 'consul agent'  
+- name: kubernetes
+  type: certificate
+  options:
+    ca: default_ca
+    common_name: kubernetes
+    alternative_names: ((minion_ips))
