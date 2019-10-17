@@ -9,9 +9,9 @@ instance_groups:
   networks:
   - name: services
     static_ips:
-    - (( grab terraform_outputs.kubernetes_static_ips.[0] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[1] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[2] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[10] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[11] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[12] ))
   jobs:
   - name: consul
     properties:
@@ -29,9 +29,9 @@ instance_groups:
   networks:
   - name: services
     static_ips:
-    - (( grab terraform_outputs.kubernetes_static_ips.[3] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[4] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[5] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[15] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[16] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[17] ))
   jobs:
   - (( append ))
   - name: cron
@@ -58,9 +58,9 @@ instance_groups:
   networks:
   - name: services
     static_ips:
-    - (( grab terraform_outputs.kubernetes_static_ips.[6] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[7] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[8] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[0] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[1] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[2] ))
   jobs:
   - name: kubernetes-minion
     properties:

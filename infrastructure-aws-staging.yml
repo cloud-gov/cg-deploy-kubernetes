@@ -17,20 +17,20 @@ instance_groups:
   networks:
   - name: services
     static_ips:
-    - (( grab terraform_outputs.kubernetes_static_ips.[0] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[1] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[2] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[3] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[4] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[5] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[6] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[7] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[8] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[9] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[10] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[11] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[12] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[13] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[36] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[37] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[38] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[39] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[40] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[41] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[42] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[43] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[44] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[45] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[46] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[47] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[48] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[49] ))
   jobs:
   - name: kubernetes-minion
     properties:
