@@ -13,11 +13,10 @@ instance_groups:
       aws:
         cluster-tag: kubernetes-production
 - name: minion
-  instances: 19
+  instances: 40
   networks:
   - name: services
     static_ips:
-    - (( grab terraform_outputs.kubernetes_static_ips.[9] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[10] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[11] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[12] ))
@@ -36,6 +35,28 @@ instance_groups:
     - (( grab terraform_outputs.kubernetes_static_ips.[25] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[26] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[27] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[28] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[29] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[30] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[31] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[32] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[33] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[34] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[35] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[36] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[37] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[38] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[39] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[40] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[41] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[42] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[43] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[44] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[45] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[46] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[47] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[48] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[49] ))
   jobs:
   - name: kubernetes-minion
     properties:
