@@ -36,3 +36,5 @@ instance_groups:
     properties:
       aws:
         cluster-tag: kubernetes-staging
+update:
+  max_in_flight: 10%
