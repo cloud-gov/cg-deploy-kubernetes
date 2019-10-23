@@ -61,3 +61,5 @@ instance_groups:
     properties:
       aws:
         cluster-tag: kubernetes-production
+update:
+  max_in_flight: 20%
