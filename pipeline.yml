@@ -14,6 +14,7 @@ groups:
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
   - acceptance-tests-staging
+  - plan-kubernetes-production
   - deploy-kubernetes-production
   - deploy-kubernetes-broker-production
   - acceptance-tests-production
@@ -38,6 +39,7 @@ groups:
   - acceptance-tests-staging
 - name: production
   jobs:
+  - plan-kubernetes-production
   - deploy-kubernetes-production
   - deploy-kubernetes-broker-production
   - deploy-exporter-production
@@ -612,6 +614,79 @@ jobs:
         K8S_PASSWORD: ((cluster-password-staging))
         K8S_APISERVER: ((api-server-staging))
 
+- name: plan-kubernetes-production
+  on_failure:
+    params:
+      channel: ((slack-channel))
+      icon_url: ((slack-icon-url))
+      text: |
+        :x: FAILED to plan kubernetes on production
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      username: ((slack-username))
+    put: slack
+  on_success:
+    params:
+      channel: ((slack-channel))
+      icon_url: ((slack-icon-url))
+      text: |
+        :white_check_mark: Successfully ran kubernetes production plan ready for review
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      username: ((slack-username))
+    put: slack
+  plan:
+  - in_parallel:
+      steps:
+        - get: common
+          resource: master-bosh-root-cert
+        - get: pipeline-tasks
+        - get: kubernetes-release
+          passed: [acceptance-tests-staging]
+          params:
+            submodules: none
+        - get: kubernetes-config
+          trigger: false
+          passed: [acceptance-tests-staging]
+        - get: kubernetes-release-tarball
+          passed: [acceptance-tests-staging]
+          trigger: false
+        - get: common-secret
+          resource: common-production
+          trigger: false
+        - get: kubernetes-stemcell-xenial
+          passed: [acceptance-tests-staging]
+          trigger: false
+        - get: consul-boshrelease
+          passed: [acceptance-tests-staging]
+          trigger: false
+        - get: terraform-yaml
+          resource: terraform-yaml-production
+  - file: kubernetes-config/build-k8s-manifest.yml
+    params:
+      CLOUDWATCH_PARAMS: ((cloudwatch-params-production))
+      KUBE2IAM_PARAMS: ((kube2iam-params-production))
+      TARGET_ENVIRONMENT: production
+    task: kubernetes-manifest
+  - file: pipeline-tasks/lint-manifest.yml
+    input_mapping:
+      lint-manifest: kubernetes-manifest
+      pipeline-config: kubernetes-config
+    params:
+      LINTER_CONFIG: bosh-lint.yml
+    task: lint-manifest
+  - params:
+      dry_run: true
+      manifest: kubernetes-manifest/manifest.yml
+      releases:
+      - kubernetes-release-tarball/*.tgz
+      - consul-boshrelease/*.tgz
+      stemcells:
+      - kubernetes-stemcell-xenial/*.tgz
+    put: kubernetes-production-deployment
+  serial: true
+  serial_groups:
+  - production
+
+
 - name: deploy-kubernetes-production
   serial: true
   plan:
@@ -620,25 +695,25 @@ jobs:
       resource: master-bosh-root-cert
     - get: pipeline-tasks
     - get: kubernetes-release
-      passed: [acceptance-tests-staging]
+      passed: [plan-kubernetes-production]
       params:
         submodules: none
     # all triggers set to false until k8s AWS volume issues are sorted
     # once that happens it's ok to set all triggers below back to true
     - get: kubernetes-config
       trigger: false
-      passed: [acceptance-tests-staging]
+      passed: [plan-kubernetes-production]
     - get: kubernetes-release-tarball
-      passed: [acceptance-tests-staging]
+      passed: [plan-kubernetes-production]
       trigger: false
     - get: common-secret
       resource: common-production
       trigger: false
     - get: kubernetes-stemcell-xenial
-      passed: [acceptance-tests-staging]
+      passed: [plan-kubernetes-production]
       trigger: false
     - get: consul-boshrelease
-      passed: [acceptance-tests-staging]
+      passed: [plan-kubernetes-production]
       trigger: false
     - get: terraform-yaml
       resource: terraform-yaml-production
