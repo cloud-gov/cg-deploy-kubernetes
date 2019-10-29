@@ -887,6 +887,7 @@ jobs:
       resource: master-bosh-root-cert
       passed: [plan-kubernetes-production]
     - get: pipeline-tasks
+      passed: [plan-kubernetes-production]
     - get: kubernetes-release
       passed: [plan-kubernetes-production]
       params:
@@ -902,6 +903,7 @@ jobs:
     - get: common-secret
       resource: common-production
       trigger: false
+      passed: [plan-kubernetes-production]
     - get: kubernetes-stemcell-xenial
       passed: [plan-kubernetes-production]
       trigger: false
@@ -910,6 +912,7 @@ jobs:
       trigger: false
     - get: terraform-yaml
       resource: terraform-yaml-production
+      passed: [plan-kubernetes-production]
   - task: kubernetes-manifest
     file: kubernetes-config/build-k8s-manifest.yml
     params:
