@@ -8,9 +8,11 @@ groups:
   - nginx
   - mongo-36
   - redis32
+  - plan-kubernetes-development
   - deploy-kubernetes-development
   - deploy-kubernetes-broker-development
   - acceptance-tests-development
+  - plan-kubernetes-staging
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
   - acceptance-tests-staging
@@ -19,19 +21,19 @@ groups:
   - deploy-kubernetes-broker-production
   - acceptance-tests-production
   - test-exporter
-  - test-exporter-development
   - deploy-exporter-development
   - deploy-exporter-staging
   - deploy-exporter-production
 - name: development
   jobs:
+  - plan-kubernetes-development
   - deploy-kubernetes-development
   - deploy-kubernetes-broker-development
-  - test-exporter-development
   - deploy-exporter-development
   - acceptance-tests-development
 - name: staging
   jobs:
+  - plan-kubernetes-staging
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
   - test-exporter
@@ -143,7 +145,14 @@ params:
       SERVICE_NAME: elasticsearch56
       PLAN_NAME: medium
       TEST_PATH: kubernetes-config/acceptance/elasticsearch56
-
+    deployment-params:
+      params: &deployment-params
+        manifest: kubernetes-manifest/manifest.yml
+        releases:
+        - kubernetes-release-tarball/*.tgz
+        - consul-boshrelease/*.tgz
+        stemcells:
+        - kubernetes-stemcell-xenial/*.tgz 
 jobs:
 - name: fluentd-cloudwatch
   plan:
@@ -216,7 +225,7 @@ jobs:
     params:
       build: kubernetes-broker-images/custom_images/redis-3.2
 
-- name: deploy-kubernetes-development
+- name: plan-kubernetes-development
   serial: true
   plan:
   - in_parallel:
@@ -224,14 +233,14 @@ jobs:
       resource: master-bosh-root-cert
     - get: pipeline-tasks
     - get: kubernetes-release
-      resource: kubernetes-release-development
+      resource: kubernetes-release
       params:
         submodules: none
     - get: kubernetes-config
-      resource: kubernetes-config-development
+      resource: kubernetes-config
       trigger: true
     - get: kubernetes-release-tarball
-      resource: kubernetes-release-tarball-development
+      resource: kubernetes-release-tarball
       trigger: true
     - get: common-secret
       resource: common-development
@@ -257,13 +266,90 @@ jobs:
     params:
       LINTER_CONFIG: bosh-lint.yml
   - put: kubernetes-development-deployment
-    params: &deployment-params
-      manifest: kubernetes-manifest/manifest.yml
-      releases:
-      - kubernetes-release-tarball/*.tgz
-      - consul-boshrelease/*.tgz
-      stemcells:
-      - kubernetes-stemcell-xenial/*.tgz
+    params:
+      dry_run: true
+      <<: *deployment-params
+  - task: create-kubernetes-dns
+    file: pipeline-tasks/bosh-errand.yml
+    params:
+      BOSH_ERRAND: create-kubernetes-dns
+      <<: *bosh-errand-development
+  - task: apply-kubernetes-manifests
+    file: pipeline-tasks/bosh-errand.yml
+    params:
+      BOSH_ERRAND: apply-kubernetes-manifests
+      <<: *bosh-errand-development
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to plan kubernetes on development
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully ran kubernetes production plan ready for review
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
+- name: deploy-kubernetes-development
+  serial: true
+  plan:
+  - in_parallel:
+    - get: common
+      resource: master-bosh-root-cert
+      passed: [plan-kubernetes-development]
+    - get: pipeline-tasks
+      passed: [plan-kubernetes-development]
+    - get: kubernetes-release
+      resource: kubernetes-release
+      params:
+        submodules: none
+      passed: [plan-kubernetes-development]
+    - get: kubernetes-config
+      resource: kubernetes-config
+      trigger: true
+      passed: [plan-kubernetes-development]
+    - get: kubernetes-release-tarball
+      resource: kubernetes-release-tarball
+      trigger: true
+      passed: [plan-kubernetes-development]
+    - get: common-secret
+      resource: common-development
+      trigger: true
+      passed: [plan-kubernetes-development]
+    - get: kubernetes-stemcell-xenial
+      trigger: true
+      passed: [plan-kubernetes-development]
+    - get: consul-boshrelease
+      trigger: true
+      passed: [plan-kubernetes-development]
+    - get: terraform-yaml
+      resource: terraform-yaml-development
+      passed: [plan-kubernetes-development]
+  - task: kubernetes-manifest
+    file: kubernetes-config/build-k8s-manifest.yml
+    params:
+      CLOUDWATCH_PARAMS: ((cloudwatch-params-development))
+      KUBE2IAM_PARAMS: ((kube2iam-params-development))
+      TARGET_ENVIRONMENT: development
+  - &lint-manifest
+    task: lint-manifest
+    file: pipeline-tasks/lint-manifest.yml
+    input_mapping:
+      pipeline-config: kubernetes-config
+      lint-manifest: kubernetes-manifest
+    params:
+      LINTER_CONFIG: bosh-lint.yml
+  - put: kubernetes-development-deployment
+    params:
+      <<: *deployment-params
   - task: create-kubernetes-dns
     file: pipeline-tasks/bosh-errand.yml
     params:
@@ -299,10 +385,10 @@ jobs:
   - in_parallel:
     - get: pipeline-tasks
     - get: kubernetes-broker
-      resource: kubernetes-broker-development
+      resource: kubernetes-broker
       trigger: true
     - get: kubernetes-config
-      resource: kubernetes-config-development
+      resource: kubernetes-config
       passed: [deploy-kubernetes-development]
     - get: kubernetes-development-deployment
       passed: [deploy-kubernetes-development]
@@ -343,12 +429,41 @@ jobs:
   serial: true
   plan:
   - in_parallel:
+    - get: common
+      resource: master-bosh-root-cert
+      passed: [deploy-kubernetes-development]
+    - get: pipeline-tasks
+      passed: [deploy-kubernetes-development]
+    - get: kubernetes-release
+      resource: kubernetes-release
+      params:
+        submodules: none
+      passed: [deploy-kubernetes-development]
     - get: kubernetes-config
-      resource: kubernetes-config-development
-      passed: [deploy-kubernetes-broker-development]
+      resource: kubernetes-config
       trigger: true
+      passed:
+      - deploy-kubernetes-development
+      - deploy-kubernetes-broker-development
+    - get: kubernetes-release-tarball
+      resource: kubernetes-release-tarball
+      trigger: true
+      passed: [deploy-kubernetes-development]
+    - get: common-secret
+      resource: common-development
+      trigger: true
+      passed: [deploy-kubernetes-development]
+    - get: kubernetes-stemcell-xenial
+      trigger: true
+      passed: [deploy-kubernetes-development]
+    - get: consul-boshrelease
+      trigger: true
+      passed: [deploy-kubernetes-development]
+    - get: terraform-yaml
+      resource: terraform-yaml-development
+      passed: [deploy-kubernetes-development]
     - get: kubernetes-broker
-      resource: kubernetes-broker-development
+      resource: kubernetes-broker
       passed: [deploy-kubernetes-broker-development]
       trigger: true
   - task: clear-acceptance-space
@@ -420,29 +535,108 @@ jobs:
         K8S_PASSWORD: ((cluster-password-development))
         K8S_APISERVER: ((api-server-development))
 
+- name: plan-kubernetes-staging
+  serial: true
+  plan:
+  - in_parallel:
+    - get: common
+      resource: master-bosh-root-cert
+      passed: [acceptance-tests-development]
+    - get: pipeline-tasks
+      passed: [acceptance-tests-development]
+    - get: kubernetes-release
+      params:
+        submodules: none
+      passed: [acceptance-tests-development]
+    - get: kubernetes-config
+      trigger: true
+      passed: [acceptance-tests-development]
+    - get: kubernetes-release-tarball
+      trigger: true
+      passed: [acceptance-tests-development]
+    - get: common-secret
+      resource: common-staging
+      trigger: true
+    - get: kubernetes-stemcell-xenial
+      trigger: true
+      passed: [acceptance-tests-development]
+    - get: consul-boshrelease
+      trigger: true
+      passed: [acceptance-tests-development]
+    - get: terraform-yaml
+      resource: terraform-yaml-staging
+  - task: kubernetes-manifest
+    file: kubernetes-config/build-k8s-manifest.yml
+    params:
+      CLOUDWATCH_PARAMS: ((cloudwatch-params-staging))
+      KUBE2IAM_PARAMS: ((kube2iam-params-staging))
+      TARGET_ENVIRONMENT: staging
+  - *lint-manifest
+  - put: kubernetes-staging-deployment
+    params: 
+      dry_run: true
+      <<: *deployment-params
+  - task: create-kubernetes-dns
+    file: pipeline-tasks/bosh-errand.yml
+    params:
+      BOSH_ERRAND: create-kubernetes-dns
+      <<: *bosh-errand-staging
+  - task: apply-kubernetes-manifests
+    file: pipeline-tasks/bosh-errand.yml
+    params:
+      BOSH_ERRAND: apply-kubernetes-manifests
+      <<: *bosh-errand-staging
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy kubernetes on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed kubernetes on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
 - name: deploy-kubernetes-staging
   serial: true
   plan:
   - in_parallel:
     - get: common
       resource: master-bosh-root-cert
+      passed: [plan-kubernetes-staging]
     - get: pipeline-tasks
+      passed: [plan-kubernetes-staging]
     - get: kubernetes-release
       params:
         submodules: none
+      passed: [plan-kubernetes-staging]
     - get: kubernetes-config
       trigger: true
+      passed: [plan-kubernetes-staging]
     - get: kubernetes-release-tarball
       trigger: true
+      passed: [plan-kubernetes-staging]
     - get: common-secret
       resource: common-staging
       trigger: true
+      passed: [plan-kubernetes-staging]
     - get: kubernetes-stemcell-xenial
       trigger: true
+      passed: [plan-kubernetes-staging]
     - get: consul-boshrelease
       trigger: true
+      passed: [plan-kubernetes-staging]
     - get: terraform-yaml
       resource: terraform-yaml-staging
+      passed: [plan-kubernetes-staging]
   - task: kubernetes-manifest
     file: kubernetes-config/build-k8s-manifest.yml
     params:
@@ -529,6 +723,9 @@ jobs:
   serial: true
   plan:
   - in_parallel:
+    - get: common
+      resource: master-bosh-root-cert
+      passed: [deploy-kubernetes-staging]
     - get: kubernetes-config
       passed: [deploy-kubernetes-broker-staging]
       trigger: true
@@ -675,12 +872,7 @@ jobs:
     task: lint-manifest
   - params:
       dry_run: true
-      manifest: kubernetes-manifest/manifest.yml
-      releases:
-      - kubernetes-release-tarball/*.tgz
-      - consul-boshrelease/*.tgz
-      stemcells:
-      - kubernetes-stemcell-xenial/*.tgz
+      <<: *deployment-params
     put: kubernetes-production-deployment
   serial: true
   serial_groups:
@@ -693,6 +885,7 @@ jobs:
   - in_parallel:
     - get: common
       resource: master-bosh-root-cert
+      passed: [plan-kubernetes-production]
     - get: pipeline-tasks
     - get: kubernetes-release
       passed: [plan-kubernetes-production]
@@ -893,22 +1086,10 @@ jobs:
   - task: test
     file: kubernetes-config/test-exporter.yml
 
-- name: test-exporter-development
-  plan:
-  - in_parallel:
-    - get: exporter-src
-      resource: exporter-src-development
-      trigger: true
-    - get: kubernetes-config
-      resource: kubernetes-config-development
-  - task: test
-    file: kubernetes-config/test-exporter.yml
-
 - name: deploy-exporter-development
   plan:
   - get: exporter-src
-    resource: exporter-src-development
-    passed: [test-exporter-development]
+    passed: [test-exporter]
     trigger: true
   - put: exporter-app-development
     params:
@@ -1039,23 +1220,11 @@ resources:
     uri: ((kubernetes-release-git-url))
     branch: ((kubernetes-release-git-branch))
 
-- name: kubernetes-release-development
-  type: git
-  source:
-    uri: ((kubernetes-release-development-git-url))
-    branch: ((kubernetes-release-development-git-branch))
-
 - name: kubernetes-broker
   type: git
   source:
     uri: ((kubernetes-broker-git-url))
     branch: ((kubernetes-broker-git-branch))
-
-- name: kubernetes-broker-development
-  type: git
-  source:
-    uri: ((kubernetes-broker-development-git-url))
-    branch: ((kubernetes-broker-development-git-branch))
 
 - name: kubernetes-config
   type: git
@@ -1063,23 +1232,11 @@ resources:
     uri: ((kubernetes-config-git-url))
     branch: ((kubernetes-config-git-branch))
 
-- name: kubernetes-config-development
-  type: git
-  source:
-    uri: ((kubernetes-config-development-git-url))
-    branch: ((kubernetes-config-development-git-branch))
-
 - name: exporter-src
   type: git
   source:
     uri: ((exporter-src-git-uri))
     branch: ((exporter-src-git-branch))
-
-- name: exporter-src-development
-  type: git
-  source:
-    uri: ((exporter-src-development-git-uri))
-    branch: ((exporter-src-development-git-branch))
 
 - name: kubernetes-stemcell-xenial
   type: bosh-io-stemcell
@@ -1294,7 +1451,6 @@ resources:
     repository: ((docker-repo-redis))
     tag: ((docker-tag-redis32))
 
-
 - &kubernetes-release-tarball
   name: kubernetes-release-tarball
   type: s3-iam
@@ -1302,9 +1458,6 @@ resources:
     bucket: ((s3-bosh-releases-bucket))
     regexp: kubernetes-(.*).tgz
     region_name: us-gov-west-1
-
-- <<: *kubernetes-release-tarball
-  name: kubernetes-release-tarball-development
 
 - name: terraform-yaml-development
   type: s3-iam
