@@ -269,16 +269,6 @@ jobs:
     params:
       dry_run: true
       <<: *deployment-params
-  - task: create-kubernetes-dns
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: create-kubernetes-dns
-      <<: *bosh-errand-development
-  - task: apply-kubernetes-manifests
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: apply-kubernetes-manifests
-      <<: *bosh-errand-development
   on_failure:
     put: slack
     params:
@@ -576,16 +566,6 @@ jobs:
     params: 
       dry_run: true
       <<: *deployment-params
-  - task: create-kubernetes-dns
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: create-kubernetes-dns
-      <<: *bosh-errand-staging
-  - task: apply-kubernetes-manifests
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: apply-kubernetes-manifests
-      <<: *bosh-errand-staging
   on_failure:
     put: slack
     params:
