@@ -1045,12 +1045,12 @@ jobs:
     - task: acceptance-test-elasticsearch56
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        <<: *cf-staging-tests
+        <<: *cf-production-tests
         <<: *elasticsearch56-tests
     - task: acceptance-test-elasticsearch56-ha
       file: kubernetes-config/acceptance/run-acceptance-test.yml
       params:
-        <<: *cf-staging-tests
+        <<: *cf-production-tests
         SERVICE_NAME: elasticsearch56
         PLAN_NAME: medium-ha
         TEST_PATH: kubernetes-config/acceptance/elasticsearch56
