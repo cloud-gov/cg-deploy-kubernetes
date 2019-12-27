@@ -33,22 +33,27 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	_, err := client.Do("SET", "test", "test")
 	if err != nil {
 		writeError(w, err)
+		checkStatus(err)
 		return
 	}
 
 	value, err := redis.String(client.Do("GET", "test"))
 	if err != nil {
 		writeError(w, err)
+		checkStatus(err)
 		return
 	}
 	if value != "test" {
-		writeError(w, fmt.Errorf("incorrect value: %s", value))
+		err := fmt.Errorf("incorrect value: %s", value)
+		writeError(w, err)
+		checkStatus(err)
 		return
 	}
 
 	_, err = client.Do("DEL", "test")
 	if err != nil {
 		writeError(w, err)
+		checkStatus(err)
 		return
 	}
 }
