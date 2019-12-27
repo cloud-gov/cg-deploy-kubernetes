@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/cloudfoundry-community/go-cfenv"
-	"github.com/garyburd/redigo/redis"
+	"github.com/go-redis/redis/v7"
 )
 
 func checkStatus(err error) {
@@ -28,7 +29,7 @@ func writeError(w http.ResponseWriter, err error) {
 	w.Write(message)
 }
 
-func newConnection() redis.Conn {
+func newConnection() *redis.Client {
 	// Get redis32-multinode credentials
 	env, _ := cfenv.Current()
 	services, _ := env.Services.WithLabel("redis32")
@@ -36,10 +37,18 @@ func newConnection() redis.Conn {
 		log.Fatal("redis32 service not found")
 	}
 	creds := services[0].Credentials
-	newClient, err := redis.Dial("tcp", fmt.Sprintf("%s:%s", creds["hostname"], creds["port"]))
-	checkStatus(err)
 
-	_, err = newClient.Do("AUTH", creds["password"].(string))
+	// set the timeouts so we can have some more definitive answers.
+	newClient := redis.NewClient(&redis.Options{
+		Addr:         fmt.Sprintf("%s:%s", creds["hostname"], creds["port"]),
+		Password:     creds["password"].(string),
+		DB:           0,
+		DialTimeout:  5 * time.Second,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	})
+
+	_, err := newClient.Ping().Result()
 	checkStatus(err)
 
 	return newClient
@@ -50,14 +59,14 @@ func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 	defer client.Close()
 
 	// Set and check value
-	_, err := client.Do("SET", "test", "test")
+	err := client.Set("test", "test", 0).Err()
 	if err != nil {
 		writeError(w, err)
 		checkStatus(err)
 		return
 	}
 
-	value, err := redis.String(client.Do("GET", "test"))
+	value, err := client.Get("test").Result()
 	if err != nil {
 		checkStatus(err)
 		writeError(w, err)
@@ -70,7 +79,7 @@ func testSetGetDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = client.Do("DEL", "test")
+	err = client.Del("test").Err()
 	if err != nil {
 		writeError(w, err)
 		checkStatus(err)
@@ -90,8 +99,7 @@ func info(w http.ResponseWriter, r *http.Request) {
 		parameter = "all"
 	}
 
-	infoString, err := redis.String(client.Do("INFO", parameter))
-
+	infoString, err := client.Info().Result()
 	if err != nil {
 		writeError(w, err)
 		checkStatus(err)
@@ -131,8 +139,7 @@ func configGet(w http.ResponseWriter, r *http.Request) {
 		parameter = "*"
 	}
 
-	primaryConfig, err := redis.StringMap(client.Do("CONFIG", "GET", parameter))
-
+	primaryConfig, err := client.ConfigGet(parameter).Result()
 	if err != nil {
 		writeError(w, err)
 		checkStatus(err)
