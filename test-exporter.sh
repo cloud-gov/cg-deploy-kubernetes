@@ -2,14 +2,9 @@
 
 set -eux
 
-export GOPATH=$(pwd)/gopath
-export PATH=$PATH:$GOPATH/bin
+cd kubernetes-broker-exporter
 
-cd gopath/src/github.com/18F/kubernetes-broker-exporter
+go get -v ./...
 
-go get github.com/Masterminds/glide
-go get github.com/onsi/ginkgo/ginkgo
-go get github.com/onsi/gomega
-
-glide install
+go get -v github.com/onsi/ginkgo/ginkgo
 ginkgo -r

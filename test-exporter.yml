@@ -9,7 +9,7 @@ image_resource:
 
 inputs:
 - name: exporter-src
-  path: gopath/src/github.com/18F/kubernetes-broker-exporter
+  path: kubernetes-broker-exporter
 - name: kubernetes-config
 
 run:
