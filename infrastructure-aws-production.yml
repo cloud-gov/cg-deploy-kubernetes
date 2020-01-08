@@ -62,4 +62,4 @@ instance_groups:
       aws:
         cluster-tag: kubernetes-production
 update:
-  max_in_flight: 20%
+  max_in_flight: 10%
