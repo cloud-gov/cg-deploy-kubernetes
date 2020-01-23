@@ -72,11 +72,11 @@ params:
       CF_ORGANIZATION: ((cf-organization-development))
       CF_SPACE: ((cf-space-development-acctests))
     bosh-errand: &bosh-errand-development
-      BOSH_TARGET: ((kubernetes-development-deployment-bosh-target))
-      BOSH_USERNAME: ((kubernetes-development-deployment-bosh-username))
-      BOSH_PASSWORD: ((kubernetes-development-deployment-bosh-password))
-      BOSH_DEPLOYMENT_NAME: ((kubernetes-development-deployment-bosh-deployment))
-      BOSH_CACERT: common/master-bosh.crt
+      BOSH_ENVIRONMENT: ((kubernetes-development-deployment-bosh-target))
+      BOSH_CLIENT: ((kubernetes-development-deployment-bosh-username))
+      BOSH_CLIENT_SECRET: ((kubernetes-development-deployment-bosh-password))
+      BOSH_DEPLOYMENT: ((kubernetes-development-deployment-bosh-deployment))
+      BOSH_CA_CERT: common/master-bosh.crt
   staging:
     cf: &cf-staging
       CF_API_URL: ((cf-api-url-staging))
@@ -91,11 +91,11 @@ params:
       CF_ORGANIZATION: ((cf-organization-staging))
       CF_SPACE: ((cf-space-staging-acctests))
     bosh-errand: &bosh-errand-staging
-      BOSH_TARGET: ((kubernetes-staging-deployment-bosh-target))
-      BOSH_USERNAME: ((kubernetes-staging-deployment-bosh-username))
-      BOSH_PASSWORD: ((kubernetes-staging-deployment-bosh-password))
-      BOSH_DEPLOYMENT_NAME: ((kubernetes-staging-deployment-bosh-deployment))
-      BOSH_CACERT: common/master-bosh.crt
+      BOSH_ENVIRONMENT: ((kubernetes-staging-deployment-bosh-target))
+      BOSH_CLIENT: ((kubernetes-staging-deployment-bosh-client))
+      BOSH_CLIENT_SECRET: ((kubernetes-staging-deployment-bosh-client-secret))
+      BOSH_DEPLOYMENT: ((kubernetes-staging-deployment-bosh-deployment))
+      BOSH_CA_CERT: common/master-bosh.crt
   production:
     cf: &cf-production
       CF_API_URL: ((cf-api-url-production))
@@ -110,11 +110,11 @@ params:
       CF_ORGANIZATION: ((cf-organization-production))
       CF_SPACE: ((cf-space-production-acctests))
     bosh-errand: &bosh-errand-production
-      BOSH_TARGET: ((kubernetes-production-deployment-bosh-target))
-      BOSH_USERNAME: ((kubernetes-production-deployment-bosh-username))
-      BOSH_PASSWORD: ((kubernetes-production-deployment-bosh-password))
-      BOSH_DEPLOYMENT_NAME: ((kubernetes-production-deployment-bosh-deployment))
-      BOSH_CACERT: common/master-bosh.crt
+      BOSH_ENVIRONMENT: ((kubernetes-production-deployment-bosh-target))
+      BOSH_CLIENT: ((kubernetes-production-deployment-bosh-username))
+      BOSH_CLIENT_SECRET: ((kubernetes-production-deployment-bosh-password))
+      BOSH_DEPLOYMENT: ((kubernetes-production-deployment-bosh-deployment))
+      BOSH_CA_CERT: common/master-bosh.crt
   acceptance:
     redis28-tests: &redis28-tests
       SERVICE_NAME: redis28
