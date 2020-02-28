@@ -13,6 +13,7 @@ instance_groups:
       aws:
         cluster-tag: kubernetes-development
 - name: minion
+  vm_type: r5.large
   jobs:
   - name: kubernetes-minion
     properties:
