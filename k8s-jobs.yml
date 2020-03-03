@@ -6,12 +6,6 @@ instance_groups:
 - name: consul
   vm_extensions: [kubernetes-sg]
   persistent_disk_type: kubernetes
-  networks:
-  - name: services
-    static_ips:
-    - (( grab terraform_outputs.kubernetes_static_ips.[4] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[5] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[6] ))
   jobs:
   - name: consul
     properties:
@@ -26,12 +20,6 @@ instance_groups:
 - name: etcd
   persistent_disk_type: kubernetes
   vm_extensions: [kubernetes-sg, kubernetes-etcd-profile]
-  networks:
-  - name: services
-    static_ips:
-    - (( grab terraform_outputs.kubernetes_static_ips.[7] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[8] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[9] ))
   jobs:
   - (( append ))
   - name: cron
@@ -55,12 +43,6 @@ instance_groups:
 - name: master
   persistent_disk_type: kubernetes
   vm_extensions: [kubernetes-lb, kubernetes-sg, kubernetes-master-profile]
-  networks:
-  - name: services
-    static_ips:
-    - (( grab terraform_outputs.kubernetes_static_ips.[0] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[1] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[2] ))
   jobs:
   - name: kubernetes-minion
     properties:
@@ -84,19 +66,8 @@ instance_groups:
         ip: (( grab instance_groups.etcd.networks.services.static_ips.[0] ))
 
 - name: minion
-  instances: 7
   persistent_disk_type: kubernetes
   vm_extensions: [kubernetes-sg, kubernetes-minion-profile]
-  networks:
-  - name: services
-    static_ips:
-    - (( grab terraform_outputs.kubernetes_static_ips.[10] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[11] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[12] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[13] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[14] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[15] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[16] ))
 
   jobs:
   - name: docker
