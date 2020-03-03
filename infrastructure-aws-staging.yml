@@ -13,24 +13,13 @@ instance_groups:
       aws:
         cluster-tag: kubernetes-staging
 - name: minion
-  instances: 14
+  instances: 3
   networks:
   - name: services
     static_ips:
     - (( grab terraform_outputs.kubernetes_static_ips.[36] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[37] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[38] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[39] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[40] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[41] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[42] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[43] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[44] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[45] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[46] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[47] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[48] ))
-    - (( grab terraform_outputs.kubernetes_static_ips.[49] ))
   jobs:
   - name: kubernetes-minion
     properties:
