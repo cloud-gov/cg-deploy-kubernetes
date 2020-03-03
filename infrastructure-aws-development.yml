@@ -1,12 +1,28 @@
 instance_groups:
 - name: etcd
+  instances: 1
+  networks:
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[7] ))
   jobs:
   - name: cron
     properties:
       cron:
         variables:
           ENVIRONMENT: development
+- name: consul
+  instances: 1
+  networks:
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[4] ))
 - name: master
+  instances: 1
+  networks:
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[0] ))
   jobs:
   - name: kubernetes-minion
     properties:
@@ -14,6 +30,13 @@ instance_groups:
         cluster-tag: kubernetes-development
 - name: minion
   vm_type: r5.large
+  instances: 3
+  networks:
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[10] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[11] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[12] ))
   jobs:
   - name: kubernetes-minion
     properties:
