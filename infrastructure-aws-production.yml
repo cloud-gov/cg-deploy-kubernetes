@@ -1,18 +1,23 @@
 instance_groups:
 - name: etcd
+  vm_type: t2.medium
   jobs:
   - name: cron
     properties:
       cron:
         variables:
           ENVIRONMENT: production
+- name: consul
+  vm_type: m3.large
 - name: master
+  vm_type: m3.large
   jobs:
   - name: kubernetes-minion
     properties:
       aws:
         cluster-tag: kubernetes-production
 - name: minion
+  vm_type: r4.xlarge
   instances: 39
   networks:
   - name: services
