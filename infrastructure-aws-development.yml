@@ -32,7 +32,7 @@ instance_groups:
       aws:
         cluster-tag: kubernetes-development
 - name: minion
-  vm_type: t3.large
+  vm_type: r4.large
   instances: 5
   networks:
   - name: services
