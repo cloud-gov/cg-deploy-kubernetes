@@ -33,7 +33,7 @@ instance_groups:
         cluster-tag: kubernetes-development
 - name: minion
   vm_type: r4.large
-  instances: 6
+  instances: 7
   networks:
   - name: services
     static_ips:
@@ -42,6 +42,7 @@ instance_groups:
     - (( grab terraform_outputs.kubernetes_static_ips.[12] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[13] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[14] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[15] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[15] ))
   jobs:
   - name: kubernetes-minion
