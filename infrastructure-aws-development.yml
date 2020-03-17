@@ -21,11 +21,12 @@ instance_groups:
     - (( grab terraform_outputs.kubernetes_static_ips.[4] ))
 - name: master
   vm_type: m3.large
-  instances: 1
+  instances: 2
   networks:
   - name: services
     static_ips:
     - (( grab terraform_outputs.kubernetes_static_ips.[0] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[1] ))
   jobs:
   - name: kubernetes-minion
     properties:
