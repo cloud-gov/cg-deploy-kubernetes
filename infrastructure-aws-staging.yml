@@ -1,17 +1,42 @@
 instance_groups:
 - name: etcd
+  vm_type: t3.large
+  instances: 3
   jobs:
   - name: cron
     properties:
       cron:
         variables:
           ENVIRONMENT: staging
+  networks:
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[7] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[8] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[9] ))
+- name: consul
+  vm_type: t3.large
+  instances: 3
+  networks:
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[4] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[5] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[6] ))
 - name: master
+  vm_type: m4.large
+  instances: 3
   jobs:
   - name: kubernetes-minion
     properties:
       aws:
         cluster-tag: kubernetes-staging
+  networks:
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[0] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[1] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[2] ))
 - name: minion
   vm_type: r4.large
   instances: 6
