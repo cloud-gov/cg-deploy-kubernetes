@@ -1,11 +1,27 @@
 instance_groups:
 - name: etcd
+  vm_type: t3.medium
   jobs:
   - name: cron
     properties:
       cron:
         variables:
           ENVIRONMENT: production
+  networks:
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[7] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[8] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[9] ))
+- name: consul
+  vm_type: t3.large
+  instances: 3
+  networks:
+  - name: services
+    static_ips:
+    - (( grab terraform_outputs.kubernetes_static_ips.[4] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[5] ))
+    - (( grab terraform_outputs.kubernetes_static_ips.[6] ))
 - name: master
   jobs:
   - name: kubernetes-minion
