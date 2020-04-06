@@ -72,6 +72,8 @@ instance_groups:
     - (( grab terraform_outputs.kubernetes_static_ips.[47] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[48] ))
     - (( grab terraform_outputs.kubernetes_static_ips.[49] ))
+  - name: create-kubernetes-dns
+    vm_type: t3.medium
   jobs:
   - name: kubernetes-minion
     properties:
