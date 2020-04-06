@@ -54,7 +54,11 @@ instance_groups:
     properties:
       aws:
         cluster-tag: kubernetes-staging
+- name: apply-kubernetes-manifests
+  vm_type: t3.medium
 - name: create-kubernetes-dns
+  vm_type: t3.medium
+- name: create-kubernetes-monitoring
   vm_type: t3.medium
 update:
   max_in_flight: 10%
