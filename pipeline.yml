@@ -152,7 +152,7 @@ params:
         - kubernetes-release-tarball/*.tgz
         - consul-boshrelease/*.tgz
         stemcells:
-        - kubernetes-stemcell-xenial/*.tgz 
+        - kubernetes-stemcell-xenial/*.tgz
 jobs:
 - name: fluentd-cloudwatch
   plan:
@@ -563,7 +563,7 @@ jobs:
       TARGET_ENVIRONMENT: staging
   - *lint-manifest
   - put: kubernetes-staging-deployment
-    params: 
+    params:
       dry_run: true
       <<: *deployment-params
   on_failure:
@@ -961,16 +961,6 @@ jobs:
         CF_API_ENDPOINT: ((cf-api-url-production))
         CF_TOKEN_KEY: ((cf-token-key-production))
   - in_parallel:
-    - task: register-service-broker-production
-      file: pipeline-tasks/register-service-broker.yml
-      params:
-        <<: *cf-production
-        BROKER_NAME: kubernetes-broker
-        AUTH_USER: ((broker-auth-user-production))
-        AUTH_PASS: ((broker-auth-pass-production))
-        SERVICES: redis28:standard redis32:standard redis32:standard-ha
-          elasticsearch24:1x elasticsearch24:3x elasticsearch24:6x elasticsearch24:medium-ha
-          elasticsearch56:medium elasticsearch56:medium-ha
     - task: register-service-broker-restricted-production
       file: pipeline-tasks/register-service-broker.yml
       params:
@@ -978,7 +968,9 @@ jobs:
         BROKER_NAME: kubernetes-broker
         AUTH_USER: ((broker-auth-user-production))
         AUTH_PASS: ((broker-auth-pass-production))
-        SERVICES: mongodb36:standard
+        SERVICES: mongodb36:standard redis28:standard redis32:standard redis32:standard-ha elasticsearch24:1x
+          elasticsearch24:3x elasticsearch24:6x elasticsearch24:medium-ha elasticsearch56:medium
+          elasticsearch56:medium-ha
         SERVICE_ORGANIZATION: ((broker-service-organization-restricted-production))
 
 - name: acceptance-tests-production
