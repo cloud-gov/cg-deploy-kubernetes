@@ -8,10 +8,6 @@ groups:
   - nginx
   - mongo-36
   - redis32
-  - plan-kubernetes-development
-  - deploy-kubernetes-development
-  - deploy-kubernetes-broker-development
-  - acceptance-tests-development
   - plan-kubernetes-staging
   - deploy-kubernetes-staging
   - deploy-kubernetes-broker-staging
@@ -21,16 +17,8 @@ groups:
   - deploy-kubernetes-broker-production
   - acceptance-tests-production
   - test-exporter
-  - deploy-exporter-development
   - deploy-exporter-staging
   - deploy-exporter-production
-- name: development
-  jobs:
-  - plan-kubernetes-development
-  - deploy-kubernetes-development
-  - deploy-kubernetes-broker-development
-  - deploy-exporter-development
-  - acceptance-tests-development
 - name: staging
   jobs:
   - plan-kubernetes-staging
@@ -58,25 +46,6 @@ groups:
   - redis32
 
 params:
-  development:
-    cf: &cf-development
-      CF_API_URL: ((cf-api-url-development))
-      CF_USERNAME: ((cf-deploy-username-development))
-      CF_PASSWORD: ((cf-deploy-password-development))
-      CF_ORGANIZATION: ((cf-organization-development))
-      CF_SPACE: ((cf-space-development))
-    cf-tests: &cf-development-tests
-      CF_API_URL: ((cf-api-url-development))
-      CF_USERNAME: ((cf-deploy-username-development))
-      CF_PASSWORD: ((cf-deploy-password-development))
-      CF_ORGANIZATION: ((cf-organization-development))
-      CF_SPACE: ((cf-space-development-acctests))
-    bosh-errand: &bosh-errand-development
-      BOSH_ENVIRONMENT: ((kubernetes-development-deployment-bosh-target))
-      BOSH_CLIENT: ((kubernetes-development-deployment-bosh-username))
-      BOSH_CLIENT_SECRET: ((kubernetes-development-deployment-bosh-password))
-      BOSH_DEPLOYMENT: ((kubernetes-development-deployment-bosh-deployment))
-      BOSH_CA_CERT: common/master-bosh.crt
   staging:
     cf: &cf-staging
       CF_API_URL: ((cf-api-url-staging))
@@ -225,334 +194,27 @@ jobs:
     params:
       build: kubernetes-broker-images/custom_images/redis-3.2
 
-- name: plan-kubernetes-development
-  serial: true
-  plan:
-  - in_parallel:
-    - get: common
-      resource: master-bosh-root-cert
-    - get: pipeline-tasks
-    - get: kubernetes-release
-      resource: kubernetes-release
-      params:
-        submodules: none
-    - get: kubernetes-config
-      resource: kubernetes-config
-      trigger: true
-    - get: kubernetes-release-tarball
-      resource: kubernetes-release-tarball
-      trigger: true
-    - get: common-secret
-      resource: common-development
-      trigger: true
-    - get: kubernetes-stemcell-xenial
-      trigger: true
-    - get: consul-boshrelease
-      trigger: true
-    - get: terraform-yaml
-      resource: terraform-yaml-development
-  - task: kubernetes-manifest
-    file: kubernetes-config/build-k8s-manifest.yml
-    params:
-      CLOUDWATCH_PARAMS: ((cloudwatch-params-development))
-      KUBE2IAM_PARAMS: ((kube2iam-params-development))
-      TARGET_ENVIRONMENT: development
-  - &lint-manifest
-    task: lint-manifest
-    file: pipeline-tasks/lint-manifest.yml
-    input_mapping:
-      pipeline-config: kubernetes-config
-      lint-manifest: kubernetes-manifest
-    params:
-      LINTER_CONFIG: bosh-lint.yml
-  - put: kubernetes-development-deployment
-    params:
-      dry_run: true
-      <<: *deployment-params
-  on_failure:
-    put: slack
-    params:
-      text: |
-        :x: FAILED to plan kubernetes on development
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Successfully ran kubernetes production plan ready for review
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-
-- name: deploy-kubernetes-development
-  serial: true
-  plan:
-  - in_parallel:
-    - get: common
-      resource: master-bosh-root-cert
-      passed: [plan-kubernetes-development]
-    - get: pipeline-tasks
-      passed: [plan-kubernetes-development]
-    - get: kubernetes-release
-      resource: kubernetes-release
-      params:
-        submodules: none
-      passed: [plan-kubernetes-development]
-    - get: kubernetes-config
-      resource: kubernetes-config
-      trigger: true
-      passed: [plan-kubernetes-development]
-    - get: kubernetes-release-tarball
-      resource: kubernetes-release-tarball
-      trigger: true
-      passed: [plan-kubernetes-development]
-    - get: common-secret
-      resource: common-development
-      trigger: true
-      passed: [plan-kubernetes-development]
-    - get: kubernetes-stemcell-xenial
-      trigger: true
-      passed: [plan-kubernetes-development]
-    - get: consul-boshrelease
-      trigger: true
-      passed: [plan-kubernetes-development]
-    - get: terraform-yaml
-      resource: terraform-yaml-development
-      passed: [plan-kubernetes-development]
-  - task: kubernetes-manifest
-    file: kubernetes-config/build-k8s-manifest.yml
-    params:
-      CLOUDWATCH_PARAMS: ((cloudwatch-params-development))
-      KUBE2IAM_PARAMS: ((kube2iam-params-development))
-      TARGET_ENVIRONMENT: development
-  - &lint-manifest
-    task: lint-manifest
-    file: pipeline-tasks/lint-manifest.yml
-    input_mapping:
-      pipeline-config: kubernetes-config
-      lint-manifest: kubernetes-manifest
-    params:
-      LINTER_CONFIG: bosh-lint.yml
-  - put: kubernetes-development-deployment
-    params:
-      <<: *deployment-params
-  - task: create-kubernetes-dns
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: create-kubernetes-dns
-      <<: *bosh-errand-development
-  - task: apply-kubernetes-manifests
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: apply-kubernetes-manifests
-      <<: *bosh-errand-development
-  on_failure:
-    put: slack
-    params:
-      text: |
-        :x: FAILED to deploy kubernetes on development
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Successfully deployed kubernetes on development
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-
-- name: deploy-kubernetes-broker-development
-  serial: true
-  plan:
-  - in_parallel:
-    - get: pipeline-tasks
-    - get: kubernetes-broker
-      resource: kubernetes-broker
-      trigger: true
-    - get: kubernetes-config
-      resource: kubernetes-config
-      passed: [deploy-kubernetes-development]
-    - get: kubernetes-development-deployment
-      passed: [deploy-kubernetes-development]
-      trigger: true
-  - task: run-tests
-    file: kubernetes-config/run-tests.yml
-  - put: kubernetes-broker-development-deployment
-    params:
-      manifest: kubernetes-broker/manifest.yml
-      path: kubernetes-broker
-      current_app_name: kubernetes-broker
-      environment_variables:
-        AUTH_USER: ((broker-auth-user-development))
-        AUTH_PASS: ((broker-auth-pass-development))
-        CONNECTOR_TYPE: static
-        CONSUL_DOMAIN: ((consul-domain-development))
-        CLUSTER_API_SERVER: ((api-server-development))
-        CLUSTER_USERNAME: ((cluster-username-development))
-        CLUSTER_PASSWORD: ((cluster-password-development))
-        CF_CLIENT_ID: kubernetes-client
-        CF_CLIENT_SECRET: ((cf-client-secret-development))
-        CF_TOKEN_URL: ((cf-token-url-development))
-        CF_API_ENDPOINT: ((cf-api-url-development))
-        CF_TOKEN_KEY: ((cf-token-key-development))
-  - task: register-service-broker-development
-    file: pipeline-tasks/register-service-broker.yml
-    params:
-      <<: *cf-development
-      BROKER_NAME: kubernetes-broker
-      AUTH_USER: ((broker-auth-user-development))
-      AUTH_PASS: ((broker-auth-pass-development))
-      SERVICES: redis28:standard redis32:standard redis32:standard-ha
-        elasticsearch24:1x elasticsearch24:3x elasticsearch24:6x elasticsearch24:12x elasticsearch24:medium-ha
-        elasticsearch56:medium elasticsearch56:medium-ha
-        mongodb36:standard
-
-- name: acceptance-tests-development
-  serial: true
-  plan:
-  - in_parallel:
-    - get: common
-      resource: master-bosh-root-cert
-      passed: [deploy-kubernetes-development]
-    - get: pipeline-tasks
-      passed: [deploy-kubernetes-development]
-    - get: kubernetes-release
-      resource: kubernetes-release
-      params:
-        submodules: none
-      passed: [deploy-kubernetes-development]
-    - get: kubernetes-config
-      resource: kubernetes-config
-      trigger: true
-      passed:
-      - deploy-kubernetes-development
-      - deploy-kubernetes-broker-development
-    - get: kubernetes-release-tarball
-      resource: kubernetes-release-tarball
-      trigger: true
-      passed: [deploy-kubernetes-development]
-    - get: common-secret
-      resource: common-development
-      trigger: true
-      passed: [deploy-kubernetes-development]
-    - get: kubernetes-stemcell-xenial
-      trigger: true
-      passed: [deploy-kubernetes-development]
-    - get: consul-boshrelease
-      trigger: true
-      passed: [deploy-kubernetes-development]
-    - get: terraform-yaml
-      resource: terraform-yaml-development
-      passed: [deploy-kubernetes-development]
-    - get: kubernetes-broker
-      resource: kubernetes-broker
-      passed: [deploy-kubernetes-broker-development]
-      trigger: true
-  - task: clear-acceptance-space
-    file: kubernetes-config/acceptance/clear-acceptance-space.yml
-    params: *cf-development-tests
-  - in_parallel:
-    - task: acceptance-test-redis28-standard
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-development-tests
-        <<: *redis28-tests
-    - task: acceptance-test-redis32-micro
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-development-tests
-        <<: *redis32-micro-tests
-    - task: acceptance-test-redis32-standard
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-development-tests
-        <<: *redis32-tests
-    - task: acceptance-test-redis32-standard-ha
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-development-tests
-        <<: *redis32-ha-tests
-        # EXTRA TESTS are executed with CWD = TEST_PATH
-        EXTRA_TESTS: ./redis-ha.sh
-        K8S_USERNAME: ((cluster-username-development))
-        K8S_PASSWORD: ((cluster-password-development))
-        K8S_APISERVER: ((api-server-development))
-    - task: acceptance-test-mongo36-standard
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-development-tests
-        <<: *mongodb36-tests
-    - task: acceptance-test-elasticsearch24-persistent
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-development-tests
-        <<: *elasticsearch24-tests
-    - task: acceptance-test-elasticsearch24-ha
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-development-tests
-        SERVICE_NAME: elasticsearch24
-        PLAN_NAME: medium-ha
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch24
-        # EXTRA TESTS are executed with CWD = TEST_PATH
-        EXTRA_TESTS: ./elastic-ha.sh
-        K8S_USERNAME: ((cluster-username-development))
-        K8S_PASSWORD: ((cluster-password-development))
-        K8S_APISERVER: ((api-server-development))
-    - task: acceptance-test-elasticsearch56
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-development-tests
-        <<: *elasticsearch56-tests
-    - task: acceptance-test-elasticsearch56-ha
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-development-tests
-        SERVICE_NAME: elasticsearch56
-        PLAN_NAME: medium-ha
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch56
-        # EXTRA TESTS are executed with CWD = TEST_PATH
-        EXTRA_TESTS: ./elastic-ha.sh
-        K8S_USERNAME: ((cluster-username-development))
-        K8S_PASSWORD: ((cluster-password-development))
-        K8S_APISERVER: ((api-server-development))
-
 - name: plan-kubernetes-staging
   serial: true
   plan:
   - in_parallel:
     - get: common
       resource: master-bosh-root-cert
-      passed: [acceptance-tests-development]
     - get: pipeline-tasks
-      passed: [acceptance-tests-development]
     - get: kubernetes-release
       params:
         submodules: none
-      passed: [acceptance-tests-development]
     - get: kubernetes-config
       trigger: true
-      passed: [acceptance-tests-development]
     - get: kubernetes-release-tarball
       trigger: true
-      passed: [acceptance-tests-development]
     - get: common-secret
       resource: common-staging
       trigger: true
     - get: kubernetes-stemcell-xenial
       trigger: true
-      passed: [acceptance-tests-development]
     - get: consul-boshrelease
       trigger: true
-      passed: [acceptance-tests-development]
     - get: terraform-yaml
       resource: terraform-yaml-staging
   - task: kubernetes-manifest
@@ -1061,44 +723,6 @@ jobs:
   - task: test
     file: kubernetes-config/test-exporter.yml
 
-- name: deploy-exporter-development
-  plan:
-  - get: exporter-src
-    passed: [test-exporter]
-    trigger: true
-  - put: exporter-app-development
-    params:
-      path: exporter-src
-      manifest: exporter-src/manifest.yml
-      current_app_name: kubernetes-broker-exporter
-      environment_variables:
-        BROKER_EXPORTER_KUBERNETES_URL: ((api-server-development))
-        BROKER_EXPORTER_KUBERNETES_USERNAME: ((cluster-username-development))
-        BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-development))
-        BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
-        BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
-        BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-development))
-        BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-development))
-        BROKER_EXPORTER_METRICS_ENVIRONMENT: development
-  on_failure:
-    put: slack
-    params:
-      text: |
-        :x: FAILED to deploy kubernetes broker exporter on development
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Successfully deployed kubernetes broker exporter on development
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-
 - name: deploy-exporter-staging
   plan:
   - get: exporter-src
@@ -1223,13 +847,6 @@ resources:
   source:
     repository: cloudfoundry-community/consul-boshrelease
 
-- name: common-development
-  type: s3-iam
-  source:
-    region_name: ((aws-region))
-    bucket: ((kubernetes-private-bucket))
-    versioned_file: development-kubernetes.yml
-
 - name: common-staging
   type: s3-iam
   source:
@@ -1243,15 +860,6 @@ resources:
     region_name: ((aws-region))
     bucket: ((kubernetes-private-bucket))
     versioned_file: production-kubernetes.yml
-
-- name: kubernetes-development-deployment
-  type: bosh-deployment
-  source:
-    target: ((kubernetes-development-deployment-bosh-target))
-    client: ((kubernetes-development-deployment-bosh-client))
-    client_secret: ((kubernetes-development-deployment-bosh-client-secret))
-    ca_cert: ((kubernetes-development-ca-cert))
-    deployment: kubernetes
 
 - name: kubernetes-staging-deployment
   type: bosh-deployment
@@ -1271,15 +879,6 @@ resources:
     ca_cert: ((kubernetes-production-ca-cert))
     deployment: kubernetes
 
-- name: kubernetes-broker-development-deployment
-  type: cf
-  source:
-    api: ((cf-api-url-development))
-    username: ((cf-deploy-username-development))
-    password: ((cf-deploy-password-development))
-    organization: ((cf-organization-development))
-    space: ((cf-space-development))
-
 - name: kubernetes-broker-staging-deployment
   type: cf
   source:
@@ -1297,15 +896,6 @@ resources:
     password: ((cf-deploy-password-production))
     organization: ((cf-organization-production))
     space: ((cf-space-production))
-
-- name: exporter-app-development
-  type: cf
-  source:
-    api: ((cf-api-url-development))
-    username: ((cf-deploy-username-development))
-    password: ((cf-deploy-password-development))
-    organization: ((cf-organization-development))
-    space: ((cf-space-development))
 
 - name: exporter-app-staging
   type: cf
@@ -1433,13 +1023,6 @@ resources:
     bucket: ((s3-bosh-releases-bucket))
     regexp: kubernetes-(.*).tgz
     region_name: us-gov-west-1
-
-- name: terraform-yaml-development
-  type: s3-iam
-  source:
-    bucket: ((tf-state-bucket-development))
-    versioned_file: ((tf-state-file-development))
-    region_name: ((aws-region))
 
 - name: terraform-yaml-staging
   type: s3-iam
