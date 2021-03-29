@@ -223,7 +223,14 @@ jobs:
       CLOUDWATCH_PARAMS: ((cloudwatch-params-staging))
       KUBE2IAM_PARAMS: ((kube2iam-params-staging))
       TARGET_ENVIRONMENT: staging
-  - *lint-manifest
+  - &lint-manifest
+    task: lint-manifest
+    file: pipeline-tasks/lint-manifest.yml
+    input_mapping:
+      pipeline-config: kubernetes-config
+      lint-manifest: kubernetes-manifest
+    params:
+      LINTER_CONFIG: bosh-lint.yml
   - put: kubernetes-staging-deployment
     params:
       dry_run: true
