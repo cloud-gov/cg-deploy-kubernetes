@@ -265,7 +265,14 @@ jobs:
       CLOUDWATCH_PARAMS: ((cloudwatch-params-production))
       KUBE2IAM_PARAMS: ((kube2iam-params-production))
       TARGET_ENVIRONMENT: production
-  - *lint-manifest
+  - &lint-manifest
+    task: lint-manifest
+    file: pipeline-tasks/lint-manifest.yml
+    input_mapping:
+      pipeline-config: kubernetes-config
+      lint-manifest: kubernetes-manifest
+    params:
+      LINTER_CONFIG: bosh-lint.yml
   - put: kubernetes-production-deployment
     params: *deployment-params
   - task: create-kubernetes-dns
