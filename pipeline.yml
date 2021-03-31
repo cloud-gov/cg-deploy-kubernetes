@@ -8,25 +8,12 @@ groups:
   - nginx
   - mongo-36
   - redis32
-  - plan-kubernetes-staging
-  - deploy-kubernetes-staging
-  - deploy-kubernetes-broker-staging
-  - acceptance-tests-staging
   - plan-kubernetes-production
   - deploy-kubernetes-production
   - deploy-kubernetes-broker-production
   - acceptance-tests-production
   - test-exporter
-  - deploy-exporter-staging
   - deploy-exporter-production
-- name: staging
-  jobs:
-  - plan-kubernetes-staging
-  - deploy-kubernetes-staging
-  - deploy-kubernetes-broker-staging
-  - test-exporter
-  - deploy-exporter-staging
-  - acceptance-tests-staging
 - name: production
   jobs:
   - plan-kubernetes-production
@@ -46,25 +33,6 @@ groups:
   - redis32
 
 params:
-  staging:
-    cf: &cf-staging
-      CF_API_URL: ((cf-api-url-staging))
-      CF_USERNAME: ((cf-deploy-username-staging))
-      CF_PASSWORD: ((cf-deploy-password-staging))
-      CF_ORGANIZATION: ((cf-organization-staging))
-      CF_SPACE: ((cf-space-staging))
-    cf-tests: &cf-staging-tests
-      CF_API_URL: ((cf-api-url-staging))
-      CF_USERNAME: ((cf-deploy-username-staging))
-      CF_PASSWORD: ((cf-deploy-password-staging))
-      CF_ORGANIZATION: ((cf-organization-staging))
-      CF_SPACE: ((cf-space-staging-acctests))
-    bosh-errand: &bosh-errand-staging
-      BOSH_ENVIRONMENT: ((kubernetes-staging-deployment-bosh-target))
-      BOSH_CLIENT: ((kubernetes-staging-deployment-bosh-client))
-      BOSH_CLIENT_SECRET: ((kubernetes-staging-deployment-bosh-client-secret))
-      BOSH_DEPLOYMENT: ((kubernetes-staging-deployment-bosh-deployment))
-      BOSH_CA_CERT: common/master-bosh.crt
   production:
     cf: &cf-production
       CF_API_URL: ((cf-api-url-production))
@@ -194,272 +162,6 @@ jobs:
     params:
       build: kubernetes-broker-images/custom_images/redis-3.2
 
-- name: plan-kubernetes-staging
-  serial: true
-  plan:
-  - in_parallel:
-    - get: common
-      resource: master-bosh-root-cert
-    - get: pipeline-tasks
-    - get: kubernetes-release
-      params:
-        submodules: none
-    - get: kubernetes-config
-      trigger: true
-    - get: kubernetes-release-tarball
-      trigger: true
-    - get: common-secret
-      resource: common-staging
-      trigger: true
-    - get: kubernetes-stemcell-xenial
-      trigger: true
-    - get: consul-boshrelease
-      trigger: true
-    - get: terraform-yaml
-      resource: terraform-yaml-staging
-  - task: kubernetes-manifest
-    file: kubernetes-config/build-k8s-manifest.yml
-    params:
-      CLOUDWATCH_PARAMS: ((cloudwatch-params-staging))
-      KUBE2IAM_PARAMS: ((kube2iam-params-staging))
-      TARGET_ENVIRONMENT: staging
-  - &lint-manifest
-    task: lint-manifest
-    file: pipeline-tasks/lint-manifest.yml
-    input_mapping:
-      pipeline-config: kubernetes-config
-      lint-manifest: kubernetes-manifest
-    params:
-      LINTER_CONFIG: bosh-lint.yml
-  - put: kubernetes-staging-deployment
-    params:
-      dry_run: true
-      <<: *deployment-params
-  on_failure:
-    put: slack
-    params:
-      text: |
-        :x: FAILED to deploy kubernetes on staging
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Successfully deployed kubernetes on staging
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-
-- name: deploy-kubernetes-staging
-  serial: true
-  plan:
-  - in_parallel:
-    - get: common
-      resource: master-bosh-root-cert
-      passed: [plan-kubernetes-staging]
-    - get: pipeline-tasks
-      passed: [plan-kubernetes-staging]
-    - get: kubernetes-release
-      params:
-        submodules: none
-      passed: [plan-kubernetes-staging]
-    - get: kubernetes-config
-      trigger: true
-      passed: [plan-kubernetes-staging]
-    - get: kubernetes-release-tarball
-      trigger: true
-      passed: [plan-kubernetes-staging]
-    - get: common-secret
-      resource: common-staging
-      trigger: true
-      passed: [plan-kubernetes-staging]
-    - get: kubernetes-stemcell-xenial
-      trigger: true
-      passed: [plan-kubernetes-staging]
-    - get: consul-boshrelease
-      trigger: true
-      passed: [plan-kubernetes-staging]
-    - get: terraform-yaml
-      resource: terraform-yaml-staging
-      passed: [plan-kubernetes-staging]
-  - task: kubernetes-manifest
-    file: kubernetes-config/build-k8s-manifest.yml
-    params:
-      CLOUDWATCH_PARAMS: ((cloudwatch-params-staging))
-      KUBE2IAM_PARAMS: ((kube2iam-params-staging))
-      TARGET_ENVIRONMENT: staging
-  - *lint-manifest
-  - put: kubernetes-staging-deployment
-    params: *deployment-params
-  - task: create-kubernetes-dns
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: create-kubernetes-dns
-      <<: *bosh-errand-staging
-  - task: apply-kubernetes-manifests
-    file: pipeline-tasks/bosh-errand.yml
-    params:
-      BOSH_ERRAND: apply-kubernetes-manifests
-      <<: *bosh-errand-staging
-  on_failure:
-    put: slack
-    params:
-      text: |
-        :x: FAILED to deploy kubernetes on staging
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Successfully deployed kubernetes on staging
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-
-- name: deploy-kubernetes-broker-staging
-  serial: true
-  plan:
-  - in_parallel:
-    - get: pipeline-tasks
-    - get: kubernetes-broker
-      trigger: true
-    - get: kubernetes-config
-      passed: [deploy-kubernetes-staging]
-    - get: kubernetes-staging-deployment
-      passed: [deploy-kubernetes-staging]
-      trigger: true
-  - task: run-tests
-    file: kubernetes-config/run-tests.yml
-  - put: kubernetes-broker-staging-deployment
-    params:
-      manifest: kubernetes-broker/manifest.yml
-      path: kubernetes-broker
-      current_app_name: kubernetes-broker
-      environment_variables:
-        AUTH_USER: ((broker-auth-user-staging))
-        AUTH_PASS: ((broker-auth-pass-staging))
-        CONNECTOR_TYPE: static
-        CONSUL_DOMAIN: ((consul-domain-staging))
-        CLUSTER_API_SERVER: ((api-server-staging))
-        CLUSTER_USERNAME: ((cluster-username-staging))
-        CLUSTER_PASSWORD: ((cluster-password-staging))
-        CF_CLIENT_ID: kubernetes-client
-        CF_CLIENT_SECRET: ((cf-client-secret-staging))
-        CF_TOKEN_URL: ((cf-token-url-staging))
-        CF_API_ENDPOINT: ((cf-api-url-staging))
-        CF_TOKEN_KEY: ((cf-token-key-staging))
-  - task: register-service-broker-staging
-    file: pipeline-tasks/register-service-broker.yml
-    params:
-      <<: *cf-staging
-      BROKER_NAME: kubernetes-broker
-      AUTH_USER: ((broker-auth-user-staging))
-      AUTH_PASS: ((broker-auth-pass-staging))
-      SERVICES: redis28:standard redis32:standard redis32:standard-ha
-        elasticsearch24:1x elasticsearch24:3x elasticsearch24:6x elasticsearch24:12x elasticsearch24:medium-ha
-        elasticsearch56:medium elasticsearch56:medium-ha
-        mongodb36:standard
-
-- name: acceptance-tests-staging
-  serial: true
-  plan:
-  - in_parallel:
-    - get: common
-      resource: master-bosh-root-cert
-      passed: [deploy-kubernetes-staging]
-    - get: kubernetes-config
-      passed: [deploy-kubernetes-broker-staging]
-      trigger: true
-    - get: kubernetes-broker
-      passed: [deploy-kubernetes-broker-staging]
-      trigger: true
-    # Get resources from upstream jobs for use in production deploy
-    - get: kubernetes-release
-      passed: [deploy-kubernetes-staging]
-      params:
-        submodules: none
-    - get: kubernetes-release-tarball
-      passed: [deploy-kubernetes-staging]
-    - get: kubernetes-stemcell-xenial
-    - get: consul-boshrelease
-      passed: [deploy-kubernetes-staging]
-  - task: clear-acceptance-space
-    file: kubernetes-config/acceptance/clear-acceptance-space.yml
-    params: *cf-staging-tests
-  - in_parallel:
-    - task: acceptance-test-redis28-standard
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        <<: *redis28-tests
-    - task: acceptance-test-redis32-micro
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        <<: *redis32-micro-tests
-    - task: acceptance-test-redis32-standard
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        <<: *redis32-tests
-    - task: acceptance-test-redis32-standard-ha
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        <<: *redis32-ha-tests
-        # EXTRA TESTS are executed with CWD = TEST_PATH
-        EXTRA_TESTS: ./redis-ha.sh
-        K8S_USERNAME: ((cluster-username-staging))
-        K8S_PASSWORD: ((cluster-password-staging))
-        K8S_APISERVER: ((api-server-staging))
-    - task: acceptance-test-mongo36-standard
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        <<: *mongodb36-tests
-    - task: acceptance-test-elasticsearch24-persistent
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        <<: *elasticsearch24-tests
-    - task: acceptance-test-elasticsearch24-ha
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        SERVICE_NAME: elasticsearch24
-        PLAN_NAME: medium-ha
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch24
-        # EXTRA TESTS are executed with CWD = TEST_PATH
-        EXTRA_TESTS: ./elastic-ha.sh
-        K8S_USERNAME: ((cluster-username-staging))
-        K8S_PASSWORD: ((cluster-password-staging))
-        K8S_APISERVER: ((api-server-staging))
-    - task: acceptance-test-elasticsearch56
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        <<: *elasticsearch56-tests
-    - task: acceptance-test-elasticsearch56-ha
-      file: kubernetes-config/acceptance/run-acceptance-test.yml
-      params:
-        <<: *cf-staging-tests
-        SERVICE_NAME: elasticsearch56
-        PLAN_NAME: medium-ha
-        TEST_PATH: kubernetes-config/acceptance/elasticsearch56
-        # EXTRA TESTS are executed with CWD = TEST_PATH
-        EXTRA_TESTS: ./elastic-ha.sh
-        K8S_USERNAME: ((cluster-username-staging))
-        K8S_PASSWORD: ((cluster-password-staging))
-        K8S_APISERVER: ((api-server-staging))
-
 - name: plan-kubernetes-production
   on_failure:
     params:
@@ -486,23 +188,18 @@ jobs:
           resource: master-bosh-root-cert
         - get: pipeline-tasks
         - get: kubernetes-release
-          passed: [acceptance-tests-staging]
           params:
             submodules: none
         - get: kubernetes-config
           trigger: false
-          passed: [acceptance-tests-staging]
         - get: kubernetes-release-tarball
-          passed: [acceptance-tests-staging]
           trigger: false
         - get: common-secret
           resource: common-production
           trigger: false
         - get: kubernetes-stemcell-xenial
-          passed: [acceptance-tests-staging]
           trigger: false
         - get: consul-boshrelease
-          passed: [acceptance-tests-staging]
           trigger: false
         - get: terraform-yaml
           resource: terraform-yaml-production
@@ -568,7 +265,14 @@ jobs:
       CLOUDWATCH_PARAMS: ((cloudwatch-params-production))
       KUBE2IAM_PARAMS: ((kube2iam-params-production))
       TARGET_ENVIRONMENT: production
-  - *lint-manifest
+  - &lint-manifest
+    task: lint-manifest
+    file: pipeline-tasks/lint-manifest.yml
+    input_mapping:
+      pipeline-config: kubernetes-config
+      lint-manifest: kubernetes-manifest
+    params:
+      LINTER_CONFIG: bosh-lint.yml
   - put: kubernetes-production-deployment
     params: *deployment-params
   - task: create-kubernetes-dns
@@ -606,7 +310,6 @@ jobs:
   - in_parallel:
     - get: pipeline-tasks
     - get: kubernetes-broker
-      passed: [acceptance-tests-staging]
       trigger: true
     - get: kubernetes-config
       passed: [deploy-kubernetes-production]
@@ -637,7 +340,7 @@ jobs:
         BROKER_NAME: kubernetes-broker
         AUTH_USER: ((broker-auth-user-production))
         AUTH_PASS: ((broker-auth-pass-production))
-        SERVICES: mongodb36:standard redis28:standard redis32:standard redis32:standard-ha elasticsearch24:1x
+        SERVICES: redis28:standard redis32:standard redis32:standard-ha elasticsearch24:1x
           elasticsearch24:3x elasticsearch24:6x elasticsearch24:medium-ha elasticsearch56:medium
           elasticsearch56:medium-ha
         SERVICE_ORGANIZATION: ((broker-service-organization-restricted-production))
@@ -717,9 +420,9 @@ jobs:
         TEST_PATH: kubernetes-config/acceptance/elasticsearch56
         # EXTRA TESTS are executed with CWD = TEST_PATH
         EXTRA_TESTS: ./elastic-ha.sh
-        K8S_USERNAME: ((cluster-username-staging))
-        K8S_PASSWORD: ((cluster-password-staging))
-        K8S_APISERVER: ((api-server-staging))
+        K8S_USERNAME: ((cluster-username-production))
+        K8S_PASSWORD: ((cluster-password-production))
+        K8S_APISERVER: ((api-server-production))
 
 - name: test-exporter
   plan:
@@ -730,48 +433,9 @@ jobs:
   - task: test
     file: kubernetes-config/test-exporter.yml
 
-- name: deploy-exporter-staging
-  plan:
-  - get: exporter-src
-    passed: [test-exporter]
-    trigger: true
-  - put: exporter-app-staging
-    params:
-      path: exporter-src
-      manifest: exporter-src/manifest.yml
-      current_app_name: kubernetes-broker-exporter
-      environment_variables:
-        BROKER_EXPORTER_KUBERNETES_URL: ((api-server-staging))
-        BROKER_EXPORTER_KUBERNETES_USERNAME: ((cluster-username-staging))
-        BROKER_EXPORTER_KUBERNETES_PASSWORD: ((cluster-password-staging))
-        BROKER_EXPORTER_KUBERNETES_NAMESPACE: default
-        BROKER_EXPORTER_CONSUL_DOMAIN: service.kubernetes
-        BROKER_EXPORTER_WEB_AUTH_USERNAME: ((exporter-auth-username-staging))
-        BROKER_EXPORTER_WEB_AUTH_PASSWORD: ((exporter-auth-password-staging))
-        BROKER_EXPORTER_METRICS_ENVIRONMENT: staging
-  on_failure:
-    put: slack
-    params:
-      text: |
-        :x: FAILED to deploy kubernetes broker exporter on staging
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Successfully deployed kubernetes broker exporter on staging
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-
 - name: deploy-exporter-production
   plan:
   - get: exporter-src
-    passed: [deploy-exporter-staging]
     trigger: true
   - put: exporter-app-production
     params:
@@ -854,28 +518,12 @@ resources:
   source:
     repository: cloudfoundry-community/consul-boshrelease
 
-- name: common-staging
-  type: s3-iam
-  source:
-    region_name: ((aws-region))
-    bucket: ((kubernetes-private-bucket))
-    versioned_file: staging-kubernetes.yml
-
 - name: common-production
   type: s3-iam
   source:
     region_name: ((aws-region))
     bucket: ((kubernetes-private-bucket))
     versioned_file: production-kubernetes.yml
-
-- name: kubernetes-staging-deployment
-  type: bosh-deployment
-  source:
-    target: ((kubernetes-staging-deployment-bosh-target))
-    client: ((kubernetes-staging-deployment-bosh-client))
-    client_secret: ((kubernetes-staging-deployment-bosh-client-secret))
-    ca_cert: ((kubernetes-staging-ca-cert))
-    deployment: kubernetes
 
 - name: kubernetes-production-deployment
   type: bosh-deployment
@@ -886,15 +534,6 @@ resources:
     ca_cert: ((kubernetes-production-ca-cert))
     deployment: kubernetes
 
-- name: kubernetes-broker-staging-deployment
-  type: cf
-  source:
-    api: ((cf-api-url-staging))
-    username: ((cf-deploy-username-staging))
-    password: ((cf-deploy-password-staging))
-    organization: ((cf-organization-staging))
-    space: ((cf-space-staging))
-
 - name: kubernetes-broker-production-deployment
   type: cf
   source:
@@ -903,15 +542,6 @@ resources:
     password: ((cf-deploy-password-production))
     organization: ((cf-organization-production))
     space: ((cf-space-production))
-
-- name: exporter-app-staging
-  type: cf
-  source:
-    api: ((cf-api-url-staging))
-    username: ((cf-deploy-username-staging))
-    password: ((cf-deploy-password-staging))
-    organization: ((cf-organization-staging))
-    space: ((cf-space-staging))
 
 - name: exporter-app-production
   type: cf
@@ -1030,13 +660,6 @@ resources:
     bucket: ((s3-bosh-releases-bucket))
     regexp: kubernetes-(.*).tgz
     region_name: us-gov-west-1
-
-- name: terraform-yaml-staging
-  type: s3-iam
-  source:
-    bucket: ((tf-state-bucket-staging))
-    versioned_file: ((tf-state-file-staging))
-    region_name: ((aws-region))
 
 - name: terraform-yaml-production
   type: s3-iam
